@@ -101,7 +101,9 @@ export default function Login() {
     <AuthShell>
       <div className="gestion-auth__form-heading">
         <span className="gestion-auth__kicker">VOTRE ESPACE DE TRAVAIL</span>
-        <h1>{forgot ? "Mot de passe oublié ?" : "Bienvenue sur Gestion"}</h1>
+        <h1>
+          {forgot ? "Mot de passe oublié ?" : "Bienvenue sur OASIS LOGISTICS"}
+        </h1>
         <p>
           {forgot
             ? "Recevez un lien sécurisé par e-mail."

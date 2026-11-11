@@ -82,3 +82,7 @@ Il reste à exécuter depuis un environnement réseau autorisé : inscription et
 ## Décisions conservatrices
 
 Aucun tarif inventé. Pas de retrait des politiques RLS pour faciliter le développement. Pas de compte administrateur ou mot de passe imposé. Pas d’exposition de service-role. Pas de données temporaires utilisées comme opérations réelles. Les seuls jeux de données artificiels sont des fixtures de tests isolées, jamais affichées comme activité d’entreprise.
+
+## Identité OASIS LOGISTICS et diagnostic réseau
+
+La marque visible du shell Auth et du camion GLB est désormais OASIS LOGISTICS. La configuration exemple du backend référence le projet et l’entreprise réels, sans secret. Une commande `npm run check:supabase -w backend` distingue DNS et accès HTTPS Auth sans identifiants utilisateur. Dans le sandbox, DNS fonctionne mais HTTPS Supabase reste interrompu (`ECONNRESET`) ; les services distants sont sains selon le connecteur de gestion. Les 84 tests, le build, TypeScript, lint et les contrôles navigateur passent, sans prétendre résoudre le blocage réseau ou valider une connexion réelle. Voir [CONNEXION-SERVEUR.md](CONNEXION-SERVEUR.md).

@@ -29,7 +29,7 @@ def accessor(values, width, kind='VEC3', integer=False):
 def material(name,color,metal=0):
     doc['materials'].append({'name':name,'pbrMetallicRoughness':{'baseColorFactor':color,'metallicFactor':metal,'roughnessFactor':.48}})
     return len(doc['materials'])-1
-blue=material('Gestion-blue',[.025,.16,.43,1],.25)
+blue=material('OASIS LOGISTICS-blue',[.025,.16,.43,1],.25)
 steel=material('Chassis-steel',[.12,.17,.22,1],.7)
 white=material('White-trim',[.85,.91,.97,1],.3)
 
@@ -78,19 +78,19 @@ for z in [-4.95,-5.5,-6.05]:
     for side,mesh in [(-1,3),(1,4)]:
         doc['nodes'].append({'name':f'wheel-trailer-{z}-{side}','mesh':mesh,'translation':[side*.48,.3,z]})
         doc['scenes'][0]['nodes'].append(len(doc['nodes'])-1)
-# White GESTION lettering embedded as a tiny PNG, no remote font or texture.
+# White OASIS LOGISTICS lettering embedded as a tiny PNG, no remote font or texture.
 logo=Image.new('RGBA',(512,128),(0,0,0,0));draw=ImageDraw.Draw(logo)
-font=ImageFont.load_default(size=70);text='GESTION';bounds=draw.textbbox((0,0),text,font=font)
+font=ImageFont.load_default(size=40);text='OASIS LOGISTICS';bounds=draw.textbbox((0,0),text,font=font)
 draw.text(((512-(bounds[2]-bounds[0]))/2,10),text,font=font,fill=(255,255,255,255))
-out=io.BytesIO();logo.save(out,format='PNG');doc['images'].append({'name':'Gestion-logo','mimeType':'image/png','bufferView':append(out.getvalue())})
+out=io.BytesIO();logo.save(out,format='PNG');doc['images'].append({'name':'OASIS LOGISTICS-logo','mimeType':'image/png','bufferView':append(out.getvalue())})
 doc['textures'].append({'source':len(doc['images'])-1})
-doc['materials'].append({'name':'GESTION-brand','doubleSided':False,'alphaMode':'MASK','alphaCutoff':.25,'pbrMetallicRoughness':{'baseColorTexture':{'index':len(doc['textures'])-1},'metallicFactor':0,'roughnessFactor':.8}})
+doc['materials'].append({'name':'OASIS LOGISTICS-brand','doubleSided':False,'alphaMode':'MASK','alphaCutoff':.25,'pbrMetallicRoughness':{'baseColorTexture':{'index':len(doc['textures'])-1},'metallicFactor':0,'roughnessFactor':.8}})
 logo_mat=len(doc['materials'])-1
 for side in [-1,1]:
-    box('GESTION-logo',[side*.772,1.65,-3.65],[.005,.7,3.2],logo_mat)
-doc['asset']['generator']='Gestion asset adaptation / Kenney Car Kit 3.1 CC0'
-doc['asset']['copyright']='Kenney (CC0); semi-trailer adaptation for Gestion (CC0)'
-doc['scenes'][0]['name']='Gestion-semi-trailer'
+    box('OASIS LOGISTICS-logo',[side*.772,1.65,-3.65],[.005,.7,3.2],logo_mat)
+doc['asset']['generator']='OASIS LOGISTICS asset adaptation / Kenney Car Kit 3.1 CC0'
+doc['asset']['copyright']='Kenney (CC0); semi-trailer adaptation for OASIS LOGISTICS (CC0)'
+doc['scenes'][0]['name']='OASIS LOGISTICS-semi-trailer'
 while len(blob)%4:blob.append(0)
 doc['buffers']=[{'byteLength':len(blob)}]
 encoded=json.dumps(doc,separators=(',',':')).encode()

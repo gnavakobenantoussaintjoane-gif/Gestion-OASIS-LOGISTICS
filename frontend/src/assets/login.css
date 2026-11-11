@@ -43,6 +43,7 @@
   gap: 14px;
 }
 .gestion-auth__brand > span {
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   width: 54px;
@@ -54,7 +55,7 @@
 }
 .gestion-auth__brand strong {
   display: block;
-  font-size: 27px;
+  font-size: clamp(18px, 2vw, 25px);
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: 1px;

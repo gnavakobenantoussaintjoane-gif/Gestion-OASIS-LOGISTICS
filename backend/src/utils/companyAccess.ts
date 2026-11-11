@@ -1,6 +1,8 @@
 import { env } from "../config/env.js";
 import { HttpError } from "./errors.js";
-/** Compare an immutable UUID, never a freely editable company name. */
+/** Comparer l’UUID configuré, jamais le nom librement modifiable de l’entreprise.
+ * Sans configuration, refuser l’accès plutôt que d’ouvrir toutes les entreprises.
+ */
 export function assertOasisCompany(companyId: string) {
   if (!env.OASIS_COMPANY_ID)
     throw new HttpError(

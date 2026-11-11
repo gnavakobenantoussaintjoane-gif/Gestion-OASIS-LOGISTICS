@@ -3,6 +3,7 @@ import { env } from "../config/env.js";
 import { HttpError } from "../utils/errors.js";
 export type AuthFlow = "google" | "recovery";
 export type FlowStore = Record<string, string>;
+// Le verifier PKCE est temporaire et httpOnly ; il relie le départ au retour du même navigateur.
 export const flowCookie = {
   httpOnly: true,
   secure: env.NODE_ENV === "production",
@@ -10,6 +11,7 @@ export const flowCookie = {
   path: "/api/auth",
   maxAge: 10 * 60 * 1000,
 };
+// Isoler la récupération des cookies métier pour ne pas ouvrir une session applicative normale.
 export const recoveryCookie = {
   ...flowCookie,
   path: "/api/auth/recovery",
@@ -42,6 +44,7 @@ export function memoryStorage(values: FlowStore) {
 export function saveFlow(res: Response, flow: AuthFlow, values: FlowStore) {
   res.cookie("gestion_auth_flow", JSON.stringify({ flow, values }), flowCookie);
 }
+// Les cookies sont des entrées non fiables : contrôler le type de flux et borner leur contenu.
 export function readFlow(req: Request, expected: AuthFlow): FlowStore {
   try {
     const stored: unknown = JSON.parse(req.cookies.gestion_auth_flow ?? "null");

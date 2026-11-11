@@ -9,7 +9,9 @@ import {
 } from "react";
 import { usePreferences } from "../../contexts/PreferencesContext";
 import { useMotionPreference } from "../../hooks/useMotionPreference";
+// Isoler le téléchargement Three/GLB : les champs de connexion restent utilisables.
 const Scene = lazy(() => import("./TruckScene"));
+// Une erreur du décor doit afficher le fond statique, pas faire disparaître la connexion.
 class SceneError extends Component<
   { children: ReactNode; onError: () => void },
   { failed: boolean }
@@ -30,6 +32,7 @@ function supportsWebGL() {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2");
     if (!gl) return false;
+    // Libérer le contexte de sondage ; le Canvas créera son propre contexte ensuite.
     gl.getExtension("WEBGL_lose_context")?.loseContext();
     return true;
   } catch {
@@ -45,6 +48,7 @@ export default function TruckBackground() {
   const [compact, setCompact] = useState(
     () => window.matchMedia("(max-width: 760px)").matches,
   );
+  // Ne pas animer un onglet masqué ; respecter aussi la préférence système et le réglage global.
   const [visible, setVisible] = useState(() => !document.hidden);
   useEffect(() => {
     const media = window.matchMedia("(max-width: 760px)");
@@ -59,6 +63,7 @@ export default function TruckBackground() {
   }, []);
   const onLoaded = useCallback(() => setLoaded(true), []);
   const onError = useCallback(() => setFailed(true), []);
+  // Ces états décrivent le décor uniquement, pas l’état de connexion du compte.
   const state = !supported || failed ? "static" : loaded ? "ready" : "loading";
   return (
     <div

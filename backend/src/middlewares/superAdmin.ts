@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { check, HttpError } from "../utils/errors.js";
+// La capacité propriétaire vient de SQL, pas d’une adresse email ou d’un booléen client.
 export const requireSuperAdmin: RequestHandler = async (req, _res, next) => {
   try {
     const { data, error } = await req.db.rpc("oasis_is_super_admin");

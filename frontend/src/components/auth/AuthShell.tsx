@@ -4,6 +4,7 @@ import TruckBackground from "../login3d/TruckBackground";
 import { usePreferences } from "../../contexts/PreferencesContext";
 import { useMotionPreference } from "../../hooks/useMotionPreference";
 import "../../assets/login.css";
+/** Présentation partagée des écrans Auth ; le décor 3D ne contrôle jamais le formulaire. */
 export default function AuthShell({ children }: { children: ReactNode }) {
   const { animations } = usePreferences();
   const reduced = useMotionPreference();

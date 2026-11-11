@@ -1,3 +1,6 @@
+/** Montants entiers uniquement : BigInt évite les pertes de précision des additions Number.
+ * Retourner des chaînes, car JSON ne sérialise pas directement les BigInt.
+ */
 export function financialTotals(
   trips: { price: number | string }[],
   expenses: { amount: number | string }[],

@@ -37,12 +37,14 @@ function Truck({
   useEffect(() => {
     onLoaded();
   }, [onLoaded]);
+  // Déplacer uniquement les transformations : aucune géométrie recréée à chaque image.
   useFrame((_state, delta) => {
     if (!animate || !moving.current) return;
     const next = advanceTruck(distance.current, delta);
     const step = (next - distance.current + 44) % 44;
     distance.current = next;
     moving.current.position.x = -18 + distance.current;
+    // Distance / rayon = angle parcouru ; les pivots wheel-* viennent du modèle GLB.
     wheels.forEach((wheel) => {
       wheel.rotation.x += step / WHEEL_RADIUS;
     });

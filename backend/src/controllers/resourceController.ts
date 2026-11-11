@@ -10,6 +10,7 @@ import { queryResource, readAllowed } from "../services/resources.js";
 import { resolveShift } from "../utils/shifts.js";
 import { HttpError, check } from "../utils/errors.js";
 const router = Router();
+// Liste blanche : un segment d’URL ne doit jamais permettre de cibler une table arbitraire.
 const resource = (v: unknown) =>
   z.enum(Object.keys(schemas) as [Resource, ...Resource[]]).parse(v);
 router.get("/:resource", async (req, res) => {
@@ -42,9 +43,11 @@ router.post("/:resource", async (req, res) => {
   if (!resourceRoles[table].includes(req.role))
     throw new HttpError(403, "Action non autorisée.");
   const fields = schemas[table].parse(req.body);
+  // Le serveur impose l’entreprise ; le navigateur ne choisit pas le périmètre d’écriture.
   const payload: any = { ...fields, company_id: req.companyId };
   if (table === "trips") {
     try {
+      // Calculer le shift et la date comptable depuis l’instant réel du trajet.
       Object.assign(payload, resolveShift(payload.occurred_at));
     } catch (e) {
       throw new HttpError(422, (e as Error).message);

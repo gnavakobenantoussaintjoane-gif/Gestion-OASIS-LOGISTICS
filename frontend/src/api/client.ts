@@ -1,3 +1,4 @@
+/** Erreur transport/API exploitable par les formulaires (statut HTTP et champs invalides). */
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -7,6 +8,7 @@ export class ApiError extends Error {
     super(message);
   }
 }
+// Une erreur de connexion Auth ne doit pas déconnecter une autre session par effet de bord.
 function expired(status: number, path: string) {
   if (status === 401 && !path.startsWith("/auth/"))
     window.dispatchEvent(new Event("gestion-session-expired"));
@@ -28,12 +30,15 @@ export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  // Conserver cet en-tête : le middleware serveur le vérifie pour les écritures.
   const headers = new Headers(options.headers);
   headers.set("X-Gestion-Client", "web");
   if (!(options.body instanceof FormData) && !headers.has("Content-Type"))
     headers.set("Content-Type", "application/json");
   let response: Response;
   try {
+    // URL relative : le navigateur passe par le proxy du site, jamais par localhost distant.
+    // Les jetons restent dans les cookies httpOnly ; JavaScript ne les lit pas.
     response = await fetch(`/api${path}`, {
       ...options,
       credentials: "same-origin",
@@ -83,6 +88,7 @@ export async function downloadReport(
   if (!response.headers.get("Content-Type")?.includes(mime))
     throw new ApiError(502, "Le serveur n’a pas renvoyé un rapport valide.");
   const blob = await response.blob();
+  // URL temporaire du téléchargement ; sa révocation évite de retenir le Blob en mémoire.
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

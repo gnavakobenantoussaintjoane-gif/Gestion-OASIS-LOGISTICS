@@ -1,5 +1,11 @@
 # État réel — 11 novembre 2026
 
+## Nouvelle connexion Gestion — intégration isolée
+
+La connexion utilise désormais une page claire dédiée, une présentation à gauche, un formulaire à droite et un fond CSS/SVG animé **en bas uniquement**. L’illustration de camion est fixe. Les anciennes animations et le dashboard sont conservés, sans changement de leurs composants ni des styles globaux. Ajout des connexions email/téléphone, du flux Google PKCE et de la récupération email via le client Supabase serveur existant. Aucun changement de tables, RLS, rôles, dépendances ou variables d’environnement.
+
+81 tests automatisés, lint, TypeScript, builds et smoke navigateur passent. Les tests de contrats Auth et de rôles sont isolés/simulés ; aucun succès de connexion réelle, consentement Google ou délivrance d’email n’est revendiqué. Les fournisseurs et URL de retour exigent une configuration externe : voir [LOGIN-INTEGRATION.md](LOGIN-INTEGRATION.md), qui contient le périmètre, les listes de fichiers et les résultats détaillés.
+
 ## Animation et lisibilité — nouvelle présentation
 
 La connexion utilise désormais une scène SVG de route dédiée : camion agrandi, décor portuaire, marquage routier défilant et mouvement de suspension discret. Le bouton pause/reprise suit la préférence globale ; le réglage système de réduction des mouvements est pris en compte, y compris lorsqu’il change pendant l’affichage. Les animations distinctes dashboard et chargement sont conservées.

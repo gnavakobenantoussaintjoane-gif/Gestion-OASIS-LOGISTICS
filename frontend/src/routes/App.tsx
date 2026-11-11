@@ -1,8 +1,15 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes, useParams } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useParams,
+  useLocation,
+} from "react-router-dom";
 import { useSession } from "../contexts/SessionContext";
 import LoadingTruckAnimation from "../components/animations/LoadingTruckAnimation";
 import AppLayout from "../layouts/AppLayout";
+import AuthReturn from "../pages/AuthReturn";
 import Login from "../pages/Login";
 import Onboarding from "../pages/Onboarding";
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -15,6 +22,11 @@ function ResourceRoute() {
 }
 export default function App() {
   const { session, loading } = useSession();
+  const { pathname } = useLocation();
+  if (pathname === "/auth/callback")
+    return <AuthReturn key="google" recovery={false} />;
+  if (pathname === "/auth/reset-password")
+    return <AuthReturn key="recovery" recovery />;
   if (loading) return <LoadingTruckAnimation />;
   if (!session) return <Login />;
   if (!session.company || !session.role) return <Onboarding />;

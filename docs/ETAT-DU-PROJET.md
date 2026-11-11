@@ -1,5 +1,11 @@
 # État réel — 11 novembre 2026
 
+## Fond de connexion GLB 3D
+
+La demande 3D remplace la présentation précédente du shell Auth par un véritable camion GLB en plein fond et une carte glassmorphism. La stack Three/R3F/Drei existante est réutilisée, sans ajout de dépendances ni modification du backend/Auth/rôles. Le modèle CC0 Kenney est adapté en semi-remorque low-poly blanc/bleu et livré localement avec licence, provenance et source de génération. Les animations du dashboard restent inchangées.
+
+84 tests, lint, TypeScript, build via pnpm 10, smoke navigateur et tests GLB réels sous Chromium/SwiftShader passent. Desktop/mobile, chargement retardé, réduction du mouvement, modèle absent, absence WebGL et perte de contexte ont été contrôlés. Cela ne valide ni les GPU physiques des téléphones ni les connexions Auth réelles. Voir [LOGIN-3D.md](LOGIN-3D.md) pour les fichiers, les ressources et les limites.
+
 ## Nouvelle connexion Gestion — intégration isolée
 
 La connexion utilise désormais une page claire dédiée, une présentation à gauche, un formulaire à droite et un fond CSS/SVG animé **en bas uniquement**. L’illustration de camion est fixe. Les anciennes animations et le dashboard sont conservés, sans changement de leurs composants ni des styles globaux. Ajout des connexions email/téléphone, du flux Google PKCE et de la récupération email via le client Supabase serveur existant. Aucun changement de tables, RLS, rôles, dépendances ou variables d’environnement.

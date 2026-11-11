@@ -515,3 +515,82 @@
     transition: none !important;
   }
 }
+
+/* GLB scene: only this auth shell changes; business pages keep their existing layout. */
+.gestion-auth {
+  background: #dce9f5;
+}
+.gestion-auth__three {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.gestion-auth__three
+  > div:not(.gestion-auth__scene-scrim):not(.gestion-auth__static-sky) {
+  position: absolute !important;
+  inset: 0;
+}
+.gestion-auth__three canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.gestion-auth__static-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 25% 65%, #b4cce4, transparent 70%),
+    linear-gradient(150deg, #f3f8ff, #cadbed);
+}
+.gestion-auth__scene-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #f5f9fff2 0%,
+    #f5f9ffb5 24%,
+    #edf5ff30 62%,
+    #dce9f5aa 100%
+  );
+}
+.gestion-auth__panel {
+  background: rgba(255, 255, 255, 0.93);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 80px #16355824;
+}
+.gestion-auth__pitch {
+  margin-top: 45px;
+  margin-bottom: auto;
+}
+.gestion-auth__pitch p {
+  color: #243e60;
+  max-width: 410px;
+}
+.gestion-auth__company {
+  background: #ffffffd9;
+  border: 1px solid #ffffff;
+  border-radius: 9px;
+  padding: 10px 14px;
+  align-self: flex-start;
+}
+.gestion-auth__footer {
+  color: #243e60;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .gestion-auth__panel {
+    background: #fff;
+  }
+}
+@media (max-width: 760px) {
+  .gestion-auth__panel {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+  }
+  .gestion-auth__scene-scrim {
+    background: linear-gradient(180deg, #f5f9fff0, #f5f9ff66 70%, #dce9f5c9);
+  }
+}

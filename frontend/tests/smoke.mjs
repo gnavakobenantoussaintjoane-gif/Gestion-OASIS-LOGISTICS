@@ -1,29 +1,8 @@
-import { chromium } from "@playwright/test";
-import serverChromium from "@sparticuz/chromium";
 import assert from "node:assert/strict";
-import { createRequire } from "node:module";
-import { readFileSync, mkdtempSync, writeFileSync } from "node:fs";
-import { brotliDecompressSync } from "node:zlib";
-import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
-if (process.platform === "linux") {
-  const require = createRequire(import.meta.url);
-  const root = dirname(require.resolve("@sparticuz/chromium"));
-  const temp = mkdtempSync(join(tmpdir(), "gestion-browser-"));
-  const tar = join(temp, "libraries.tar");
-  writeFileSync(
-    tar,
-    brotliDecompressSync(readFileSync(join(root, "../bin/al2023.tar.br"))),
-  );
-  execFileSync("tar", ["xf", tar, "-C", temp]);
-  process.env.LD_LIBRARY_PATH = `${join(temp, "lib")}:${process.env.LD_LIBRARY_PATH || ""}`;
-}
-const browser = await chromium.launch({
-  executablePath: await serverChromium.executablePath(),
-  args: serverChromium.args,
-  headless: true,
-});
+import { join } from "node:path";
+import { launchBrowser } from "./browser.mjs";
+const browser = await launchBrowser();
 const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
@@ -69,20 +48,19 @@ await checkFormContrast();
 assert.equal(await page.locator(".gestion-auth .flat-truck").count(), 0);
 assert.equal(
   await page.locator(".gestion-auth .truck-illustration").count(),
-  1,
+  0,
+);
+await page.waitForFunction(() =>
+  ["ready", "static"].includes(
+    document.querySelector(".gestion-auth__three")?.dataset.sceneState,
+  ),
 );
 assert.equal(
-  await page
-    .locator(".gestion-auth")
-    .evaluate(
-      (el) =>
-        Math.abs(
-          el.getBoundingClientRect().bottom -
-            el
-              .querySelector(".gestion-auth__background")
-              .getBoundingClientRect().bottom,
-        ) < 1,
-    ),
+  await page.locator(".gestion-auth__three").evaluate((el) => {
+    const a = el.getBoundingClientRect(),
+      b = el.closest("main").getBoundingClientRect();
+    return Math.abs(a.height - b.height) < 2 && Math.abs(a.width - b.width) < 2;
+  }),
   true,
 );
 await page.screenshot({
@@ -175,5 +153,5 @@ assert.equal(await page.locator(".loading-screen .realistic-wheel").count(), 5);
 assert.deepEqual(errors, []);
 await browser.close();
 console.log(
-  "PASS: real login screen, light login, phone validation, recovery form, callback errors, responsive layout, dashboard and loading animation components. No authenticated workflow was simulated.",
+  "PASS: real login screen, GLB login with fallback, phone validation, recovery form, callback errors, responsive layout, dashboard and loading animation components. No authenticated workflow was simulated.",
 );

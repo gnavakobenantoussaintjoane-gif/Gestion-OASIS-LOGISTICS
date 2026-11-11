@@ -1,6 +1,7 @@
 export type Row = Record<string, any> & { id: string };
 export type Role = "admin" | "manager" | "operator" | "driver";
 export type Session = {
+  isSuperAdmin?: boolean;
   user: { id: string; email: string };
   profile: Row | null;
   role: Role | null;

@@ -1,5 +1,11 @@
 # État réel — 11 novembre 2026
 
+## Super administrateur — préparation
+
+Ajout du contrôle propriétaire privé, des routes de création de comptes Auth et de la gestion des rôles réservée au Super administrateur. Le changement de mot de passe reste disponible dans Paramètres → Sécurité. Les migrations et le provisionnement réel de `gnavakobenan@gmail.com` ne sont pas exécutés : voir [SUPER-ADMIN.md](SUPER-ADMIN.md). Aucune valeur de mot de passe demandée n’est enregistrée dans Git.
+
+Contrôles locaux : 54 tests (44 backend, 10 frontend), lint, TypeScript et builds réussis. Les nouveaux tests utilisent des services Auth simulés ; aucune connexion ni création Auth réelle n’est revendiquée. La création de comptes nécessite une clé administrative strictement serveur, sans changement des clients métier soumis à RLS.
+
 ## Évolution : application privée OASIS LOGISTICS
 
 Le nouveau périmètre remplace l’inscription libre multi-entreprise par une installation interne OASIS LOGISTICS. Le nom, l’accueil et les visuels ont été harmonisés. Les routes publiques d’inscription/création d’entreprise sont fermées et les accès métier de l’API sont verrouillés sur `OASIS_COMPANY_ID` (refus si non configuré). La configuration réelle de ce UUID, la fermeture d’Auth Supabase et l’application de la migration privée restent nécessaires : voir [OASIS-PRIVATE.md](OASIS-PRIVATE.md). Aucun premier administrateur n’a été inventé et aucune donnée existante n’a été supprimée.

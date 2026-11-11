@@ -22,7 +22,7 @@ Vérifications : 54 tests, builds, lint et TypeScript réussis ; smoke navigateu
 
 ## Super administrateur — préparation
 
-Ajout du contrôle propriétaire privé, des routes de création de comptes Auth et de la gestion des rôles réservée au Super administrateur. Le changement de mot de passe reste disponible dans Paramètres → Sécurité. Les migrations et le provisionnement réel de `gnavakobenan@gmail.com` ne sont pas exécutés : voir [SUPER-ADMIN.md](SUPER-ADMIN.md). Aucune valeur de mot de passe demandée n’est enregistrée dans Git.
+Ajout du contrôle propriétaire privé, des routes de création de comptes Auth et de la gestion des rôles réservée au Super administrateur. Le changement de mot de passe reste disponible dans Paramètres → Sécurité. Les migrations privées et Super administrateur ont été appliquées et vérifiées sur Supabase ; le compte Auth confirmé `gnavakobenan@gmail.com` a ensuite été rattaché à OASIS LOGISTICS comme Super administrateur. Le nom personnalisé et le téléphone restent à fournir ; la configuration `OASIS_COMPANY_ID` du serveur déployé et le login réel restent à vérifier : voir [SUPER-ADMIN.md](SUPER-ADMIN.md). Aucune valeur de mot de passe demandée n’est enregistrée dans Git.
 
 Contrôles locaux : 54 tests (44 backend, 10 frontend), lint, TypeScript et builds réussis. Les nouveaux tests utilisent des services Auth simulés ; aucune connexion ni création Auth réelle n’est revendiquée. La création de comptes nécessite une clé administrative strictement serveur, sans changement des clients métier soumis à RLS.
 

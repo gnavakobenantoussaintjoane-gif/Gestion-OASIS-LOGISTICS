@@ -25,7 +25,7 @@ cp backend/.env.example backend/.env
 npm run dev
 ```
 
-- Frontend : `http://localhost:5173`
+- Frontend : `http://localhost:3000`
 - Backend : `http://localhost:4000/api/health`
 - Vite transmet `/api` à Express : aucun appel navigateur à localhost pour joindre un autre serveur.
 

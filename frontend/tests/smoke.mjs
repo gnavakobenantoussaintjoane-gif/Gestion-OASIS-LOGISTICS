@@ -27,7 +27,7 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
-await page.goto(process.env.APP_URL || "http://localhost:5173");
+await page.goto(process.env.APP_URL || "http://localhost:3000");
 await page.getByRole("heading", { name: "Bienvenue sur GESTION" }).waitFor();
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-desktop.png"),

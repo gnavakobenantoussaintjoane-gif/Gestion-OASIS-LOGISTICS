@@ -1,6 +1,14 @@
-import { createContext, useContext, useEffect, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  type ReactNode,
+} from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "../api/client";
+import { clearPrivateQueries } from "../services/queryCache";
+import { toast } from "sonner";
 import type { Session } from "../types";
 const Context = createContext<{
   session: Session | null;
@@ -17,23 +25,34 @@ const Context = createContext<{
 });
 export function SessionProvider({ children }: { children: ReactNode }) {
   const client = useQueryClient();
+  const previousIdentity = useRef<string | null | undefined>(undefined);
   const q = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
+      let next: Session | null;
       try {
-        return await api<Session>("/auth/session");
+        next = await api<Session>("/auth/session");
       } catch (e) {
-        if (e instanceof ApiError && e.status === 401) return null;
-        throw e;
+        if (e instanceof ApiError && e.status === 401) next = null;
+        else throw e;
       }
+      const identity = next?.user.id ?? null;
+      if (
+        previousIdentity.current !== undefined &&
+        previousIdentity.current !== identity
+      )
+        await clearPrivateQueries(client);
+      previousIdentity.current = identity;
+      return next;
     },
     retry: false,
     staleTime: 300000,
   });
   useEffect(() => {
     const expired = () => {
+      previousIdentity.current = null;
       client.setQueryData(["session"], null);
-      client.removeQueries({ predicate: (q) => q.queryKey[0] !== "session" });
+      void clearPrivateQueries(client);
     };
     window.addEventListener("gestion-session-expired", expired);
     return () => window.removeEventListener("gestion-session-expired", expired);
@@ -46,9 +65,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         error: q.error,
         reload: () => q.refetch(),
         logout: async () => {
-          await api("/auth/logout", { method: "POST" });
-          client.clear();
+          const result = await api<{ revoked: boolean }>("/auth/logout", {
+            method: "POST",
+          });
+          previousIdentity.current = null;
           client.setQueryData(["session"], null);
+          await clearPrivateQueries(client);
+          if (!result.revoked)
+            toast.warning(
+              "Session locale fermée. La révocation distante n’a pas pu être confirmée.",
+            );
         },
       }}
     >

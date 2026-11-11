@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, RotateCcw } from "lucide-react";
 import { useReferences, rowLabel } from "../hooks/useReferences";
+import { periodRange, selectedPeriod } from "../utils/periods";
 import type { Filters } from "../types";
 export default function FiltersBar({
   value,
@@ -14,25 +15,7 @@ export default function FiltersBar({
   const set = (k: string, v: string) =>
     onChange({ ...value, [k]: v, page: "1" });
   function period(v: string) {
-    const end = new Date();
-    const start = new Date();
-    if (v === "yesterday") {
-      start.setUTCDate(start.getUTCDate() - 1);
-      end.setUTCDate(end.getUTCDate() - 1);
-    }
-    if (v === "week")
-      start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7));
-    if (v === "month") start.setUTCDate(1);
-    if (v === "quarter") {
-      start.setUTCMonth(Math.floor(start.getUTCMonth() / 3) * 3, 1);
-    }
-    if (v === "year") start.setUTCMonth(0, 1);
-    onChange({
-      ...value,
-      start: v ? start.toISOString().slice(0, 10) : "",
-      end: v ? end.toISOString().slice(0, 10) : "",
-      page: "1",
-    });
+    onChange({ ...value, ...periodRange(v), page: "1" });
   }
   const referenceSelect = (key: string, table: string, title: string) => (
     <select
@@ -62,10 +45,13 @@ export default function FiltersBar({
         </label>
         <select
           aria-label="Période prédéfinie"
-          defaultValue=""
+          value={selectedPeriod(value.start, value.end)}
           onChange={(e) => period(e.target.value)}
         >
           <option value="">Toutes les périodes</option>
+          <option value="custom" disabled>
+            Période personnalisée
+          </option>
           <option value="today">Aujourd’hui</option>
           <option value="yesterday">Hier</option>
           <option value="week">Cette semaine</option>

@@ -92,13 +92,17 @@ export function queryResource(req: Request, resource: Resource, f: Filters) {
   ].includes(resource)
     ? "name"
     : "created_at";
-  return query.order(
-    sorts.includes(f.sort) &&
-      !["terminals", "container_types", "expense_categories"].includes(resource)
-      ? f.sort
-      : fallback,
-    { ascending: f.order === "asc" },
-  );
+  return query
+    .order(
+      sorts.includes(f.sort) &&
+        !["terminals", "container_types", "expense_categories"].includes(
+          resource,
+        )
+        ? f.sort
+        : fallback,
+      { ascending: f.order === "asc" },
+    )
+    .order("id", { ascending: true });
 }
 export async function allResource(
   req: Request,

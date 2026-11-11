@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -42,8 +42,10 @@ export default function Dashboard({
   reportMode?: boolean;
   shiftsMode?: boolean;
 }) {
-  const [params] = useSearchParams();
-  const [filters, setFilters] = useState<Filters>(Object.fromEntries(params));
+  const [params, setParams] = useSearchParams();
+  const filters: Filters = Object.fromEntries(params);
+  const setFilters = (next: Filters) =>
+    setParams(queryString(next), { replace: true });
   const { session } = useSession();
   const refs = useReferences();
   const data = useQuery({

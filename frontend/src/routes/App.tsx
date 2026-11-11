@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { useSession } from "../contexts/SessionContext";
 import LoadingTruckAnimation from "../components/animations/LoadingTruckAnimation";
 import AppLayout from "../layouts/AppLayout";
@@ -9,6 +9,10 @@ const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Records = lazy(() => import("../pages/ResourcePage"));
 const Settings = lazy(() => import("../pages/Settings"));
 const Notifications = lazy(() => import("../pages/Notifications"));
+function ResourceRoute() {
+  const { resource } = useParams();
+  return <Records key={resource} resource={resource} />;
+}
 export default function App() {
   const { session, loading } = useSession();
   if (loading) return <LoadingTruckAnimation />;
@@ -16,7 +20,7 @@ export default function App() {
   if (!session.company || !session.role) return <Onboarding />;
   const finances = ["admin", "manager"].includes(session.role);
   return (
-    <Suspense fallback={<LoadingTruckAnimation />}>
+    <Suspense key={session.user.id} fallback={<LoadingTruckAnimation />}>
       <Routes>
         <Route element={<AppLayout />}>
           <Route
@@ -29,7 +33,7 @@ export default function App() {
               )
             }
           />
-          <Route path="/records/:resource" element={<Records />} />
+          <Route path="/records/:resource" element={<ResourceRoute />} />
           <Route
             path="/reports"
             element={

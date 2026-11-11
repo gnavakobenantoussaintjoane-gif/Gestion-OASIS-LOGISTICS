@@ -7,39 +7,50 @@ export class ApiError extends Error {
     super(message);
   }
 }
+function expired(status: number, path: string) {
+  if (status === 401 && !path.startsWith("/auth/"))
+    window.dispatchEvent(new Event("gestion-session-expired"));
+}
+async function readJson(response: Response) {
+  try {
+    const body: unknown = await response.json();
+    if (!body || typeof body !== "object")
+      throw new Error("Invalid JSON shape");
+    return body as Record<string, any>;
+  } catch {
+    throw new ApiError(
+      response.ok ? 502 : response.status,
+      "Réponse du serveur invalide. Vérifiez la configuration de l’API.",
+    );
+  }
+}
 export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  const headers = new Headers(options.headers);
+  headers.set("X-Gestion-Client", "web");
+  if (!(options.body instanceof FormData) && !headers.has("Content-Type"))
+    headers.set("Content-Type", "application/json");
   let response: Response;
   try {
     response = await fetch(`/api${path}`, {
       ...options,
       credentials: "same-origin",
-      headers: {
-        ...(options.body instanceof FormData
-          ? {}
-          : { "Content-Type": "application/json" }),
-        "X-Gestion-Client": "web",
-        ...options.headers,
-      },
+      headers,
     });
   } catch {
     throw new ApiError(0, "Connexion au serveur impossible. Réessayez.");
   }
-  const body = await response
-    .json()
-    .catch(() => ({ error: "Réponse du serveur invalide." }));
-  if (!response.ok) {
-    if (response.status === 401 && !path.startsWith("/auth/"))
-      window.dispatchEvent(new Event("gestion-session-expired"));
+  expired(response.status, path);
+  const body = await readJson(response);
+  if (!response.ok)
     throw new ApiError(
       response.status,
       body.error || "Opération impossible.",
       body.details,
     );
-  }
-  return body;
+  return body as T;
 }
 export const queryString = (filters: Record<string, string>) => {
   const p = new URLSearchParams();
@@ -52,14 +63,25 @@ export async function downloadReport(
   format: "xlsx" | "pdf",
   filters: Record<string, string>,
 ) {
-  const response = await fetch(
-    `/api/reports/${format}?${queryString(filters)}`,
-    { credentials: "same-origin" },
-  );
-  if (!response.ok) {
-    const e = await response.json();
-    throw new Error(e.error || "Export impossible.");
+  let response: Response;
+  try {
+    response = await fetch(`/api/reports/${format}?${queryString(filters)}`, {
+      credentials: "same-origin",
+    });
+  } catch {
+    throw new ApiError(0, "Connexion au serveur impossible. Réessayez.");
   }
+  expired(response.status, "/reports");
+  if (!response.ok) {
+    const e = await readJson(response);
+    throw new ApiError(response.status, e.error || "Export impossible.");
+  }
+  const mime =
+    format === "pdf"
+      ? "application/pdf"
+      : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  if (!response.headers.get("Content-Type")?.includes(mime))
+    throw new ApiError(502, "Le serveur n’a pas renvoyé un rapport valide.");
   const blob = await response.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

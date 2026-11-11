@@ -58,22 +58,29 @@ app.use(
   ) => {
     if (res.headersSent) return res.end();
     if (error instanceof z.ZodError)
-      return res
-        .status(422)
-        .json({
-          error: "Vérifiez les champs saisis.",
-          details: error.issues.map((i) => ({
-            field: i.path.join("."),
-            message: i.message,
-          })),
-        });
+      return res.status(422).json({
+        error: "Vérifiez les champs saisis.",
+        details: error.issues.map((i) => ({
+          field: i.path.join("."),
+          message: i.message,
+        })),
+      });
     if (error instanceof HttpError)
       return res.status(error.status).json({ error: error.message });
     if (error instanceof multer.MulterError)
+      return res.status(422).json({
+        error: "Fichier trop volumineux ou envoi invalide (5 Mo maximum).",
+      });
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "type" in error &&
+      error.type === "entity.too.large"
+    )
       return res
-        .status(422)
+        .status(413)
         .json({
-          error: "Fichier trop volumineux ou envoi invalide (5 Mo maximum).",
+          error: "La requête dépasse la taille maximale autorisée (100 Ko).",
         });
     if (error instanceof SyntaxError)
       return res.status(400).json({ error: "Corps JSON invalide." });
@@ -81,11 +88,9 @@ app.use(
       "Request failure:",
       error instanceof Error ? error.name : "unknown",
     );
-    res
-      .status(503)
-      .json({
-        error:
-          "Service temporairement indisponible. Vérifiez la connexion au serveur.",
-      });
+    res.status(503).json({
+      error:
+        "Service temporairement indisponible. Vérifiez la connexion au serveur.",
+    });
   },
 );

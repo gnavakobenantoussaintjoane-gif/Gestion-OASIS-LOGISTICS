@@ -9,13 +9,29 @@ La base Supabase du projet Gestion-OASIS-LOGISTICS a reçu les migrations multi-
 ## Vérifié
 
 - TypeScript frontend/backend, ESLint et builds de production passent.
-- 30 tests automatisés backend : horaires, minuit, montants exacts, validations, permissions de lecture, protections HTTP et fichiers Excel/PDF.
+- 34 tests automatisés backend : horaires, minuit, montants exacts, validations, permissions de lecture, protections HTTP, sessions, limite de taille JSON et fichiers Excel/PDF.
+- 10 tests frontend de régression : périodes UTC et remise à zéro, erreurs réseau/JSON/exports, expiration de session, en-têtes et isolation/annulation du cache privé.
+- `npm audit` : 0 vulnérabilité signalée dans les dépendances installées (contrôle du 11 novembre 2026).
 - Test navigateur : écran de connexion, validation d’inscription, thème, mobile et composants d’animation dashboard/chargement. Aucune fausse session injectée.
 - Test transactionnel exécuté sur PostgreSQL : isolation de deux entreprises, permissions opérateur, refus anonyme, références interentreprise, tarif historique, doublons, date comptable de nuit, audit, préservation d’une dépense à la suppression du voyage. Un second test SQL a confirmé toutes les bornes horaires demandées et le rejet d’un camion archivé après ajout des gardes de disponibilité. Toutes les fixtures ont été annulées.
 
+## Correctifs de régression — 11 novembre 2026
+
+- Le quota de tentatives d’authentification ne s’applique plus aux consultations de session ni à la fermeture de session ; le quota global de l’API reste actif.
+- Les pannes temporaires d’Auth (réseau/statuts serveur) ne sont plus confondues avec des identifiants invalides. Les cookies renouvelés sont aussi disponibles aux traitements suivants de la même requête.
+- La déconnexion efface les cookies même sans session valide ; si la révocation distante échoue, l’interface le signale sans prétendre avoir révoqué le jeton distant.
+- Le cache métier est annulé puis supprimé au changement de compte ou à l’expiration, sans supprimer la requête de session observée.
+- Les filtres du dashboard suivent l’URL ; les modules de ressources sont remontés à la navigation pour ne plus conserver les modales, filtres et pages du module précédent. Une ressource inconnue ne déclenche plus sa requête de liste.
+- Le sélecteur de période reflète les dates et la remise à zéro ; les bornes sont calculées en UTC, fuseau d’Abidjan.
+- Le client refuse les réponses HTML/JSON invalides et les faux exports ; les erreurs réseau sont explicites. Les corps JSON trop volumineux renvoient 413 au lieu de 500.
+- Un tri secondaire par identifiant stabilise la pagination des listes ayant des valeurs de tri identiques.
+- Les dépendances de développement vulnérables ont été corrigées et les tests frontend font désormais partie de `npm test`.
+
+Contrôles relancés : lint, TypeScript, 44 tests, builds backend/frontend, audit et smoke navigateur non authentifié. La configuration locale ignorée `backend/.env`, absente de ce nouveau checkout, a été restaurée avec la clé **publishable** existante (aucune clé privilégiée).
+
 ## Bloquant pour la recette de bout en bout
 
-Le serveur de cet environnement ne peut pas joindre le domaine Supabase en HTTPS (`ECONNRESET`). Le connecteur a accès à la base, mais ce n’est pas le réseau du processus Express. Il n’a pas été utilisé pour simuler des appels métier à la place du backend.
+Lors de la recette précédente, le serveur de cet environnement ne pouvait pas joindre le domaine Supabase en HTTPS (`ECONNRESET`). La recette authentifiée n’a pas été réexécutée pendant cette passe de correction. Le connecteur a accès à la base, mais ce n’est pas le réseau du processus Express. Il n’a pas été utilisé pour simuler des appels métier à la place du backend.
 
 Il reste à exécuter depuis un environnement réseau autorisé : inscription et confirmation e-mail réelles, connexion/déconnexion/renouvellement, création d’entreprise, rattachement de membres, parcours complets par les quatre rôles, upload/download réel et vérification de persistance après reconnexion. **Le projet ne doit pas être annoncé comme prêt pour la production avant cette recette.**
 

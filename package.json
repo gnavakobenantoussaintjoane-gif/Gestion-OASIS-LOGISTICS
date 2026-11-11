@@ -10,10 +10,11 @@
     "dev": "concurrently -n API,WEB -c blue,cyan \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w backend && npm run build -w frontend",
     "typecheck": "npm run typecheck --workspaces",
-    "test": "npm run test -w backend",
+    "test": "npm run test -w backend && npm run test -w frontend",
     "lint": "eslint frontend/src backend/src",
     "start": "npm run start -w backend",
-    "test:e2e": "node frontend/tests/smoke.mjs"
+    "test:e2e": "node frontend/tests/smoke.mjs",
+    "test:frontend": "npm run test -w frontend"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",
@@ -28,6 +29,9 @@
   "overrides": {
     "exceljs": {
       "uuid": "11.1.1"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.8"
     }
   }
 }

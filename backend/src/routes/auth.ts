@@ -4,27 +4,26 @@ import { rateLimit } from "express-rate-limit";
 import { supabase } from "../config/supabase.js";
 import { authenticate } from "../middlewares/auth.js";
 import { clearSession, saveSession } from "../services/session.js";
+import { isTemporaryAuthError } from "../utils/authErrors.js";
 import { HttpError, check } from "../utils/errors.js";
 const router = Router();
 const credentials = z.object({
   email: z.email().max(254),
   password: z.string().min(12).max(128),
 });
-router.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 40,
-    standardHeaders: "draft-8",
-    legacyHeaders: false,
-    message: { error: "Trop de tentatives. Réessayez dans quelques minutes." },
-  }),
-);
-router.post("/login", async (req, res) => {
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 40,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+});
+router.post("/login", authLimiter, async (req, res) => {
   const c = z
     .object({ email: z.email(), password: z.string().min(1).max(128) })
     .parse(req.body);
   const { data, error } = await supabase().auth.signInWithPassword(c);
-  if (error?.name === "AuthRetryableFetchError")
+  if (isTemporaryAuthError(error))
     throw new HttpError(
       503,
       "Le serveur ne parvient pas à joindre Supabase. Vérifiez son accès réseau.",
@@ -37,10 +36,10 @@ router.post("/login", async (req, res) => {
   saveSession(res, data.session);
   res.json({ ok: true });
 });
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   const c = credentials.parse(req.body);
   const { data, error } = await supabase().auth.signUp(c);
-  if (error?.name === "AuthRetryableFetchError")
+  if (isTemporaryAuthError(error))
     throw new HttpError(
       503,
       "Le serveur ne parvient pas à joindre Supabase. Vérifiez son accès réseau.",
@@ -51,13 +50,11 @@ router.post("/register", async (req, res) => {
       "Inscription indisponible. Vérifiez votre adresse ou réessayez plus tard.",
     );
   if (data.session) saveSession(res, data.session);
-  res
-    .status(201)
-    .json({
-      authenticated: !!data.session,
-      message:
-        "Si votre adresse est admissible, un message de confirmation vous sera envoyé.",
-    });
+  res.status(201).json({
+    authenticated: !!data.session,
+    message:
+      "Si votre adresse est admissible, un message de confirmation vous sera envoyé.",
+  });
 });
 router.get("/session", authenticate, async (req, res) => {
   const [profile, role] = await Promise.all([
@@ -87,21 +84,30 @@ router.get("/session", authenticate, async (req, res) => {
     company,
   });
 });
-router.post("/logout", authenticate, async (req, res) => {
+// Logging out locally must also work when the access token is expired or Auth is offline.
+router.post("/logout", async (req, res) => {
   const access = req.cookies.gestion_access;
   const refresh = req.cookies.gestion_refresh;
-  if (access && refresh) {
-    const authClient = supabase();
-    const session = await authClient.auth.setSession({
-      access_token: access,
-      refresh_token: refresh,
-    });
-    if (!session.error) await authClient.auth.signOut({ scope: "local" });
+  let revoked = !access && !refresh;
+  try {
+    if (access && refresh) {
+      const client = supabase();
+      const restored = await client.auth.setSession({
+        access_token: access,
+        refresh_token: refresh,
+      });
+      if (!restored.error) {
+        const result = await client.auth.signOut({ scope: "local" });
+        revoked = !result.error;
+      }
+    }
+  } catch {
+    /* Never retain browser cookies because remote revocation failed. */
   }
   clearSession(res);
-  res.json({ ok: true });
+  res.json({ ok: true, revoked });
 });
-router.post("/password", authenticate, async (req, res) => {
+router.post("/password", authLimiter, authenticate, async (req, res) => {
   const { password, current_password } = z
     .object({
       password: z.string().min(12).max(128),
@@ -113,6 +119,11 @@ router.post("/password", authenticate, async (req, res) => {
     email: req.user.email!,
     password: current_password,
   });
+  if (isTemporaryAuthError(verified.error))
+    throw new HttpError(
+      503,
+      "Le service d’authentification est temporairement indisponible.",
+    );
   if (verified.error)
     throw new HttpError(401, "Mot de passe actuel incorrect.");
   const { error } = await authClient.auth.updateUser({ password });

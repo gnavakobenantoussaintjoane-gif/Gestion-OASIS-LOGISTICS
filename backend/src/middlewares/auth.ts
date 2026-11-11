@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import { supabase } from "../config/supabase.js";
 import { clearSession, saveSession } from "../services/session.js";
+import { isTemporaryAuthError } from "../utils/authErrors.js";
 import { HttpError, check } from "../utils/errors.js";
 const refreshing = new Map<
   string,
@@ -10,7 +11,7 @@ export const authenticate: RequestHandler = async (req, res, next) => {
   try {
     let token = req.cookies.gestion_access as string | undefined;
     let result = token ? await supabase(token).auth.getUser() : null;
-    if (result?.error?.name === "AuthRetryableFetchError")
+    if (isTemporaryAuthError(result?.error))
       throw new HttpError(
         503,
         "Supabase est temporairement inaccessible. Réessayez sans vous déconnecter.",
@@ -24,7 +25,7 @@ export const authenticate: RequestHandler = async (req, res, next) => {
         setTimeout(() => refreshing.delete(refresh), 10000).unref();
       }
       const renewed = await pending;
-      if (renewed.error?.name === "AuthRetryableFetchError")
+      if (isTemporaryAuthError(renewed.error))
         throw new HttpError(
           503,
           "Le renouvellement de session est temporairement indisponible. Réessayez.",
@@ -32,6 +33,8 @@ export const authenticate: RequestHandler = async (req, res, next) => {
       if (renewed.data.session) {
         saveSession(res, renewed.data.session);
         token = renewed.data.session.access_token;
+        req.cookies.gestion_access = token;
+        req.cookies.gestion_refresh = renewed.data.session.refresh_token;
         result = { data: { user: renewed.data.user! }, error: null };
       }
     }

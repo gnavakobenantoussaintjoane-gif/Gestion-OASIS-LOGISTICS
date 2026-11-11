@@ -45,6 +45,7 @@ export default function ResourcePage({
   const close = useCallback(() => setEditing(null), []);
   const closeDetail = useCallback(() => setDetail(null), []);
   const records = useQuery({
+    enabled: !!config,
     queryKey: ["records", resource, filters],
     queryFn: () => api<ListResult>(`/${resource}?${queryString(filters)}`),
   });

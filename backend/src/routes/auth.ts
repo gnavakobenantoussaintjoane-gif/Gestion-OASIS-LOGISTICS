@@ -7,7 +7,9 @@ import { authenticate } from "../middlewares/auth.js";
 import { clearSession, saveSession } from "../services/session.js";
 import { isTemporaryAuthError } from "../utils/authErrors.js";
 import { HttpError, check } from "../utils/errors.js";
+import flows from "./authFlows.js";
 const router = Router();
+router.use(flows);
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 40,
@@ -16,8 +18,22 @@ const authLimiter = rateLimit({
   message: { error: "Trop de tentatives. Réessayez dans quelques minutes." },
 });
 router.post("/login", authLimiter, async (req, res) => {
+  const password = z.string().min(1).max(128);
   const c = z
-    .object({ email: z.email(), password: z.string().min(1).max(128) })
+    .union([
+      z.object({ email: z.email().max(254), password }).strict(),
+      z
+        .object({
+          phone: z
+            .string()
+            .regex(
+              /^\+[1-9]\d{7,14}$/,
+              "Utilisez le format international, par exemple +2250700000000.",
+            ),
+          password,
+        })
+        .strict(),
+    ])
     .parse(req.body);
   const { data, error } = await supabase().auth.signInWithPassword(c);
   if (isTemporaryAuthError(error))
@@ -103,7 +119,9 @@ router.post("/password", authLimiter, authenticate, async (req, res) => {
     .parse(req.body);
   const authClient = supabase();
   const verified = await authClient.auth.signInWithPassword({
-    email: req.user.email!,
+    ...(req.user.email
+      ? { email: req.user.email }
+      : { phone: req.user.phone! }),
     password: current_password,
   });
   if (isTemporaryAuthError(verified.error))

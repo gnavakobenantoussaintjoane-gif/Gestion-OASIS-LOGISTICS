@@ -28,107 +28,119 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
-await page
-  .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
-  .waitFor();
+await page.getByRole("heading", { name: "Bienvenue sur Gestion" }).waitFor();
 async function checkFormContrast() {
   const ratios = await page.evaluate(() => {
-    const luminance = (color) => {
-      const channels = color
+    const lum = (color) => {
+      const c = color
         .match(/[\d.]+/g)
         .slice(0, 3)
         .map(Number)
         .map((v) => v / 255)
         .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-      return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+      return c[0] * 0.2126 + c[1] * 0.7152 + c[2] * 0.0722;
     };
     const ratio = (a, b) => {
-      const x = luminance(a),
-        y = luminance(b);
+      const x = lum(a),
+        y = lum(b);
       return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
     };
-    const input = document.querySelector(".login-form input");
-    const panel = getComputedStyle(document.querySelector(".login-form-panel"));
+    const input = document.querySelector(".gestion-auth input");
+    const panel = getComputedStyle(
+      document.querySelector(".gestion-auth__panel"),
+    );
     return [
       ratio(
         getComputedStyle(input).color,
         getComputedStyle(input).backgroundColor,
       ),
       ratio(
-        getComputedStyle(document.querySelector(".login-form form > label"))
-          .color,
+        getComputedStyle(document.querySelector(".gestion-auth label")).color,
         panel.backgroundColor,
       ),
     ];
   });
   assert.ok(
     ratios.every((r) => r >= 4.5),
-    "Form text contrast must reach 4.5:1",
+    "Readable form contrast",
   );
 }
 await checkFormContrast();
-const motionButton = page.getByRole("button", {
-  name: "Mettre l’animation en pause",
-});
-await motionButton.click();
+assert.equal(await page.locator(".gestion-auth .flat-truck").count(), 0);
 assert.equal(
-  await page.locator(".login-visual--showcase.is-moving").count(),
-  0,
-);
-await page.getByRole("button", { name: "Reprendre l’animation" }).click();
-assert.equal(
-  await page.locator(".login-visual--showcase.is-moving").count(),
+  await page.locator(".gestion-auth .truck-illustration").count(),
   1,
 );
 assert.equal(
   await page
-    .getByLabel("Adresse e-mail")
-    .evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 16),
+    .locator(".gestion-auth")
+    .evaluate(
+      (el) =>
+        Math.abs(
+          el.getBoundingClientRect().bottom -
+            el
+              .querySelector(".gestion-auth__background")
+              .getBoundingClientRect().bottom,
+        ) < 1,
+    ),
   true,
 );
-await page.emulateMedia({ reducedMotion: "reduce" });
-await page.getByText("Mouvements réduits", { exact: true }).waitFor();
-assert.equal(
-  await page.locator(".login-visual--showcase.is-moving").count(),
-  0,
-);
-await page.emulateMedia({ reducedMotion: "no-preference" });
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-desktop.png"),
   fullPage: true,
   animations: "disabled",
 });
-assert.equal(
-  await page
-    .getByRole("button", { name: "Créer un compte", exact: true })
-    .count(),
-  0,
+await page.getByRole("button", { name: "Se connecter", exact: true }).click();
+await page.getByRole("alert").waitFor();
+await page.getByRole("button", { name: "Téléphone", exact: true }).click();
+await page.getByLabel("Numéro de téléphone").fill("0700000000");
+await page.getByRole("button", { name: "Se connecter", exact: true }).click();
+assert.ok((await page.getByRole("alert").textContent()).includes("E.164"));
+await page.getByRole("button", { name: "Mot de passe oublié ?" }).click();
+await page.getByRole("heading", { name: "Mot de passe oublié ?" }).waitFor();
+await page.getByRole("button", { name: "Retour à la connexion" }).click();
+await page.emulateMedia({ reducedMotion: "reduce" });
+await page.waitForFunction(
+  () =>
+    !document
+      .querySelector(".gestion-auth")
+      .classList.contains("gestion-auth--moving"),
 );
-await page
-  .getByText("Pour obtenir un accès, contactez votre administrateur.")
-  .waitFor();
-await page.getByRole("button", { name: "Changer le thème" }).click();
-assert.equal(
-  await page.evaluate(() => document.documentElement.dataset.theme),
-  "dark",
-);
-await checkFormContrast();
-await page.getByRole("button", { name: "Changer le thème" }).click();
+await page.emulateMedia({ reducedMotion: "no-preference" });
+await page.evaluate(() => (document.documentElement.dataset.theme = "dark"));
+await checkFormContrast(); // The login stays light without changing the stored theme preference.
+await page.evaluate(() => (document.documentElement.dataset.theme = "light"));
+for (const width of [768, 390, 320]) {
+  await page.setViewportSize({ width, height: 844 });
+  assert.equal(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+    true,
+  );
+  assert.equal(
+    await page
+      .getByLabel("Adresse e-mail")
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 16),
+    true,
+  );
+}
 await page.setViewportSize({ width: 390, height: 844 });
-
-await page
-  .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
-  .waitFor();
+await page.waitForFunction(
+  () => document.querySelectorAll("[data-sonner-toast]").length === 0,
+);
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-mobile.png"),
   fullPage: true,
   animations: "disabled",
 });
-assert.equal(
-  await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-  true,
+await page.goto(
+  (process.env.APP_URL || "http://localhost:3000") +
+    "/auth/callback?error=access_denied",
 );
-assert.equal(await page.locator(".login-visual").isVisible(), true);
+await page.getByRole("alert").waitFor();
+await page.getByRole("button", { name: "Retour à la connexion" }).click();
+await page.getByRole("heading", { name: "Bienvenue sur Gestion" }).waitFor();
 // Component-only animation checks. No fabricated session or operational data.
 await page.evaluate(async () => {
   const React = await import("/node_modules/.vite/deps/react.js");
@@ -163,5 +175,5 @@ assert.equal(await page.locator(".loading-screen .realistic-wheel").count(), 5);
 assert.deepEqual(errors, []);
 await browser.close();
 console.log(
-  "PASS: real login screen, private access notice, theme, mobile, dashboard and loading animation components. No authenticated workflow was simulated.",
+  "PASS: real login screen, light login, phone validation, recovery form, callback errors, responsive layout, dashboard and loading animation components. No authenticated workflow was simulated.",
 );

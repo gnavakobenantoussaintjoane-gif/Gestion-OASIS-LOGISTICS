@@ -6,7 +6,7 @@ export default function Brand() {
         <Truck size={24} />
       </span>
       <div>
-        GESTION<small>TRANSPORT & LOGISTICS</small>
+        OSIS LOGISTICS<small>TRANSPORT & LOGISTICS</small>
       </div>
     </div>
   );

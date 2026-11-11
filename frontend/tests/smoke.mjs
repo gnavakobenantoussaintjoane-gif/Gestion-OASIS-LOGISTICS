@@ -28,7 +28,7 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
-await page.getByRole("heading", { name: "Bienvenue sur GESTION" }).waitFor();
+await page.getByRole("heading", { name: "Bienvenue sur OSIS LOGISTICS" }).waitFor();
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-desktop.png"),
   fullPage: true,
@@ -55,7 +55,7 @@ assert.equal(
 await page.getByRole("button", { name: "Changer le thème" }).click();
 await page.setViewportSize({ width: 390, height: 844 });
 await page.getByRole("button", { name: "Se connecter", exact: true }).click();
-await page.getByRole("heading", { name: "Bienvenue sur GESTION" }).waitFor();
+await page.getByRole("heading", { name: "Bienvenue sur OSIS LOGISTICS" }).waitFor();
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-mobile.png"),
   fullPage: true,

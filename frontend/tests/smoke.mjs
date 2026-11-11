@@ -28,23 +28,97 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
-await page.getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" }).waitFor();
+await page
+  .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
+  .waitFor();
+async function checkFormContrast() {
+  const ratios = await page.evaluate(() => {
+    const luminance = (color) => {
+      const channels = color
+        .match(/[\d.]+/g)
+        .slice(0, 3)
+        .map(Number)
+        .map((v) => v / 255)
+        .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+    };
+    const ratio = (a, b) => {
+      const x = luminance(a),
+        y = luminance(b);
+      return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+    };
+    const input = document.querySelector(".login-form input");
+    const panel = getComputedStyle(document.querySelector(".login-form-panel"));
+    return [
+      ratio(
+        getComputedStyle(input).color,
+        getComputedStyle(input).backgroundColor,
+      ),
+      ratio(
+        getComputedStyle(document.querySelector(".login-form form > label"))
+          .color,
+        panel.backgroundColor,
+      ),
+    ];
+  });
+  assert.ok(
+    ratios.every((r) => r >= 4.5),
+    "Form text contrast must reach 4.5:1",
+  );
+}
+await checkFormContrast();
+const motionButton = page.getByRole("button", {
+  name: "Mettre l’animation en pause",
+});
+await motionButton.click();
+assert.equal(
+  await page.locator(".login-visual--showcase.is-moving").count(),
+  0,
+);
+await page.getByRole("button", { name: "Reprendre l’animation" }).click();
+assert.equal(
+  await page.locator(".login-visual--showcase.is-moving").count(),
+  1,
+);
+assert.equal(
+  await page
+    .getByLabel("Adresse e-mail")
+    .evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 16),
+  true,
+);
+await page.emulateMedia({ reducedMotion: "reduce" });
+await page.getByText("Mouvements réduits", { exact: true }).waitFor();
+assert.equal(
+  await page.locator(".login-visual--showcase.is-moving").count(),
+  0,
+);
+await page.emulateMedia({ reducedMotion: "no-preference" });
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-desktop.png"),
   fullPage: true,
   animations: "disabled",
 });
-assert.equal(await page.getByRole('button',{name:'Créer un compte',exact:true}).count(),0);
-await page.getByText('Pour obtenir un accès, contactez votre administrateur.').waitFor();
+assert.equal(
+  await page
+    .getByRole("button", { name: "Créer un compte", exact: true })
+    .count(),
+  0,
+);
+await page
+  .getByText("Pour obtenir un accès, contactez votre administrateur.")
+  .waitFor();
 await page.getByRole("button", { name: "Changer le thème" }).click();
 assert.equal(
   await page.evaluate(() => document.documentElement.dataset.theme),
   "dark",
 );
+await checkFormContrast();
 await page.getByRole("button", { name: "Changer le thème" }).click();
 await page.setViewportSize({ width: 390, height: 844 });
 
-await page.getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" }).waitFor();
+await page
+  .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
+  .waitFor();
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-mobile.png"),
   fullPage: true,

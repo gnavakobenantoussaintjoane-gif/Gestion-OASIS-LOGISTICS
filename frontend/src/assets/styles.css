@@ -3389,3 +3389,344 @@ h3 {
     animation: none;
   }
 }
+
+/* OASIS high-visibility edition: readable content, not miniature captions. */
+:root {
+  --ink: #162943;
+  --muted: #405570;
+  --line: #c6d1df;
+}
+[data-theme="dark"] {
+  --ink: #f4f7fc;
+  --muted: #c7d5e8;
+  --line: #53647c;
+}
+body {
+  font-size: 16px;
+  line-height: 1.55;
+}
+p {
+  font-size: 16px;
+}
+small {
+  font-size: 13px;
+}
+.sidebar nav > a {
+  font-size: 15px;
+  min-height: 46px;
+  color: #d6e2f5;
+}
+.sidebar nav > a.active {
+  color: #fff;
+  font-weight: 700;
+}
+.nav-caption,
+.sidebar-profile small {
+  font-size: 12px;
+  color: #b8cbe5;
+}
+.stat-card > div,
+.stat-card > small {
+  font-size: 14px;
+  color: var(--muted);
+}
+th,
+th > button {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+td {
+  font-size: 15px;
+  color: var(--ink);
+}
+.field > label,
+.detail-list dt {
+  font-size: 15px;
+  color: var(--ink);
+}
+.badge,
+.table-pagination,
+.container-options button {
+  font-size: 13px;
+}
+.login-form h1 {
+  font-size: clamp(36px, 3.5vw, 48px);
+  font-weight: 800;
+}
+.login-form > p {
+  font-size: 18px;
+  color: var(--ink);
+}
+.login-form form > label {
+  font-size: 17px;
+  font-weight: 700;
+}
+.login-form form input {
+  font-size: 17px;
+  font-weight: 500;
+  min-height: 58px;
+}
+.login-form form input::placeholder {
+  opacity: 1;
+  color: var(--muted);
+}
+.login-form .eyebrow {
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.login-submit {
+  font-size: 18px;
+  min-height: 58px;
+}
+.auth-security,
+.auth-note p,
+.login-form-panel > footer,
+.login-form-panel > footer span {
+  font-size: 14px;
+  color: var(--muted);
+}
+.login-switch {
+  font-size: 16px;
+  color: var(--ink);
+}
+.login-top .brand small {
+  font-size: 12px;
+  letter-spacing: 0.6px;
+}
+.login-visual--showcase {
+  display: grid;
+  grid-template-rows: auto minmax(250px, 1fr) auto;
+  min-height: 720px;
+  background:
+    radial-gradient(ellipse at 55% 50%, #27567e, transparent 65%), #0b2038;
+  isolation: isolate;
+}
+.login-visual--showcase .login-visual-copy {
+  padding: 48px 36px 0;
+}
+.login-visual--showcase .hero-kicker {
+  color: #cfe5ff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+.login-visual--showcase .login-visual-copy h2 {
+  font-size: clamp(32px, 3vw, 46px);
+  line-height: 1.15;
+  font-weight: 750;
+  margin-top: 22px;
+}
+.login-visual--showcase .login-visual-copy p {
+  color: #edf5ff;
+  font-size: 18px;
+  line-height: 1.65;
+  max-width: 380px;
+}
+.oasis-road-stage {
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  align-self: end;
+  width: 100%;
+}
+.oasis-road-stage .flat-scene {
+  z-index: 2;
+}
+.oasis-road-stage .port-crane {
+  display: none;
+}
+.oasis-road-stage .flat-truck {
+  width: 90%;
+  left: 4%;
+  bottom: 55px;
+  transform: none;
+  filter: drop-shadow(0 16px 10px #030b16aa);
+}
+.oasis-road-stage .flat-road {
+  bottom: 48px;
+  height: 2px;
+  background: #9bb4cc;
+  box-shadow: 0 2px 0 #030d1b;
+}
+.oasis-road-markings {
+  position: absolute;
+  bottom: 0;
+  height: 48px;
+  width: 100%;
+  background: #0b1523;
+  border-bottom: 1px solid #70869b;
+}
+.oasis-road-markings:after {
+  content: "";
+  position: absolute;
+  inset: 22px -120px auto;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    #deebf5 0 58px,
+    transparent 58px 120px
+  );
+}
+.is-moving .oasis-road-markings:after {
+  animation: oasisRoad 2.4s linear infinite;
+}
+.oasis-road-stage .rolling .flat-truck {
+  animation: oasisSuspension 3s ease-in-out infinite;
+}
+.oasis-skyline {
+  position: absolute;
+  inset: auto 0 50px;
+  height: 200px;
+  opacity: 0.48;
+}
+.oasis-skyline i {
+  position: absolute;
+  bottom: 0;
+  width: 26%;
+  height: 45%;
+  background: repeating-linear-gradient(90deg, #5684a5 0 3px, #2b5678 3px 17px);
+  border-top: 3px solid #81abc5;
+}
+.oasis-skyline i:nth-child(1) {
+  left: 0;
+}
+.oasis-skyline i:nth-child(2) {
+  left: 27%;
+  height: 70%;
+}
+.oasis-skyline i:nth-child(3) {
+  left: 54%;
+  height: 35%;
+}
+.oasis-skyline i:nth-child(4) {
+  left: 81%;
+  height: 58%;
+}
+.oasis-showcase-bottom {
+  padding: 28px 36px 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  position: relative;
+  z-index: 3;
+}
+.oasis-service-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  width: 100%;
+}
+.oasis-service-labels span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e6f0fc;
+  font-size: 14px;
+  font-weight: 600;
+}
+.oasis-motion-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #91a9c4;
+  border-radius: 9px;
+  padding: 10px 16px;
+  min-height: 44px;
+  color: #fff;
+  font-size: 14px;
+  background: #163453;
+}
+.oasis-motion-button:hover {
+  background: #254f77;
+}
+.oasis-motion-button:disabled {
+  opacity: 1;
+  color: #d7e6f5;
+}
+@keyframes oasisRoad {
+  to {
+    transform: translateX(-120px);
+  }
+}
+@keyframes oasisSuspension {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 2px -1px;
+  }
+}
+@media (max-width: 700px) {
+  .login-visual--showcase {
+    display: grid;
+    min-height: auto;
+    grid-template-rows: auto 175px auto;
+    order: 0;
+    margin: 14px;
+  }
+  .login-visual--showcase .login-visual-copy {
+    padding: 24px 22px 0;
+  }
+  .login-visual--showcase .hero-kicker {
+    font-size: 12px;
+  }
+  .login-visual--showcase .login-visual-copy h2 {
+    font-size: 30px;
+    margin-top: 12px;
+  }
+  .login-visual--showcase .login-visual-copy p {
+    display: block;
+    font-size: 15px;
+    margin-top: 12px;
+  }
+  .oasis-road-stage {
+    min-height: 175px;
+  }
+  .oasis-road-stage .flat-truck {
+    width: 94%;
+    left: 2%;
+    transform: none;
+    bottom: 37px;
+  }
+  .oasis-road-stage .flat-road {
+    bottom: 32px;
+  }
+  .oasis-road-markings {
+    height: 32px;
+  }
+  .oasis-road-markings:after {
+    top: 15px;
+    height: 3px;
+  }
+  .oasis-skyline {
+    bottom: 34px;
+    height: 110px;
+  }
+  .oasis-showcase-bottom {
+    padding: 18px 22px;
+    gap: 18px;
+  }
+  .oasis-service-labels {
+    gap: 12px;
+  }
+  .oasis-service-labels span {
+    font-size: 13px;
+  }
+  .login-form h1 {
+    font-size: 36px;
+  }
+  .login-top .brand {
+    font-size: 17px;
+  }
+  .login-top .brand small {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-moving .oasis-road-markings:after,
+  .oasis-road-stage .rolling .flat-truck {
+    animation: none;
+  }
+}

@@ -99,7 +99,7 @@ export default function AppLayout() {
       "/notifications": "Notifications",
       "/audit": "Journal d’audit",
     }[location.pathname] ||
-    "GESTION";
+    "OASIS LOGISTICS";
   const initials =
     session?.profile?.full_name
       ?.split(" ")
@@ -249,7 +249,7 @@ export default function AppLayout() {
           <Outlet />
           <footer className="app-footer">
             <span>
-              GESTION <b>TRANSPORT & LOGISTICS</b>
+              OASIS LOGISTICS <b>TRANSPORT & LOGISTICS</b>
             </span>
             <span>
               Conçu pour aller plus loin. <i>✦</i>

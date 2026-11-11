@@ -22,9 +22,9 @@ export default function TruckModel({
   useFrame(({ clock }, dt) => {
     if (!animate) return;
     if (group.current)
-      group.current.position.x = Math.sin(clock.elapsedTime * 0.3) * 1.1;
+      group.current.position.x = Math.sin(clock.elapsedTime * 0.15) * 0.35;
     wheels.current.forEach((w) => {
-      w.rotation.z -= dt * 3;
+      w.rotation.z -= dt * 0.8;
     });
   });
   return (
@@ -63,6 +63,41 @@ export default function TruckModel({
         <boxGeometry args={[0.05, 0.3, 1.3]} />
         <meshStandardMaterial color="#20364d" />
       </mesh>
+      {/* Mirrors, cab steps, fuel tanks and radiator slats. */}
+      {[-1, 1].map((side) => (
+        <group key={side}>
+          <mesh position={[3.1, 2.15, side * 1.16]}>
+            <boxGeometry args={[0.14, 0.4, 0.2]} />
+            <meshStandardMaterial color="#152637" metalness={0.6} />
+          </mesh>
+          <mesh position={[2.85, 2.3, side * 1.02]}>
+            <boxGeometry args={[0.5, 0.05, 0.3]} />
+            <meshStandardMaterial color="#9aafbf" metalness={0.85} />
+          </mesh>
+          <mesh position={[1.35, 0.75, side * 0.85]}>
+            <boxGeometry args={[0.8, 0.38, 0.32]} />
+            <meshStandardMaterial
+              color="#adbcc7"
+              metalness={0.9}
+              roughness={0.25}
+            />
+          </mesh>
+          <mesh position={[2.25, 0.86, side * 0.98]}>
+            <boxGeometry args={[0.6, 0.12, 0.28]} />
+            <meshStandardMaterial color="#738b9c" metalness={0.8} />
+          </mesh>
+          <mesh position={[2.85, 1.55, side * 0.96]}>
+            <boxGeometry args={[0.25, 0.045, 0.035]} />
+            <meshStandardMaterial color="#314759" />
+          </mesh>
+        </group>
+      ))}
+      {[0, 1, 2, 3, 4].map((i) => (
+        <mesh key={i} position={[3.56, 1.2 + i * 0.09, 0]}>
+          <boxGeometry args={[0.035, 0.025, 1.2]} />
+          <meshStandardMaterial color="#899dac" metalness={0.9} />
+        </mesh>
+      ))}
       {[-0.7, 0.7].map((z) => (
         <mesh key={z} position={[3.58, 0.93, z]}>
           <boxGeometry args={[0.05, 0.15, 0.3]} />

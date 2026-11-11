@@ -12,7 +12,7 @@ export default function LoadingTruckAnimation() {
       aria-busy="true"
     >
       <strong>
-        GESTION<span>TRANSPORT & LOGISTICS</span>
+        OASIS LOGISTICS<span>TRANSPORT & LOGISTICS</span>
       </strong>
       <FlatTruck animated={animations && !reduce} />
       <div className="loading-track">

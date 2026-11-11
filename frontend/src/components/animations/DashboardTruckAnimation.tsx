@@ -20,7 +20,7 @@ export default function DashboardTruckAnimation() {
           Un seul espace pour tout piloter.
         </p>
         <div className="hero-brand">
-          GESTION <span>— TRANSPORT & LOGISTICS</span>
+          OASIS LOGISTICS <span>— TRANSPORT & LOGISTICS</span>
         </div>
       </div>
       <TruckVisual kind={kind} />

@@ -57,7 +57,7 @@ export default function Modal({
       >
         <header>
           <div>
-            <span className="eyebrow">GESTION · OPÉRATIONS</span>
+            <span className="eyebrow">OASIS LOGISTICS · OPÉRATIONS</span>
             <h2 id="modal-title">{title}</h2>
           </div>
           <button className="icon-button" aria-label="Fermer" onClick={onClose}>

@@ -96,7 +96,7 @@ export async function exportReport(
   res.attachment(filename);
   if (format === "xlsx") {
     const book = new ExcelJS.Workbook();
-    book.creator = "GESTION";
+    book.creator = "OASIS LOGISTICS";
     for (const [name, head, rows] of sheets) {
       const sheet = book.addWorksheet(name);
       sheet.addRow([company]);
@@ -134,7 +134,7 @@ export async function exportReport(
           .fillColor("#173b7a")
           .font("Helvetica-Bold")
           .fontSize(22)
-          .text("GESTION / " + company);
+          .text("OASIS LOGISTICS / " + company);
         doc
           .fillColor("#62728b")
           .fontSize(10)

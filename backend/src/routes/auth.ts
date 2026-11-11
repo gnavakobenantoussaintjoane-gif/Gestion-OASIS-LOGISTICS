@@ -1,3 +1,4 @@
+import { assertOasisCompany } from "../utils/companyAccess.js";
 import { Router } from "express";
 import { z } from "zod";
 import { rateLimit } from "express-rate-limit";
@@ -7,10 +8,6 @@ import { clearSession, saveSession } from "../services/session.js";
 import { isTemporaryAuthError } from "../utils/authErrors.js";
 import { HttpError, check } from "../utils/errors.js";
 const router = Router();
-const credentials = z.object({
-  email: z.email().max(254),
-  password: z.string().min(12).max(128),
-});
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 40,
@@ -36,25 +33,11 @@ router.post("/login", authLimiter, async (req, res) => {
   saveSession(res, data.session);
   res.json({ ok: true });
 });
-router.post("/register", authLimiter, async (req, res) => {
-  const c = credentials.parse(req.body);
-  const { data, error } = await supabase().auth.signUp(c);
-  if (isTemporaryAuthError(error))
-    throw new HttpError(
-      503,
-      "Le serveur ne parvient pas à joindre Supabase. Vérifiez son accès réseau.",
-    );
-  if (error)
-    throw new HttpError(
-      422,
-      "Inscription indisponible. Vérifiez votre adresse ou réessayez plus tard.",
-    );
-  if (data.session) saveSession(res, data.session);
-  res.status(201).json({
-    authenticated: !!data.session,
-    message:
-      "Si votre adresse est admissible, un message de confirmation vous sera envoyé.",
-  });
+router.post("/register", (_req, _res) => {
+  throw new HttpError(
+    403,
+    "Les inscriptions publiques sont fermées. Contactez OASIS LOGISTICS.",
+  );
 });
 router.get("/session", authenticate, async (req, res) => {
   const [profile, role] = await Promise.all([
@@ -67,6 +50,7 @@ router.get("/session", authenticate, async (req, res) => {
   ]);
   check(profile.error);
   check(role.error);
+  if (role.data) assertOasisCompany(role.data.company_id);
   let company = null;
   if (role.data) {
     const result = await req.db
@@ -132,15 +116,10 @@ router.post("/password", authLimiter, authenticate, async (req, res) => {
   clearSession(res);
   res.json({ ok: true });
 });
-router.post("/company", authenticate, async (req, res) => {
-  const fields = z
-    .object({
-      company_name: z.string().trim().min(2).max(100),
-      display_name: z.string().trim().min(2).max(100),
-    })
-    .parse(req.body);
-  const { data, error } = await req.db.rpc("gestion_create_company", fields);
-  check(error);
-  res.status(201).json({ id: data });
+router.post("/company", (_req, _res) => {
+  throw new HttpError(
+    403,
+    "La création d’entreprises est désactivée : cette application est réservée à OASIS LOGISTICS.",
+  );
 });
 export default router;

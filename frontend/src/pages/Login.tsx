@@ -66,7 +66,7 @@ export default function Login() {
           <div className="eyebrow">
             <span /> VOTRE ESPACE PROFESSIONNEL
           </div>
-          <h1>{register ? "Créez votre compte." : "Bienvenue sur GESTION"}</h1>
+          <h1>{register ? "Créez votre compte." : "Bienvenue sur OSIS LOGISTICS"}</h1>
           <p>Pilotez votre flotte. Maîtrisez vos finances.</p>
           {error && (
             <div className="alert">
@@ -154,7 +154,7 @@ export default function Login() {
           </div>
         </div>
         <footer>
-          © {new Date().getFullYear()} GESTION{" "}
+          © {new Date().getFullYear()} OSIS LOGISTICS{" "}
           <span>Africa/Abidjan · FCFA</span>
         </footer>
       </section>

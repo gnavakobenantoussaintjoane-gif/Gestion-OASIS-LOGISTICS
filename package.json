@@ -1,50 +1,29 @@
 {
-  "name": "oasis-transport-logistics",
+  "name": "gestion",
   "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:e2e": "node tests/e2e/smoke.mjs"
-  },
-  "dependencies": {
-    "@hookform/resolvers": "^7.0.5",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.4.0",
-    "dotenv": "17.3.1",
-    "drizzle-orm": "0.45.2",
-    "exceljs": "^4.4.0",
-    "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.9",
-    "lucide-react": "^1.71.0",
-    "next": "^16.4.6",
-    "pg": "8.20.0",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "react-hook-form": "^7.91.0",
-    "recharts": "^3.10.1",
-    "tailwind-merge": "^3.7.0",
-    "vitest": "^5.1.0",
-    "zod": "^4.6.7"
+    "dev": "concurrently -n API,WEB -c blue,cyan \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test -w backend",
+    "lint": "eslint frontend/src backend/src",
+    "start": "npm run start -w backend",
+    "test:e2e": "node frontend/tests/smoke.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",
     "@sparticuz/chromium": "^153.0.0",
-    "@tailwindcss/postcss": "4.1.17",
-    "@types/node": "22.19.15",
-    "@types/pg": "8.18.0",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
-    "drizzle-kit": "0.31.10",
-    "eslint": "9.39.4",
-    "eslint-config-next": "^16.4.6",
-    "postcss": "^8.5.32",
-    "tailwindcss": "4.1.17",
-    "typescript": "5.9.3"
+    "@types/node": "^22.19.15",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.2",
+    "vite": "8.3.8"
   },
   "overrides": {
     "exceljs": {

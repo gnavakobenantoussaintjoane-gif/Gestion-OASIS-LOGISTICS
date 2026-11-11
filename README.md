@@ -1,74 +1,106 @@
-# OASIS Transport & Logistics
+# GESTION — Transport & Logistics
 
-Application de gestion de flotte et de suivi financier de transport de conteneurs à Abidjan. **Version 1 : prototype fonctionnel local**, sans connexion Supabase ni authentification.
+Application de gestion de flotte et de transport de conteneurs pour Abidjan. **Refonte React/Vite + Express réellement implémentée**, avec schéma Supabase multi-entreprise, sans données métier de démonstration. Le périmètre complet demandé n’est pas encore certifié prêt pour la production : consulter [l’état détaillé et les réserves](docs/ETAT-DU-PROJET.md).
 
-## Base de données Supabase
+## Architecture
 
-Les tables `trucks`, `trips` et `expenses` ont été créées dans le projet Supabase **Gestion-OASIS-LOGISTICS**, avec contraintes, recettes calculées et politiques RLS par utilisateur. La migration SQL est conservée dans `supabase/migrations/`.
-
-**L’interface reste locale : sa connexion à Supabase et l’authentification ne sont pas encore implémentées.** Voir [l’état et les prochaines étapes](docs/SUPABASE-INTEGRATION.md). Aucune donnée du navigateur n’a été transférée automatiquement.
-
-## Démarrage
-
-Node.js 22 recommandé.
-
-```bash
-npm ci
-npm run dev -- --hostname 0.0.0.0
+```text
+frontend/   React 19, Vite, TypeScript, Tailwind, React Router, TanStack Query
+backend/    Node.js, Express 5, TypeScript, Supabase, Zod, ExcelJS, PDFKit
+supabase/   migrations PostgreSQL, politiques RLS, tests transactionnels
+archive/    ancien prototype Next.js conservé pour référence, non exécuté
+ docs/      architecture, API, SQL, installation et guide utilisateur
 ```
 
-Ouvrir `http://localhost:3000`. Production : `npm run build && npm run start`.
+Aucun Next.js, Prisma ou stockage métier local dans l’application active. Le navigateur communique avec `/api`, Express interroge Supabase avec **la session utilisateur et la clé publiable**, sans service-role. Les cookies de session sont HttpOnly ; aucun jeton n’est placé dans le localStorage. Seuls le thème et la préférence d’animation sont locaux.
 
-## Fonctionnalités
+## Installation et démarrage
 
-- Tableau de bord : recettes, dépenses, résultat, graphiques et répartition des shifts.
-- Camions : immatriculation, chauffeur, statut, modification et suppression protégée.
-- Voyages regroupés par quantité : shift jour (06h–18h30) ou soir (19h–06h J+1), ATL/CIT, 20 DRY / 40 DRY / 40 REEFER, plein/vide, prix unitaire et encaissement.
-- Dépenses générales, par camion ou liées à une ligne de voyages.
-- Filtres combinables et recherche ; exports Excel et PDF multisections.
-- Finances : distinction résultat, encaissements, reste dû et trésorerie simplifiée.
-- Sauvegarde/restauration JSON validée et réinitialisation de la démonstration.
-- Interface responsive, animations réduites si demandé, modales accessibles au clavier.
+Node.js **22.22+** recommandé. Depuis la racine :
 
-## Important avant utilisation réelle
+```bash
+npm install
+cp backend/.env.example backend/.env
+# Renseigner SUPABASE_URL et SUPABASE_PUBLISHABLE_KEY dans backend/.env
+npm run dev
+```
 
-Les données initiales sont **fictives**, les tarifs ne sont pas des prix officiels. Les données sont conservées dans le `localStorage` du navigateur : pas de synchronisation, pas de sauvegarde serveur, pas de protection par compte. Exportez et sauvegardez régulièrement. Ne pas utiliser comme système comptable de production.
+- Frontend : `http://localhost:5173`
+- Backend : `http://localhost:4000/api/health`
+- Vite transmet `/api` à Express : aucun appel navigateur à localhost pour joindre un autre serveur.
 
-Les encaissements sont rattachés à la date de départ du voyage, pas à une date bancaire. Les dépenses sont considérées payées à la date saisie. Un historique de paiements séparé sera nécessaire pour une trésorerie bancaire exacte.
+Les applications peuvent être démarrées séparément :
 
-Les filtres shift/terminal/conteneur/état excluent les dépenses non liées aux voyages sélectionnés. Les exports reprennent les voyages et dépenses filtrés et le parc de camions complet.
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Le dépôt utilise les workspaces npm pour partager uniquement l’outillage de développement. Chaque application possède ses propres dépendances et responsabilités.
+
+## Supabase et premier compte
+
+Les migrations versionnées sont **déjà appliquées** au projet Supabase `Gestion-OASIS-LOGISTICS`. Ne pas les réexécuter sur ce projet. Pour une nouvelle base, les appliquer dans l’ordre, puis suivre [les instructions Supabase](docs/SUPABASE-INTEGRATION.md).
+
+1. Créer son compte depuis l’écran de connexion et confirmer son adresse selon la configuration Supabase Auth.
+2. Se connecter puis créer son entreprise. Le créateur devient administrateur via une fonction SQL transactionnelle, pas via des métadonnées client.
+3. Ajouter les chauffeurs, les camions et **les vrais tarifs de l’entreprise**.
+4. Enregistrer les voyages et dépenses. La base ne contient aucun tarif prédéfini ni opération fictive.
+5. Pour rejoindre une équipe, créer et confirmer son compte **sans créer d’entreprise**, puis demander son rattachement à un administrateur.
+
+### Limite de l’aperçu Arena
+
+Le serveur de cet environnement n’a pas d’accès réseau direct au domaine Supabase (connexion sortante observée : `ECONNRESET`). Le connecteur Supabase a permis d’appliquer et de tester le SQL, **mais pas de valider une connexion navigateur → Express → Auth Supabase**. Le code ne contourne pas cette restriction et ne simule aucun succès. Il faut exécuter/déployer Express dans un environnement autorisant l’accès HTTPS au projet pour la recette authentifiée complète.
+
+## Fonctionnalités implémentées
+
+- Connexion, inscription, cookies de session, renouvellement, déconnexion et changement de mot de passe.
+- Création d’entreprise, profil et rattachement de comptes existants aux quatre rôles.
+- RLS par entreprise, permissions backend, clés étrangères composites et audit transactionnel.
+- Camions (archivage), chauffeurs, voyages unitaires, dépenses, références et grille tarifaire.
+- Shifts calculés côté serveur **et en base**, avec rattachement à la veille avant 06h et rejet hors shift.
+- Tarifs actifs requis, copie historique indépendante des futures modifications, détection des doublons.
+- Justificatifs PDF/JPEG/PNG ≤ 5 Mo dans un bucket privé, téléchargements signés 60 secondes.
+- Tableau de bord, graphiques, rapports, filtres combinables, recherche, pagination et tri des champs autorisés.
+- Exports Excel et PDF : synthèse, voyages, dépenses, camions, shifts, terminaux, chauffeurs.
+- Notifications des opérations et consultation du journal d’audit.
+- Thèmes clair/sombre, préférence d’animation, modales clavier et interface mobile.
+- Trois animations intégrées : dashboard, connexion et chargement réel. Modèle 3D procédural original, conteneurs distincts et fallback CSS animé, sans ressource externe manquante.
 
 ## Vérifications
 
 ```bash
-npm run lint
 npm run typecheck
+npm run lint
 npm test
 npm run build
-# Serveur démarré, test navigateur Linux :
+# Avec le frontend et le backend démarrés, sous Linux :
 npm run test:e2e
 ```
 
-Le test navigateur utilise Chromium empaqueté par npm (Linux) et une session de navigateur isolée ; il ne modifie pas les données de votre navigateur. `APP_URL` permet de viser une autre adresse. Captures temporaires dans le dossier temporaire système.
+Le test navigateur contrôle la connexion non authentifiée, la validation, le thème, le responsive et les composants d’animation. **Il ne simule pas une session authentifiée et ne prouve pas une connexion à Supabase.**
 
-## Architecture
+Le test SQL `supabase/tests/security-and-business.sql` crée ses fixtures dans une transaction et termine par `ROLLBACK`. Réservé à une base de développement ou de recette. Aucun jeu de données de test n’est chargé dans le logiciel.
 
-- `src/app/page.tsx` : interface et opérations locales.
-- `src/app/globals.css` : design responsive et animations.
-- `src/lib/domain.ts` : modèles, calculs, filtres et données de démonstration.
-- `src/lib/validation.ts` : validation Zod des sauvegardes et références.
-- `src/lib/exports.ts` : génération Excel/PDF chargée à la demande.
-- `tests/domain.test.ts` : tests unitaires.
-- `tests/e2e/smoke.mjs` : parcours navigateur.
+## Production
 
-Les dépendances PostgreSQL/Drizzle et `drizzle.config.json` héritées du socle ne sont pas utilisées par cette version. Le schéma mentionné dans cette configuration n’est pas encore créé : ne pas lancer de migration à ce stade.
+`npm run build` génère `frontend/dist` et `backend/dist` (artefacts ignorés par Git). Servir le frontend sur HTTPS avec repli SPA vers `index.html` et transmettre `/api` vers Express sur **la même origine**. Configurer `NODE_ENV=production`, `FRONTEND_ORIGIN` et les variables Supabase côté serveur. `npm start` démarre l’API compilée. Le backend doit pouvoir joindre Supabase en HTTPS. Voir [le guide de déploiement](docs/INSTALLATION.md).
 
 ## Documentation
 
-- [Prompt professionnel et cahier des charges](docs/PROMPT-PROJET.md)
+- [État du projet, limites et recette restante](docs/ETAT-DU-PROJET.md)
+- [Architecture et sécurité](docs/ARCHITECTURE.md)
+- [API REST](docs/API.md)
+- [Schéma SQL et Supabase](docs/SUPABASE-INTEGRATION.md)
+- [Installation et déploiement](docs/INSTALLATION.md)
+- [Guide utilisateur](docs/GUIDE-UTILISATEUR.md)
 - [Règles métier](docs/BUSINESS_RULES.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Frontend](docs/FRONTEND.md)
-- [Base Supabase et prochaines étapes](docs/SUPABASE-INTEGRATION.md)
 
-- [Vérification du code dans les fichiers](docs/VERIFICATION-FICHIERS.md)
+Les documents de l’ancienne démonstration sont conservés dans `archive/next-prototype/docs` et ne décrivent pas l’état actuel.

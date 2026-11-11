@@ -1,9 +1,12 @@
-# Frontend
+# Frontend GESTION
 
-Navigation : vue d’ensemble, camions, voyages/shifts, dépenses, finances/rapports, paramètres.
+Voir `frontend/src` pour l’application React 19/Vite active. Les anciens fichiers Next.js sont archivés, pas exécutés.
 
-Design : palette vert émeraude et blanc cassé, navigation latérale, cartes d’indicateurs, graphique en barres CSS, listes tabulaires et formulaires en modale. Les tableaux défilent horizontalement sur mobile. Le menu devient rétractable sous 700 px.
+- Navigation et accès : `routes`, `layouts`, `contexts`.
+- Modules : `pages`, avec formulaires et tableaux partagés dans `components`.
+- Contrats REST : `api`, hooks TanStack Query dans `hooks`.
+- Configuration des champs métier : `services/resources.ts` ; validations front RHF/Zod et validation backend indépendante.
+- Design responsive et thème : `assets/styles.css`.
+- Animations : `components/animations/{TruckModel,TruckScene,TruckVisual,DashboardTruckAnimation,LoginTruckAnimation,LoadingTruckAnimation}.tsx`.
 
-Les animations d’apparition et de progression respectent `prefers-reduced-motion`. Les modales portent un nom accessible, retiennent le focus, se ferment avec Échap et restituent le focus. Les champs sont associés à leurs labels.
-
-Les modifications sont automatiquement sauvegardées localement. Les données initiales sont fictives. En cas de stockage indisponible ou de données corrompues, l’interface avertit l’utilisateur et évite de réécrire les données existantes jusqu’à réinitialisation ou restauration explicite.
+Aucune donnée métier n’est conservée en localStorage. Aucun token Supabase n’est exposé à JavaScript. Seuls `gestion-theme` et `gestion-animations` y sont enregistrés. Le thème, le mouvement réduit et le repli sans WebGL sont pris en compte.

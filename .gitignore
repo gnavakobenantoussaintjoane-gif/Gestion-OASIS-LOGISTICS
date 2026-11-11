@@ -21,3 +21,12 @@ next-env.d.ts
 npm-debug.log*
 .DS_Store
 *.pem
+
+# GESTION workspaces
+**/dist/
+**/.env
+**/.env.local
+**/node_modules/
+*.log
+playwright-report/
+test-results/

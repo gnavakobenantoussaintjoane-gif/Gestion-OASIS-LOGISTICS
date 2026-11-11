@@ -1,0 +1,135 @@
+import { Router } from "express";
+import { z } from "zod";
+import { rateLimit } from "express-rate-limit";
+import { supabase } from "../config/supabase.js";
+import { authenticate } from "../middlewares/auth.js";
+import { clearSession, saveSession } from "../services/session.js";
+import { HttpError, check } from "../utils/errors.js";
+const router = Router();
+const credentials = z.object({
+  email: z.email().max(254),
+  password: z.string().min(12).max(128),
+});
+router.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 40,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+  }),
+);
+router.post("/login", async (req, res) => {
+  const c = z
+    .object({ email: z.email(), password: z.string().min(1).max(128) })
+    .parse(req.body);
+  const { data, error } = await supabase().auth.signInWithPassword(c);
+  if (error?.name === "AuthRetryableFetchError")
+    throw new HttpError(
+      503,
+      "Le serveur ne parvient pas à joindre Supabase. Vérifiez son accès réseau.",
+    );
+  if (error || !data.session)
+    throw new HttpError(
+      401,
+      "Identifiants invalides ou adresse non confirmée.",
+    );
+  saveSession(res, data.session);
+  res.json({ ok: true });
+});
+router.post("/register", async (req, res) => {
+  const c = credentials.parse(req.body);
+  const { data, error } = await supabase().auth.signUp(c);
+  if (error?.name === "AuthRetryableFetchError")
+    throw new HttpError(
+      503,
+      "Le serveur ne parvient pas à joindre Supabase. Vérifiez son accès réseau.",
+    );
+  if (error)
+    throw new HttpError(
+      422,
+      "Inscription indisponible. Vérifiez votre adresse ou réessayez plus tard.",
+    );
+  if (data.session) saveSession(res, data.session);
+  res
+    .status(201)
+    .json({
+      authenticated: !!data.session,
+      message:
+        "Si votre adresse est admissible, un message de confirmation vous sera envoyé.",
+    });
+});
+router.get("/session", authenticate, async (req, res) => {
+  const [profile, role] = await Promise.all([
+    req.db.from("profiles").select("*").eq("id", req.user.id).maybeSingle(),
+    req.db
+      .from("user_roles")
+      .select("role,company_id")
+      .eq("user_id", req.user.id)
+      .maybeSingle(),
+  ]);
+  check(profile.error);
+  check(role.error);
+  let company = null;
+  if (role.data) {
+    const result = await req.db
+      .from("companies")
+      .select("*")
+      .eq("id", role.data.company_id)
+      .single();
+    check(result.error);
+    company = result.data;
+  }
+  res.json({
+    user: { id: req.user.id, email: req.user.email },
+    profile: profile.data,
+    role: role.data?.role || null,
+    company,
+  });
+});
+router.post("/logout", authenticate, async (req, res) => {
+  const access = req.cookies.gestion_access;
+  const refresh = req.cookies.gestion_refresh;
+  if (access && refresh) {
+    const authClient = supabase();
+    const session = await authClient.auth.setSession({
+      access_token: access,
+      refresh_token: refresh,
+    });
+    if (!session.error) await authClient.auth.signOut({ scope: "local" });
+  }
+  clearSession(res);
+  res.json({ ok: true });
+});
+router.post("/password", authenticate, async (req, res) => {
+  const { password, current_password } = z
+    .object({
+      password: z.string().min(12).max(128),
+      current_password: z.string().min(1),
+    })
+    .parse(req.body);
+  const authClient = supabase();
+  const verified = await authClient.auth.signInWithPassword({
+    email: req.user.email!,
+    password: current_password,
+  });
+  if (verified.error)
+    throw new HttpError(401, "Mot de passe actuel incorrect.");
+  const { error } = await authClient.auth.updateUser({ password });
+  check(error);
+  await authClient.auth.signOut({ scope: "global" });
+  clearSession(res);
+  res.json({ ok: true });
+});
+router.post("/company", authenticate, async (req, res) => {
+  const fields = z
+    .object({
+      company_name: z.string().trim().min(2).max(100),
+      display_name: z.string().trim().min(2).max(100),
+    })
+    .parse(req.body);
+  const { data, error } = await req.db.rpc("gestion_create_company", fields);
+  check(error);
+  res.status(201).json({ id: data });
+});
+export default router;

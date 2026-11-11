@@ -1,0 +1,36 @@
+# État réel — 11 novembre 2026
+
+## Livré dans le code
+
+Le prototype local est remplacé par une application React/Vite et une API Express séparées. Les écrans et routes d’authentification, rôles, entreprises, flotte, chauffeurs, tarifs, voyages, dépenses, justificatifs, finances, graphiques, exports, notifications, audit et paramètres sont implémentés. Aucun succès opérationnel n’est simulé. Les trois animations sont intégrées aux composants demandés et ont un fallback animé sans WebGL.
+
+La base Supabase du projet Gestion-OASIS-LOGISTICS a reçu les migrations multi-entreprise, hardening et contrôle de disponibilité. Les anciennes tables sont conservées sous `legacy_*`, sans import automatique. Aucune opération métier ni compte de démonstration n’a été conservé.
+
+## Vérifié
+
+- TypeScript frontend/backend, ESLint et builds de production passent.
+- 30 tests automatisés backend : horaires, minuit, montants exacts, validations, permissions de lecture, protections HTTP et fichiers Excel/PDF.
+- Test navigateur : écran de connexion, validation d’inscription, thème, mobile et composants d’animation dashboard/chargement. Aucune fausse session injectée.
+- Test transactionnel exécuté sur PostgreSQL : isolation de deux entreprises, permissions opérateur, refus anonyme, références interentreprise, tarif historique, doublons, date comptable de nuit, audit, préservation d’une dépense à la suppression du voyage. Un second test SQL a confirmé toutes les bornes horaires demandées et le rejet d’un camion archivé après ajout des gardes de disponibilité. Toutes les fixtures ont été annulées.
+
+## Bloquant pour la recette de bout en bout
+
+Le serveur de cet environnement ne peut pas joindre le domaine Supabase en HTTPS (`ECONNRESET`). Le connecteur a accès à la base, mais ce n’est pas le réseau du processus Express. Il n’a pas été utilisé pour simuler des appels métier à la place du backend.
+
+Il reste à exécuter depuis un environnement réseau autorisé : inscription et confirmation e-mail réelles, connexion/déconnexion/renouvellement, création d’entreprise, rattachement de membres, parcours complets par les quatre rôles, upload/download réel et vérification de persistance après reconnexion. **Le projet ne doit pas être annoncé comme prêt pour la production avant cette recette.**
+
+## Éléments du cahier des charges encore à compléter
+
+- Upload du logo de l’entreprise et incorporation d’un logo personnalisé dans les rapports. Les rapports actuels portent la marque textuelle GESTION.
+- Horaires des shifts actuellement fixés aux règles demandées ; la table de définition existe mais l’édition des horaires n’est pas exposée, pour éviter une incohérence avec les triggers. Une future modification devra versionner les règles, harmoniser SQL/API/UI et préserver les écritures historiques.
+- Notifications automatiques spécialisées : seuil de dépense importante configurable, tarif manquant et dépenses sans justificatif. Les notifications actuelles couvrent les écritures effectuées par l’utilisateur ; les permis expirants sont signalés sur le dashboard, pas par un planificateur d’e-mails.
+- Configuration fine des permissions par utilisateur au-delà des quatre rôles fixes.
+- MFA, récupération du mot de passe par e-mail, invitation e-mail automatisée et administration du cycle de vie complet des comptes.
+- Trésorerie avec paiements datés, fiscalité et amortissements : le bénéfice présenté est un résultat d’exploitation simplifié, non une comptabilité certifiée.
+- Export PDF spécifique préformaté par fréquence : la période des filtres permet déjà un rapport journalier/mensuel/annuel, mais il n’y a pas encore de modèles de rapport distincts.
+- La liste des voyages rattachables à une dépense est limitée aux 100 plus récents dans le formulaire ; prévoir une recherche paginée pour les historiques importants.
+- Audit de performance, tests de charge, accessibilité avancée et recette WebGL sur de vrais appareils. Le fallback a été vérifié ; le rendu GPU doit être contrôlé sur le matériel de destination.
+
+## Décisions conservatrices
+
+Aucun tarif inventé. Pas de retrait des politiques RLS pour faciliter le développement. Pas de compte administrateur ou mot de passe imposé. Pas d’exposition de service-role. Pas de données temporaires utilisées comme opérations réelles. Les seuls jeux de données artificiels sont des fixtures de tests isolées, jamais affichées comme activité d’entreprise.

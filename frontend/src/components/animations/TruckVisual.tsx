@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, useState, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import { usePreferences } from "../../contexts/PreferencesContext";
+import TruckIllustration from "./TruckIllustration";
 import type { ContainerKind } from "./TruckModel";
 const Scene = lazy(() => import("./TruckScene"));
 class SceneBoundary extends Component<
@@ -30,24 +31,7 @@ export function FlatTruck({
       <div className="port-crane" />
       <div className="flat-road" />
       <div className={`flat-truck kind-${kind}`}>
-        <div className="flat-container">
-          GESTION{" "}
-          <span>
-            {kind === "40_REEFER"
-              ? "TEMPERATURE CONTROLLED"
-              : "INTERMODAL LOGISTICS"}
-          </span>
-          {kind === "40_REEFER" && <i className="reefer-unit" />}
-        </div>
-        <div className="flat-cab">
-          <i />
-        </div>
-        <div className="flat-chassis" />
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className={`flat-wheel wheel-${i}`}>
-            <i />
-          </div>
-        ))}
+        <TruckIllustration kind={kind} />
       </div>
     </div>
   );

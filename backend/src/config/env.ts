@@ -7,6 +7,7 @@ dotenv.config({
 });
 export const env = z
   .object({
+    OASIS_COMPANY_ID: z.uuid().optional(),
     PORT: z.coerce.number().default(4000),
     NODE_ENV: z
       .enum(["development", "production", "test"])

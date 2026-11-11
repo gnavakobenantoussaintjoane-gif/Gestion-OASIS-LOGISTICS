@@ -22,7 +22,6 @@ const schema = z.object({
   password: z.string().min(1, "Mot de passe requis").max(128),
 });
 export default function Login() {
-  const [register, setRegister] = useState(false);
   const [show, setShow] = useState(false);
   const { reload, error } = useSession();
   const { dark, toggleDark } = usePreferences();
@@ -30,21 +29,12 @@ export default function Login() {
     resolver: zodResolver(schema),
   });
   const submit = form.handleSubmit(async (values) => {
-    if (register && values.password.length < 12) {
-      form.setError("password", {
-        message: "Utilisez au moins 12 caractères.",
-      });
-      return;
-    }
     try {
-      const result = await api<{ authenticated?: boolean; message?: string }>(
-        `/auth/${register ? "register" : "login"}`,
-        { method: "POST", body: JSON.stringify(values) },
-      );
-      if (register && !result.authenticated) {
-        toast.success(result.message);
-        setRegister(false);
-      } else await reload();
+      await api("/auth/login", {
+        method: "POST",
+        body: JSON.stringify(values),
+      });
+      await reload();
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -66,7 +56,7 @@ export default function Login() {
           <div className="eyebrow">
             <span /> VOTRE ESPACE PROFESSIONNEL
           </div>
-          <h1>{register ? "Créez votre compte." : "Bienvenue sur OSIS LOGISTICS"}</h1>
+          <h1>Bienvenue sur OASIS LOGISTICS</h1>
           <p>Pilotez votre flotte. Maîtrisez vos finances.</p>
           {error && (
             <div className="alert">
@@ -94,10 +84,8 @@ export default function Login() {
               <div className="password-field">
                 <input
                   type={show ? "text" : "password"}
-                  autoComplete={register ? "new-password" : "current-password"}
-                  placeholder={
-                    register ? "12 caractères minimum" : "Votre mot de passe"
-                  }
+                  autoComplete="current-password"
+                  placeholder="Votre mot de passe"
                   {...form.register("password")}
                 />
                 <button
@@ -127,34 +115,26 @@ export default function Login() {
             >
               {form.formState.isSubmitting
                 ? "Connexion en cours…"
-                : register
-                  ? "Créer mon compte"
-                  : "Se connecter"}
+                : "Se connecter"}
               <ArrowRight size={17} />
             </button>
           </form>
           <div className="login-switch">
-            {register ? "Déjà un compte ?" : "Première connexion ?"}{" "}
-            <button
-              onClick={() => {
-                setRegister((v) => !v);
-                form.clearErrors();
-              }}
-            >
-              {register ? "Se connecter" : "Créer un compte"}
-            </button>
+            Espace privé OASIS LOGISTICS.
+            <br />
+            Pour obtenir un accès, contactez votre administrateur.
           </div>
           <div className="auth-note">
             <ShieldCheck size={21} />
             <p>
-              Vos données sont privées et isolées par entreprise.
+              Accès réservé aux collaborateurs autorisés.
               <br />
-              Aucune donnée fictive. Aucun tarif imposé.
+              Vos opérations et vos données restent confidentielles.
             </p>
           </div>
         </div>
         <footer>
-          © {new Date().getFullYear()} OSIS LOGISTICS{" "}
+          © {new Date().getFullYear()} OASIS LOGISTICS{" "}
           <span>Africa/Abidjan · FCFA</span>
         </footer>
       </section>

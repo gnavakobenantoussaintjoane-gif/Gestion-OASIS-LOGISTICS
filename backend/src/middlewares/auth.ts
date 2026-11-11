@@ -1,3 +1,4 @@
+import { assertOasisCompany } from "../utils/companyAccess.js";
 import type { RequestHandler } from "express";
 import { supabase } from "../config/supabase.js";
 import { clearSession, saveSession } from "../services/session.js";
@@ -62,6 +63,7 @@ export const requireCompany: RequestHandler = async (req, _res, next) => {
         428,
         "Créez une entreprise ou demandez votre rattachement à un administrateur.",
       );
+    assertOasisCompany(data.company_id);
     req.companyId = data.company_id;
     req.role = data.role;
     next();

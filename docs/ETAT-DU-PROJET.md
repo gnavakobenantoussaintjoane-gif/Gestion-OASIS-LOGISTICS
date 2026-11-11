@@ -1,5 +1,11 @@
 # État réel — 11 novembre 2026
 
+## Évolution : application privée OASIS LOGISTICS
+
+Le nouveau périmètre remplace l’inscription libre multi-entreprise par une installation interne OASIS LOGISTICS. Le nom, l’accueil et les visuels ont été harmonisés. Les routes publiques d’inscription/création d’entreprise sont fermées et les accès métier de l’API sont verrouillés sur `OASIS_COMPANY_ID` (refus si non configuré). La configuration réelle de ce UUID, la fermeture d’Auth Supabase et l’application de la migration privée restent nécessaires : voir [OASIS-PRIVATE.md](OASIS-PRIVATE.md). Aucun premier administrateur n’a été inventé et aucune donnée existante n’a été supprimée.
+
+Vérifications de cette évolution : 47 tests automatisés, ESLint, TypeScript, builds frontend/backend et smoke navigateur non authentifié réussis. Le rendu fallback SVG a été contrôlé sur capture ; le rendu 3D doit toujours être vérifié sur un véritable appareil avec GPU.
+
 ## Livré dans le code
 
 Le prototype local est remplacé par une application React/Vite et une API Express séparées. Les écrans et routes d’authentification, rôles, entreprises, flotte, chauffeurs, tarifs, voyages, dépenses, justificatifs, finances, graphiques, exports, notifications, audit et paramètres sont implémentés. Aucun succès opérationnel n’est simulé. Les trois animations sont intégrées aux composants demandés et ont un fallback animé sans WebGL.

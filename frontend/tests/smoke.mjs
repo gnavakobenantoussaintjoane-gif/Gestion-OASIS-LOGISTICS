@@ -28,25 +28,14 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
-await page.getByRole("heading", { name: "Bienvenue sur OSIS LOGISTICS" }).waitFor();
+await page.getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" }).waitFor();
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-desktop.png"),
   fullPage: true,
   animations: "disabled",
 });
-await page
-  .getByRole("button", { name: "Créer un compte", exact: true })
-  .click();
-await page.getByRole("heading", { name: "Créez votre compte." }).waitFor();
-await page.getByLabel("Adresse e-mail").fill("not-an-email");
-await page.getByLabel("Mot de passe", { exact: true }).fill("short");
-await page
-  .getByRole("button", { name: "Créer mon compte", exact: true })
-  .click();
-assert.equal(
-  await page.getByRole("heading", { name: "Créez votre compte." }).count(),
-  1,
-);
+assert.equal(await page.getByRole('button',{name:'Créer un compte',exact:true}).count(),0);
+await page.getByText('Pour obtenir un accès, contactez votre administrateur.').waitFor();
 await page.getByRole("button", { name: "Changer le thème" }).click();
 assert.equal(
   await page.evaluate(() => document.documentElement.dataset.theme),
@@ -54,8 +43,8 @@ assert.equal(
 );
 await page.getByRole("button", { name: "Changer le thème" }).click();
 await page.setViewportSize({ width: 390, height: 844 });
-await page.getByRole("button", { name: "Se connecter", exact: true }).click();
-await page.getByRole("heading", { name: "Bienvenue sur OSIS LOGISTICS" }).waitFor();
+
+await page.getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" }).waitFor();
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-mobile.png"),
   fullPage: true,
@@ -96,9 +85,9 @@ await page.evaluate(async () => {
   );
 });
 await page.getByText("Préparation de votre espace de gestion...").waitFor();
-assert.equal(await page.locator(".loading-screen .flat-wheel").count(), 4);
+assert.equal(await page.locator(".loading-screen .realistic-wheel").count(), 5);
 assert.deepEqual(errors, []);
 await browser.close();
 console.log(
-  "PASS: real login screen, registration validation, theme, mobile, dashboard and loading animation components. No authenticated workflow was simulated.",
+  "PASS: real login screen, private access notice, theme, mobile, dashboard and loading animation components. No authenticated workflow was simulated.",
 );

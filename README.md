@@ -2,6 +2,12 @@
 
 Application de gestion de flotte et de suivi financier de transport de conteneurs à Abidjan. **Version 1 : prototype fonctionnel local**, sans connexion Supabase ni authentification.
 
+## Base de données Supabase
+
+Les tables `trucks`, `trips` et `expenses` ont été créées dans le projet Supabase **Gestion-OASIS-LOGISTICS**, avec contraintes, recettes calculées et politiques RLS par utilisateur. La migration SQL est conservée dans `supabase/migrations/`.
+
+**L’interface reste locale : sa connexion à Supabase et l’authentification ne sont pas encore implémentées.** Voir [l’état et les prochaines étapes](docs/SUPABASE-INTEGRATION.md). Aucune donnée du navigateur n’a été transférée automatiquement.
+
 ## Démarrage
 
 Node.js 22 recommandé.
@@ -63,4 +69,6 @@ Les dépendances PostgreSQL/Drizzle et `drizzle.config.json` héritées du socle
 - [Règles métier](docs/BUSINESS_RULES.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Frontend](docs/FRONTEND.md)
-- [Prochaine étape Supabase](docs/SUPABASE-INTEGRATION.md)
+- [Base Supabase et prochaines étapes](docs/SUPABASE-INTEGRATION.md)
+
+- [Vérification du code dans les fichiers](docs/VERIFICATION-FICHIERS.md)

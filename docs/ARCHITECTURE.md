@@ -9,3 +9,7 @@ La page gère l’état local, la navigation et les formulaires. Pour une extens
 ## Dépendances
 
 Les dépendances Next.js et PostCSS initiales ont été actualisées pour supprimer les alertes hautes/critiques observées. L’override ciblé `exceljs > uuid` utilise 11.1.1 ; les exports doivent être retestés lors de toute mise à jour. Certaines dépendances d’outillage héritées peuvent encore présenter des alertes modérées : vérifier `npm audit` avant déploiement. Ne pas appliquer aveuglément `npm audit fix --force`.
+
+## Schéma Supabase préparé
+
+La migration initiale `supabase/migrations/20261111174500_create_oasis_database.sql` est appliquée au projet Supabase OASIS. Trois tables privées par utilisateur sont disponibles. L’interface ne les utilise pas encore ; voir `docs/SUPABASE-INTEGRATION.md` pour distinguer la base créée des fonctionnalités encore à implémenter.

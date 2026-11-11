@@ -34,6 +34,7 @@ function GoogleIcon() {
     </svg>
   );
 }
+/** Interface commune email/téléphone et récupération ; aucune clé administrative côté client. */
 export default function Login() {
   const { reload, error: sessionError } = useSession();
   const [mode, setMode] = useState<"email" | "phone">("email");
@@ -44,6 +45,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [forgot, setForgot] = useState(false);
   const [notice, setNotice] = useState("");
+  // Le verrou est immédiat, contrairement à un setState : il bloque les doubles soumissions.
   const lock = useRef(false);
   async function run(action: () => Promise<void>) {
     if (lock.current) return;
@@ -65,6 +67,7 @@ export default function Login() {
   }
   async function submit() {
     await run(async () => {
+      // Une demande de récupération n’authentifie pas l’utilisateur.
       if (forgot) {
         const email = z.email().safeParse(identity.trim());
         if (!email.success)
@@ -87,6 +90,7 @@ export default function Login() {
           "Utilisez le format international E.164, par exemple +2250700000000.",
         );
       if (!password) throw new Error("Saisissez votre mot de passe.");
+      // Le serveur dialogue avec Supabase et pose les cookies sécurisés.
       await api("/auth/login", {
         method: "POST",
         body: JSON.stringify({ [mode]: value, password }),

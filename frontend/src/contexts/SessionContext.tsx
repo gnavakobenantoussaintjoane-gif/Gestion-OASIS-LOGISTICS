@@ -23,6 +23,7 @@ const Context = createContext<{
   reload: async () => {},
   logout: async () => {},
 });
+/** Source de vérité de l’interface : la session et les rôles sont relus depuis l’API. */
 export function SessionProvider({ children }: { children: ReactNode }) {
   const client = useQueryClient();
   const previousIdentity = useRef<string | null | undefined>(undefined);
@@ -33,9 +34,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       try {
         next = await api<Session>("/auth/session");
       } catch (e) {
+        // Seul 401 signifie « anonyme » ; une panne réseau reste une erreur visible.
         if (e instanceof ApiError && e.status === 401) next = null;
         else throw e;
       }
+      // Ne jamais réafficher les données du compte précédent après un changement d’utilisateur.
       const identity = next?.user.id ?? null;
       if (
         previousIdentity.current !== undefined &&
@@ -49,6 +52,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     staleTime: 300000,
   });
   useEffect(() => {
+    // Les appels métier signalent ici une session expirée sans dépendre du routeur.
     const expired = () => {
       previousIdentity.current = null;
       client.setQueryData(["session"], null);

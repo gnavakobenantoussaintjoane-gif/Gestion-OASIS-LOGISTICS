@@ -10,6 +10,7 @@ import api from "./routes/api.js";
 import { HttpError } from "./utils/errors.js";
 export const app = express();
 app.disable("x-powered-by");
+// Ne pas faire confiance arbitrairement aux en-têtes proxy (IP et limitation de débit).
 app.set("trust proxy", false);
 app.use(helmet());
 app.use(express.json({ limit: "100kb" }));
@@ -24,6 +25,8 @@ app.use(
     message: { error: "Trop de requêtes. Réessayez dans une minute." },
   }),
 );
+// Les écritures exigent l’en-tête applicatif et, si fournie, une origine autorisée.
+// Ce contrôle complète les cookies sameSite ; il ne remplace pas l’authentification.
 app.use("/api", (req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
@@ -43,6 +46,8 @@ app.use("/api", (req, res, next) => {
   }
   next();
 });
+// Sonde locale : « configured » ne garantit pas que Supabase est joignable.
+// Utiliser check:supabase pour diagnostiquer l’accès réseau réel depuis le serveur.
 app.get("/api/health", (_req, res) =>
   res.json({ service: "GESTION API", status: "ok", database: "configured" }),
 );

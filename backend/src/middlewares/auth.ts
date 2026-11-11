@@ -4,10 +4,12 @@ import { supabase } from "../config/supabase.js";
 import { clearSession, saveSession } from "../services/session.js";
 import { isTemporaryAuthError } from "../utils/authErrors.js";
 import { HttpError, check } from "../utils/errors.js";
+// Mutualiser brièvement le renouvellement : plusieurs requêtes peuvent voir le même jeton expiré.
 const refreshing = new Map<
   string,
   ReturnType<ReturnType<typeof supabase>["auth"]["refreshSession"]>
 >();
+/** Vérifie le compte auprès d’Auth avant d’attacher le client RLS à la requête. */
 export const authenticate: RequestHandler = async (req, res, next) => {
   try {
     let token = req.cookies.gestion_access as string | undefined;
@@ -50,6 +52,7 @@ export const authenticate: RequestHandler = async (req, res, next) => {
     next(e);
   }
 };
+/** Déduit l’entreprise du rôle en base, jamais d’un company_id envoyé par le navigateur. */
 export const requireCompany: RequestHandler = async (req, _res, next) => {
   try {
     const { data, error } = await req.db

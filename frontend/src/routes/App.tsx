@@ -12,6 +12,7 @@ import AppLayout from "../layouts/AppLayout";
 import AuthReturn from "../pages/AuthReturn";
 import Login from "../pages/Login";
 import Onboarding from "../pages/Onboarding";
+// Charger les écrans métier à la demande pour alléger l’ouverture de la connexion.
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Records = lazy(() => import("../pages/ResourcePage"));
 const Settings = lazy(() => import("../pages/Settings"));
@@ -23,6 +24,7 @@ function ResourceRoute() {
 export default function App() {
   const { session, loading } = useSession();
   const { pathname } = useLocation();
+  // Ces retours doivent être traités même sans session métier : ils servent à l’établir.
   if (pathname === "/auth/callback")
     return <AuthReturn key="google" recovery={false} />;
   if (pathname === "/auth/reset-password")
@@ -30,6 +32,7 @@ export default function App() {
   if (loading) return <LoadingTruckAnimation />;
   if (!session) return <Login />;
   if (!session.company || !session.role) return <Onboarding />;
+  // Ceci filtre la navigation, pas la sécurité : l’API et la RLS vérifient aussi les droits.
   const finances = ["admin", "manager"].includes(session.role);
   return (
     <Suspense key={session.user.id} fallback={<LoadingTruckAnimation />}>

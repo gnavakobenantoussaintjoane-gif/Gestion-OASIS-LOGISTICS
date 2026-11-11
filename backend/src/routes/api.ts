@@ -13,6 +13,7 @@ import { reportReferences } from "../services/reportReferences.js";
 import { exportReport } from "../services/exports.js";
 import { HttpError, check } from "../utils/errors.js";
 const router = Router();
+// Toutes les routes métier ci-dessous exigent un utilisateur et son entreprise autorisée.
 router.use(authenticate, requireCompany);
 router.get("/reference-data", async (req, res) => {
   const tables =
@@ -36,6 +37,7 @@ router.get("/reference-data", async (req, res) => {
   const output: Record<string, any> = {};
   for (const table of tables) {
     const rows: any[] = [];
+    // Paginer pour ne pas tronquer silencieusement les référentiels au plafond Supabase.
     for (let offset = 0; offset < 100000; offset += 1000) {
       const { data, error } = await req.db
         .from(table)

@@ -17,6 +17,7 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: "Trop de tentatives. Réessayez dans quelques minutes." },
 });
+// Accepter exactement email+mot de passe OU téléphone+mot de passe ; pas de champs supplémentaires.
 router.post("/login", authLimiter, async (req, res) => {
   const password = z.string().min(1).max(128);
   const c = z
@@ -36,6 +37,7 @@ router.post("/login", authLimiter, async (req, res) => {
     ])
     .parse(req.body);
   const { data, error } = await supabase().auth.signInWithPassword(c);
+  // Conserver la distinction 503 (transport/service) et 401 (identifiants refusés).
   if (isTemporaryAuthError(error))
     throw new HttpError(
       503,
@@ -55,6 +57,7 @@ router.post("/register", (_req, _res) => {
     "Les inscriptions publiques sont fermées. Contactez OASIS LOGISTICS.",
   );
 });
+// Un compte Auth valide ne suffit pas : profil, entreprise et capacité propriétaire viennent de SQL.
 router.get("/session", authenticate, async (req, res) => {
   const [profile, role] = await Promise.all([
     req.db.from("profiles").select("*").eq("id", req.user.id).maybeSingle(),

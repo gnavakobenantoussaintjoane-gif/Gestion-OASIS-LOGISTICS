@@ -8,6 +8,8 @@ import App from "./routes/App";
 import { SessionProvider } from "./contexts/SessionContext";
 import { PreferencesProvider } from "./contexts/PreferencesContext";
 import "./assets/styles.css";
+// Un seul cache React Query pour toute l’application ; les données privées sont
+// explicitement purgées lorsque l’identité change dans SessionProvider.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry: 1, refetchOnWindowFocus: true, staleTime: 15000 },

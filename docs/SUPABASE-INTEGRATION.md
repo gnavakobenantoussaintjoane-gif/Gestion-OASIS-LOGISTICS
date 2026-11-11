@@ -1,49 +1,50 @@
-# Supabase — base créée, interface encore locale
+# Supabase / SQL GESTION
 
-## État au 11 novembre 2026
+## Projet existant
 
-La migration `supabase/migrations/20261111174500_create_oasis_database.sql` a été exécutée dans le projet **Gestion-OASIS-LOGISTICS** (`nrwfnqtomyamswirrhqv`). Les tables étaient absentes avant cette opération. Aucune donnée de démonstration ni compte utilisateur n’a été importé.
+Projet : **Gestion-OASIS-LOGISTICS** (`nrwfnqtomyamswirrhqv`). Les migrations SQL de ce dépôt ont été appliquées via le connecteur. Ne pas les rejouer sur ce projet.
 
-| Table | Contenu |
-| --- | --- |
-| `public.trucks` | Propriétaire, immatriculation, chauffeur, statut |
-| `public.trips` | Date de départ, camion, shift, terminal, conteneur, état, quantité, tarif, encaissement, recette calculée |
-| `public.expenses` | Date, camion/voyage facultatifs, catégorie, description, montant payé |
+## Ordre des migrations pour une nouvelle base Supabase vide
 
-Chaque table a une clé UUID, un `owner_id` lié à Supabase Auth et des dates de création/modification. Les plaques sont uniques par propriétaire sans distinction de casse. Les clés étrangères empêchent de relier des opérations de propriétaires différents. Le camion d’une dépense liée doit être celui de son voyage.
+1. `20261111174500_create_oasis_database.sql` : ancien schéma propriétaire.
+2. `20261111180000_gestion_saas.sql` : conservation sous `legacy_*`, nouveau schéma par entreprise.
+3. `20261111190000_gestion_hardening.sql` : droits de correction des dépenses, accès des chauffeurs et synchronisation des opérations.
+4. `20261111193000_gestion_operation_guards.sql` : rejet des camions archivés/en maintenance/hors service, chauffeurs inactifs et références désactivées pour les nouveaux voyages.
 
-La recette est calculée en base (`quantity * price`), l’encaissement ne peut pas la dépasser. Les montants sont stockés avec une échelle de zéro décimale en FCFA ; PostgreSQL arrondit les fractions entrantes. L’application actuelle valide déjà des montants entiers. Un camion utilisé est protégé contre la suppression ; supprimer un voyage conserve ses dépenses en retirant seulement leur lien au voyage. Modifier le camion du voyage reporte le changement sur ses dépenses liées.
+Ces scripts sont destinés à Supabase, qui fournit `auth.users`, `auth.uid()`, les rôles anon/authenticated et Storage. Ne pas les exécuter dans un PostgreSQL nu sans ces composants. Utiliser l’éditeur SQL ou un outil de migrations avec historique ; conserver l’ordre et les transactions. Aucune migration ne charge des opérations fictives ni des prix.
 
-## Sécurité
+## Tables
 
-- RLS activée sur les trois tables.
-- Une politique par table autorise uniquement le propriétaire connecté (`auth.uid() = owner_id`) à lire, ajouter, modifier et supprimer ses lignes.
-- Le rôle anonyme n’a aucun droit de lecture/écriture.
-- `authenticated` reçoit uniquement les droits SELECT, INSERT, UPDATE et DELETE, sous réserve des politiques RLS.
-- Pas de clé d’API ni de mot de passe ajouté au dépôt.
+- `companies` : entreprise, coordonnées, devise et fuseau.
+- `profiles`, `user_roles` : membre unique d’une entreprise et rôle contrôlé.
+- `drivers`, `trucks` : personnes, documents et flotte.
+- `terminals`, `container_types`, `shift_definitions`, `expense_categories` : références propres à l’entreprise.
+- `tariff_rules` : prix actifs selon terminal/conteneur/état/shift.
+- `trips` : un voyage unitaire, heure de départ, date comptable, tarif historique.
+- `expenses` : paiements de charges, associations facultatives et chemin de justificatif.
+- `notifications`, `audit_logs` : événements personnels et traçabilité d’entreprise.
 
-**Attention : ce modèle isole les données par utilisateur, pas par entreprise partagée.** Les rôles métier, les équipes et la piste d’audit ne sont pas encore implémentés. La présence de politiques a été vérifiée dans le catalogue PostgreSQL ; les parcours avec deux vrais utilisateurs restent à tester lors du raccordement de l’authentification.
+Les trois tables `legacy_*` conservent le schéma historique et ses RLS. Elles ne sont pas utilisées par l’API GESTION.
 
-## Vérifications effectuées
+## RLS
 
-- Trois tables présentes, toutes vides après création.
-- RLS et politique propriétaire présentes sur chaque table.
-- Lecture anonyme interdite et droits CRUD authentifiés présents.
-- Colonne `revenue` générée par PostgreSQL.
-- Trois déclencheurs de mise à jour de `updated_at` présents.
-- Clé étrangère composite de la dépense vers le voyage vérifiée.
+Le rôle est lu en base, jamais depuis des champs librement modifiables du JWT. Les fonctions `gestion_company()` et `gestion_role()` évitent la récursion des politiques et ont un search_path fermé.
 
-La migration enregistrée ici est une migration initiale pour une base vide, **pas un script à réexécuter sur le projet déjà initialisé**. Ne pas utiliser `drizzle.config.json` : c’est une ancienne configuration locale sans rapport avec cette migration Supabase.
+- **Admin** : opérations, paramètres, rattachement des membres, audit et finances.
+- **Gestionnaire** : opérations, dépenses, rapports, audit ; tarifs en lecture.
+- **Opérateur** : références et voyages ; création et correction de ses propres voyages ; pas de suppression ni lecture des dépenses.
+- **Chauffeur** : son profil chauffeur, son camion associé et ses propres missions, sans écriture d’opérations.
 
-## Connexion de l’application — à faire
+L’API applique ces contrôles avant les requêtes, et la base les applique à nouveau. Les clés étrangères composites empêchent les liens interentreprise. L’historique du tarif est protégé par trigger.
 
-L’interface ne contacte toujours pas Supabase. Les voyages saisis dans le navigateur ne sont donc **pas encore envoyés à la base**. Le profil « Administrateur » affiché n’est pas un compte authentifié.
+## Auth et Storage
 
-Prochaines étapes :
-1. Ajouter Supabase Auth et les parcours de connexion/déconnexion.
-2. Configurer l’URL et une clé publiable, jamais une clé `service_role` côté navigateur.
-3. Remplacer les accès `localStorage` par des opérations authentifiées sur les trois tables ; mapper les champs camelCase de l’interface vers les colonnes snake_case, et les identifiants de démonstration vers de vrais UUID.
-4. Tester l’isolation entre deux utilisateurs et les rejets de montants/références incorrects.
-5. Prévoir un import explicite des données locales, sans importer automatiquement les données fictives.
-6. Pour une équipe : concevoir les entreprises, membres et rôles, puis faire évoluer les politiques.
-7. Ajouter journal de paiements datés, audit et sauvegardes avant un usage financier de production.
+Configurer dans Supabase Auth l’URL du site et les redirections autorisées pour le domaine final. Ne pas désactiver la confirmation e-mail pour contourner un problème de livraison ; configurer SMTP avant production. Créer les comptes depuis l’application. Le premier membre confirmé crée une entreprise ; les membres suivants attendent leur rattachement sans créer d’autre entreprise.
+
+Le bucket `gestion-receipts` est privé : PDF, JPEG ou PNG, 5 Mo maximum. Chemins `company_uuid/expense_uuid/random_uuid.extension`. Lecture/écriture réservées aux admins et gestionnaires de l’entreprise. L’API vérifie l’appartenance de la dépense et la signature du fichier, puis fournit un lien signé valable 60 secondes.
+
+## Tests
+
+`supabase/tests/security-and-business.sql` a été exécuté avec succès sur le schéma multi-entreprise et hardening. Il utilise des fixtures Auth et métier dans une transaction annulée. Le contrôle supplémentaire de disponibilité a ensuite été ajouté ; le test prévoit désormais le refus d’une référence interentreprise par contrainte ou par disponibilité. `supabase/tests/shift-boundaries.sql` a ensuite été exécuté avec succès après le contrôle de disponibilité : il vérifie toutes les bornes horaires demandées et le rejet d’un camion archivé, avec annulation de toutes ses fixtures. Réexécuter les tests SQL après tout changement de politique ou trigger sur une base de recette.
+
+Les essais HTTP Auth/Storage depuis Express restent bloqués par l’accès réseau de l’environnement, comme expliqué dans `ETAT-DU-PROJET.md`.

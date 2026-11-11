@@ -1,13 +1,12 @@
-# Règles métier
+# Règles métier GESTION
 
-1. Devise XOF, montants entiers positifs, encaissement autorisé à zéro. Pas de calcul de TVA ni de tarification officielle.
-2. Chaque ligne regroupe un nombre entier de voyages homogènes : même camion, date, shift, terminal, conteneur, état et prix.
-3. Recette = quantité × tarif. Le nombre de voyages est la somme des quantités.
-4. Jour : 06h00–18h30. Soir : 19h00–06h00 J+1. Date du shift soir = date de départ.
-5. Encaissement ≤ recette. Pas de journal de paiements séparé : encaissement rattaché à la date du voyage.
-6. Dépenses considérées payées à leur date. Affectation facultative au camion ou au voyage. Une affectation au voyage impose son camion. Une modification du camion du voyage reporte ce camion sur ses dépenses liées.
-7. Supprimer un voyage conserve les dépenses et retire leur lien au voyage. Un camion utilisé par un voyage ou une dépense ne peut être supprimé.
-8. Résultat simplifié = recettes − dépenses ; trésorerie simplifiée = encaissements − dépenses ; reste dû = recettes − encaissements.
-9. Dates de filtres inclusives. Les dépenses sont filtrées selon leur propre date. Les filtres spécifiques aux voyages (shift, terminal, conteneur, plein/vide) excluent les charges non affectées aux voyages correspondants. La recherche textuelle s’applique aux champs propres à chaque registre.
-10. Les exports financiers et de voyages suivent les filtres ; le parc exporté reste complet. La courbe montre les sept jours se terminant à la date de fin sélectionnée ou à aujourd’hui.
-11. Les sauvegardes sont validées : structure, montants, dates, unicité des identifiants/plaques, références camions/voyages. Une restauration remplace l’ensemble des données après confirmation.
+- XOF et Africa/Abidjan (UTC+0). Un voyage unitaire est une seule recette, issue d’un tarif actif et copiée historiquement.
+- Date comptable calculée selon le shift de départ ; minuit à 05h59 appartient au soir de la veille. 06h00 est jour. 18h30 exacte est jour ; après 18h30:00 et avant 19h00, hors shift.
+- Pas de tarif libre inventé ni de tarif fictif de secours. L’administrateur configure les prix avant la saisie des voyages.
+- Un camion archivé/en maintenance/hors service ou un chauffeur inactif ne peut être utilisé pour un nouveau voyage. Une opération historique peut rester consultable après changement de statut.
+- Doublon strict : même entreprise, camion, timestamp, terminal, conteneur et état. Un deuxième voyage réel demande son propre timestamp.
+- Une dépense est considérée payée à sa date. Son lien au voyage synchronise camion, chauffeur et shift. Suppression du voyage : dépense conservée, lien retiré.
+- Archives des camions pour conserver l’historique. Suppressions physiques des autres références protégées par clés étrangères lorsqu’elles sont utilisées.
+- Recettes = somme des tarifs historiques. Dépenses = somme des montants payés. Bénéfice simplifié = recettes − dépenses. Totaux exacts BigInt côté serveur, sérialisés en chaînes décimales.
+- Les filtres ne s’appliquent qu’aux champs présents dans le registre. Les filtres de terminal/conteneur/état des rapports excluent les dépenses non affectées aux voyages correspondants.
+- Pas de comptabilité de TVA, amortissements, paiements clients ni gestion bancaire dans cette version.

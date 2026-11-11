@@ -1,5 +1,13 @@
 # État réel — 11 novembre 2026
 
+## Animation et lisibilité — nouvelle présentation
+
+La connexion utilise désormais une scène SVG de route dédiée : camion agrandi, décor portuaire, marquage routier défilant et mouvement de suspension discret. Le bouton pause/reprise suit la préférence globale ; le réglage système de réduction des mouvements est pris en compte, y compris lorsqu’il change pendant l’affichage. Les animations distinctes dashboard et chargement sont conservées.
+
+Les titres, textes de formulaire, champs, boutons, labels, tableaux et menus ont été renforcés. Contrôle navigateur du contraste texte/fond des champs et labels du formulaire : au moins 4,5:1 en modes clair et sombre (ce contrôle ciblé n’est pas un audit WCAG complet). Captures ordinateur et mobile contrôlées sans débordement horizontal à 390 px. La connexion reste prioritaire sur mobile, avec la scène sous le formulaire.
+
+Vérifications : 54 tests, builds, lint et TypeScript réussis ; smoke navigateur étendu à pause/reprise, réduction des mouvements, taille des champs et contraste du formulaire. Aucun parcours authentifié supplémentaire n’a été validé.
+
 ## Super administrateur — préparation
 
 Ajout du contrôle propriétaire privé, des routes de création de comptes Auth et de la gestion des rôles réservée au Super administrateur. Le changement de mot de passe reste disponible dans Paramètres → Sécurité. Les migrations et le provisionnement réel de `gnavakobenan@gmail.com` ne sont pas exécutés : voir [SUPER-ADMIN.md](SUPER-ADMIN.md). Aucune valeur de mot de passe demandée n’est enregistrée dans Git.

@@ -7,6 +7,7 @@ dotenv.config({
 });
 export const env = z
   .object({
+    SUPABASE_SERVICE_ROLE_KEY: z.string().min(20).optional(),
     OASIS_COMPANY_ID: z.uuid().optional(),
     PORT: z.coerce.number().default(4000),
     NODE_ENV: z

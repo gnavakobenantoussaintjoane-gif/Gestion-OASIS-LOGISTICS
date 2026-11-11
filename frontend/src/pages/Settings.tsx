@@ -19,6 +19,8 @@ export default function Settings() {
   const { dark, toggleDark, animations, toggleAnimations } = usePreferences();
   const [busy, setBusy] = useState(false);
   const client = useQueryClient();
+  const superAdmin = session?.isSuperAdmin === true;
+  const [createAccount, setCreateAccount] = useState(true);
   const admin = session?.role === "admin";
   const members = useQuery({
     queryKey: ["members"],
@@ -36,8 +38,10 @@ export default function Settings() {
       await reload();
       await client.invalidateQueries({ queryKey: ["members"] });
       toast.success("Modifications enregistrées.");
+      return true;
     } catch (e) {
       toast.error((e as Error).message);
+      return false;
     } finally {
       setBusy(false);
     }
@@ -50,7 +54,11 @@ export default function Settings() {
           <h1>
             Paramètres<span className="title-dot">.</span>
           </h1>
-          <p>Votre entreprise, vos accès et vos préférences.</p>
+          <p>
+            {superAdmin
+              ? "Super administrateur · OASIS LOGISTICS"
+              : "Votre entreprise, vos accès et vos préférences."}
+          </p>
         </div>
       </div>
       <div className="settings-grid">
@@ -266,23 +274,39 @@ export default function Settings() {
           </form>
         </section>
       </div>
-      {admin && (
+      {superAdmin && (
         <section className="card settings-card member-card">
           <h2>Utilisateurs & permissions</h2>
           <p>
-            Le membre doit créer et confirmer son compte, sans créer sa propre
-            entreprise. Rattachez ensuite son adresse ici. Votre propre rôle ne
-            peut pas être modifié pour éviter un verrouillage du compte.
+            En tant que Super administrateur, créez les comptes de votre équipe
+            ou attribuez un rôle à un compte existant. Votre propre rôle reste
+            protégé. Communiquez le mot de passe initial par un canal sûr ;
+            l’utilisateur peut le changer dans Sécurité.
           </p>
+          <label>
+            Opération{" "}
+            <select
+              value={createAccount ? "create" : "attach"}
+              onChange={(e) => setCreateAccount(e.target.value === "create")}
+            >
+              <option value="create">Créer un compte utilisateur</option>
+              <option value="attach">
+                Rattacher un compte / modifier son rôle
+              </option>
+            </select>
+          </label>
           <form
+            key={String(createAccount)}
             className="member-form"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              void send(
-                "/members",
-                Object.fromEntries(new FormData(e.currentTarget)),
+              const form = e.currentTarget;
+              const saved = await send(
+                createAccount ? "/members/accounts" : "/members",
+                Object.fromEntries(new FormData(form)),
                 "POST",
               );
+              if (saved) form.reset();
             }}
           >
             <label>
@@ -298,6 +322,22 @@ export default function Settings() {
               Adresse e-mail
               <input name="member_email" type="email" required />
             </label>
+            {createAccount && (
+              <label>
+                Mot de passe initial
+                <input
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  maxLength={128}
+                  required
+                />
+                <small>
+                  12 caractères minimum. À transmettre de manière sécurisée.
+                </small>
+              </label>
+            )}
             <label>
               Rôle
               <select name="member_role">
@@ -308,7 +348,9 @@ export default function Settings() {
               </select>
             </label>
             <button className="button primary" disabled={busy}>
-              Rattacher / modifier le rôle
+              {createAccount
+                ? "Créer le compte"
+                : "Rattacher / modifier le rôle"}
             </button>
           </form>
           {members.error && <p className="error">{members.error.message}</p>}

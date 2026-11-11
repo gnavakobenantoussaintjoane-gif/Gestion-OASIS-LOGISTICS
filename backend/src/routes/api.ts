@@ -1,3 +1,6 @@
+import { requireSuperAdmin } from "../middlewares/superAdmin.js";
+import { adminSupabase } from "../config/adminSupabase.js";
+import { rateLimit } from "express-rate-limit";
 import { Router } from "express";
 import resourcesRouter from "../controllers/resourceController.js";
 import { z } from "zod";
@@ -100,7 +103,7 @@ router.get("/members", allow("admin", "manager"), async (req, res) => {
   check(error);
   res.json(data);
 });
-router.post("/members", allow("admin"), async (req, res) => {
+router.post("/members", requireSuperAdmin, async (req, res) => {
   const fields = z
     .object({
       member_email: z.email(),
@@ -112,6 +115,59 @@ router.post("/members", allow("admin"), async (req, res) => {
   check(error);
   res.json({ ok: true });
 });
+router.post(
+  "/members/accounts",
+  requireSuperAdmin,
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: { error: "Trop de créations. Réessayez plus tard." },
+  }),
+  async (req, res) => {
+    const fields = z
+      .object({
+        member_email: z.email().max(254),
+        member_name: z.string().trim().min(2).max(100),
+        member_role: z.enum(["admin", "manager", "operator", "driver"]),
+        password: z.string().min(12).max(128),
+      })
+      .strict()
+      .parse(req.body);
+    const privileged = adminSupabase();
+    const created = await privileged.auth.admin.createUser({
+      email: fields.member_email,
+      password: fields.password,
+      email_confirm: true,
+    });
+    if (created.error || !created.data.user)
+      throw new HttpError(
+        422,
+        "Création impossible. Vérifiez l’adresse ou utilisez le rattachement d’un compte existant.",
+      );
+    const { error } = await req.db.rpc("gestion_set_member", {
+      member_email: fields.member_email,
+      member_name: fields.member_name,
+      member_role: fields.member_role,
+    });
+    if (error) {
+      const cleanup = await privileged.auth.admin.deleteUser(
+        created.data.user.id,
+      );
+      if (cleanup.error)
+        throw new HttpError(
+          500,
+          "Rattachement échoué et suppression du compte incomplète. Une intervention administrative est nécessaire.",
+        );
+      throw new HttpError(
+        422,
+        "Le rattachement a échoué. Le nouveau compte a été supprimé.",
+      );
+    }
+    res.status(201).json({ id: created.data.user.id });
+  },
+);
 router.patch("/company", allow("admin"), async (req, res) => {
   const fields = z
     .object({

@@ -61,7 +61,10 @@ router.get("/session", authenticate, async (req, res) => {
     check(result.error);
     company = result.data;
   }
+  const capability = await req.db.rpc("oasis_is_super_admin");
+  check(capability.error);
   res.json({
+    isSuperAdmin: capability.data === true,
     user: { id: req.user.id, email: req.user.email },
     profile: profile.data,
     role: role.data?.role || null,

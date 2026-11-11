@@ -5,7 +5,8 @@ export default defineConfig({
   plugins: [react(), tailwind()],
   server: {
     host: "0.0.0.0",
-    port: 5173,
+    port: 3000,
+    strictPort: true,
     allowedHosts: [".e2b.app"],
     proxy: {
       "/api": {

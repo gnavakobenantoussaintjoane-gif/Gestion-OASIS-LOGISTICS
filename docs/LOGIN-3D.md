@@ -8,11 +8,11 @@ L’intégration adapte `AuthShell`, partagé par la connexion et ses retours OA
 
 ## Modèle réellement livré
 
-- Fichier : `frontend/public/models/truck.glb`, **213 116 octets**, glTF binaire 2.0.
+- Fichier : `frontend/public/models/truck.glb`, **212 280 octets**, glTF binaire 2.0.
 - Environ **5 130 triangles** après instanciation, 99 nœuds, 9 maillages partagés, textures PNG embarquées. Pas de téléchargement de décodeur, HDRI ou police à l’exécution.
 - Source : Kenney Car Kit 3.1, licence **CC0**, vérifiée sur https://kenney.nl/assets/car-kit et dans le fichier de licence livré avec le pack.
 - Copie téléchargée depuis un miroir GitHub à commit épinglé ; source originale, empreintes et licence conservées. Voir `frontend/public/models/README.md` et `KENNEY-LICENSE.txt`.
-- La source est un camion court, pas un semi-remorque complet. L’adaptation locale ajoute une longue remorque nervurée, trois essieux supplémentaires, châssis/protections, couchette et carénage hauts, accents bleus et logo GESTION. La carrosserie est repeinte en blanc.
+- La source est un camion court, pas un semi-remorque complet. L’adaptation locale ajoute une longue remorque nervurée, trois essieux supplémentaires, châssis/protections, couchette et carénage hauts, accents bleus et logo OASIS LOGISTICS. La carrosserie est repeinte en blanc.
 - Ces adaptations sont **baked dans le GLB** par le générateur ; la scène charge le véritable asset avec `useGLTF`, pas une image ou un camion CSS. Le rendu est **low-poly stylisé**, pas photoréaliste, et les proportions restent illustratives.
 
 ## Scène et comportement

@@ -14,14 +14,14 @@ export default function AuthShell({ children }: { children: ReactNode }) {
       <div className="gestion-auth__layout">
         <section
           className="gestion-auth__intro"
-          aria-label="Présentation de Gestion"
+          aria-label="Présentation de OASIS LOGISTICS"
         >
           <div className="gestion-auth__brand">
             <span>
               <Truck size={28} />
             </span>
             <div>
-              <strong>GESTION</strong>
+              <strong>OASIS LOGISTICS</strong>
               <small>FLEET MANAGEMENT</small>
             </div>
           </div>
@@ -46,7 +46,7 @@ export default function AuthShell({ children }: { children: ReactNode }) {
         <section className="gestion-auth__panel">{children}</section>
       </div>
       <footer className="gestion-auth__footer">
-        © {new Date().getFullYear()} Gestion · OASIS LOGISTICS
+        © {new Date().getFullYear()} OASIS LOGISTICS
         <span>Transport · Logistique · Gestion de flotte</span>
       </footer>
       <TruckBackground />

@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "start": "node dist/server.js",
     "test": "vitest run",
-    "provision:owner": "tsx scripts/provision-owner.ts"
+    "provision:owner": "tsx scripts/provision-owner.ts",
+    "check:supabase": "tsx scripts/check-supabase.ts"
   },
   "dependencies": {
     "express": "^5.1.0",

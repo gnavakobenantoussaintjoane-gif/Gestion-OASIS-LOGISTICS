@@ -1,379 +1,464 @@
-/* Auth OTL : le fond est statique ; seul le formulaire HTML est interactif. */
+/* Connexion OTL : la maquette fournie est le décor exact et la carte HTML la reproduit.
+   Seuls les éléments HTML sont interactifs ; aucun Canvas ni modèle 3D n'est chargé ici.
+   Les tailles de la carte sont exprimées en cqw (1 cqw = 1 % de la largeur de la carte)
+   pour que la composition reste identique à la maquette à toutes les échelles. */
 .gestion-auth {
-  --auth-ink: #102f70;
-  --auth-muted: #465675;
+  --auth-ink: #0c2a63;
+  --auth-muted: #4a5875;
+  --auth-field: #f9fafd;
   position: relative;
   isolation: isolate;
   min-height: 100svh;
-  overflow: hidden;
+  overflow-x: hidden;
   color: var(--auth-ink);
-  background: #102f70;
-  font-family: "Segoe UI", Arial, sans-serif;
+  background: #0e2a63;
+  font-family: "Segoe UI", Inter, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 0;
 }
 .gestion-auth *,
 .gestion-auth *::before,
 .gestion-auth *::after {
   box-sizing: border-box;
 }
-.otl-auth-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 24px 3.5vw 0;
+
+/* Scène : l'image couvre l'écran comme un décor fixe (aucune animation). */
+.gestion-auth__stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 }
-.otl-auth-identity {
-  display: flex;
-  gap: 28px;
-  align-items: center;
+.gestion-auth__canvas {
+  /* Le décor est centré indépendamment de sa taille : quand il est plus large que
+     l'écran, il déborde autant à gauche qu'à droite et la carte reste alignée. */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100vw, calc(100svh * 1672 / 941));
+  aspect-ratio: 1672 / 941;
 }
-.otl-auth-identity .otl-logo {
-  width: 240px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 5px 30px #102f7010;
-}
-.otl-auth-identity p {
-  font-size: 18px;
-  font-style: italic;
-  font-weight: 750;
-  line-height: 1.5;
-  color: #102f70;
-  border-left: 2px solid #102f70;
-  padding-left: 28px;
-  margin: 0;
-  text-shadow: 0 1px 8px #ffffff90;
-}
-.otl-auth-identity p span {
-  display: block;
-  width: 110px;
-  height: 3px;
-  background: #f47700;
-  margin-top: 10px;
-  border-radius: 100%;
-}
-.otl-secure {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 10px 16px;
-  border: 1px solid #ffffff35;
-  color: white;
-  background: #102f70;
-  border-radius: 30px;
-  font-size: 12px;
-  white-space: nowrap;
-}
-.otl-secure svg {
-  color: #ffb36c;
-}
-.gestion-auth__layout {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 24px 42px;
+.otl-auth-background {
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
 }
-.gestion-auth__panel {
-  width: min(100%, 480px);
-  position: relative;
-  padding: 22px 32px;
-  background: rgba(246, 249, 255, 0.93);
-  border: 1px solid #ffffffd0;
-  border-radius: 28px;
-  backdrop-filter: blur(20px);
+
+/* Carte : mêmes proportions, même position et mêmes espacements que la carte
+   dessinée dans la maquette. 1 cqw = 1 % de la largeur de la carte, ce qui garde
+   la composition identique quelle que soit la taille de l'écran. */
+.gestion-auth--static .gestion-auth__panel {
+  position: absolute;
+  /* Coordonnées relevées sur la maquette : centre de la carte dessinée
+     (x de 575 à 1097 px, y de 155 à 812 px sur 1672 × 941). */
+  left: 49.97%;
+  top: 51.38%;
+  transform: translate(-50%, -50%);
+  /* 31,28 % de la largeur du décor (max(100vw, 1672/941 × 100svh)) : la carte HTML
+     couvre ainsi entièrement la carte dessinée dans la maquette. */
+  width: max(31.28vw, 55.58svh);
+  /* Même hauteur que la carte dessinée (523 × 657 px) : même quand un écran affiche
+     moins de contenu (récupération, erreurs), la maquette reste entièrement couverte. */
+  min-height: max(39.3vw, 69.8svh);
+  max-width: none;
+  container-type: inline-size;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #ffffffc0;
+  border-radius: 4.2cqw;
+  background-color: #eef3fc;
+  background-image:
+    radial-gradient(
+      115% 80% at 10% 4%,
+      #ffffff 0%,
+      #f6f9ff 34%,
+      #e5ebfa 74%,
+      #d3ddf4 100%
+    ),
+    linear-gradient(180deg, #ffffff26, #ffffff00);
   box-shadow:
-    0 24px 70px #061a4660,
-    inset 0 1px 0 white;
+    0 2.2cqw 5.6cqw #08214d55,
+    inset 0 1px 0 #ffffff;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
-.gestion-auth__panel::before {
+/* Rappel de l'accent orange de la maquette, en haut à droite de la carte. */
+.gestion-auth--static .gestion-auth__panel::before {
   content: "";
   position: absolute;
   top: 0;
-  right: 28px;
-  width: 80px;
-  height: 4px;
-  background: #f47700;
-  border-radius: 0 0 5px 5px;
+  right: 9%;
+  width: 25cqw;
+  height: 2.3cqw;
+  border-radius: 0 0 100% 100%;
+  background: linear-gradient(90deg, #f47700 0%, #ff9b2f 100%);
 }
+.gestion-auth__card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  /* Les écrans courts (récupération, erreurs) restent centrés dans la carte. */
+  justify-content: center;
+  padding: 0 7.65cqw 5.7cqw;
+}
+
+/* Logo officiel : image originale (aucune retouche), fond blanc fondu dans la carte.
+   Comme dans la maquette, le haut des arcs est légèrement recadré par le bord de la carte. */
 .gestion-auth .otl-auth-logo {
-  width: 210px;
-  margin: 0 auto 8px;
-  background: #fff;
+  display: block;
+  width: 60.75cqw;
+  height: auto;
+  margin: -4.16cqw auto 0;
+  background: transparent;
+  mix-blend-mode: multiply;
 }
 .gestion-auth__form-heading {
   text-align: center;
 }
-.gestion-auth__kicker {
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  font-weight: 750;
-  color: #174a91;
-}
 .gestion-auth__form-heading h1 {
-  font-size: 27px;
-  letter-spacing: -0.7px;
+  margin: -5.9cqw 0 0;
+  font-size: 6.45cqw;
+  white-space: nowrap;
   line-height: 1.2;
-  color: #102f70;
-  margin: 8px 0;
+  letter-spacing: -0.06cqw;
+  font-weight: 800;
+  color: #08265e;
 }
 .gestion-auth p {
   color: var(--auth-muted);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 3.32cqw;
+  line-height: 1.35;
 }
 .gestion-auth__form-heading p {
-  max-width: 340px;
-  margin: 0 auto;
+  max-width: 78cqw;
+  margin: 1.7cqw auto 0;
+  color: #3d4f6d;
 }
 .gestion-auth__form-heading::after {
   content: "";
   display: block;
-  width: 58px;
-  height: 3px;
-  border-radius: 4px;
+  width: 22.6cqw;
+  height: 0.58cqw;
+  border-radius: 6px;
+  margin: 2.1cqw auto 3.6cqw;
   background: #f47700;
-  margin: 16px auto;
+}
+
+/* Onglets E-mail / Téléphone. */
+.gestion-auth__modes button,
+.gestion-auth__password > button,
+.gestion-auth__options button,
+.gestion-auth__google,
+.gestion-auth__back,
+.gestion-auth__remember input {
+  border: 0;
 }
 .gestion-auth__modes {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 4px;
-  background: #dce3ed;
-  border-radius: 12px;
-  margin-bottom: 18px;
+  gap: 1.3cqw;
+  margin: 0 0 2.8cqw;
+  padding: 0;
+  background: transparent;
 }
+/* Les tailles de police des boutons sont définies par chaque variante ci-dessous. */
 .gestion-auth button {
-  font: inherit;
   cursor: pointer;
 }
 .gestion-auth__modes button {
-  border-radius: 9px;
-  padding: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #102f70;
-  background: #f1f5fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.7cqw;
+  min-height: 9cqw;
+  padding: 0 2cqw;
+  border-radius: 2.1cqw;
+  font-size: 2.9cqw;
+  font-weight: 650;
+  color: #0c2a63;
+  background: #e8edfb;
+  border: 1px solid #dde5f6;
   transition:
     background 0.18s,
     color 0.18s;
 }
-.gestion-auth__modes button[aria-pressed="true"] {
-  color: white;
-  background: #102f70;
-  box-shadow: 0 3px 8px #102f7020;
+.gestion-auth__modes button svg {
+  flex: none;
+  width: 3.2cqw;
+  height: 3.2cqw;
 }
+.gestion-auth__modes button[aria-pressed="true"] {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(95deg, #08204f 0%, #10387c 100%);
+  box-shadow: 0 0.7cqw 1.6cqw #0a24593d;
+}
+
 .gestion-auth form {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 2.7cqw;
 }
-.gestion-auth label {
-  color: #102f70;
-  font-size: 12px;
+/* Libellés réels mais masqués visuellement : la maquette n'affiche que les placeholders. */
+.gestion-auth__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.gestion-auth label:not(.gestion-auth__label) {
+  color: #0c2a63;
+  font-size: 2.6cqw;
   font-weight: 700;
+}
+.gestion-auth__field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.gestion-auth__field > svg {
+  position: absolute;
+  left: 3.1cqw;
+  width: 3.2cqw;
+  height: 3.2cqw;
+  color: #3b5ea8;
+  pointer-events: none;
 }
 .gestion-auth input {
   width: 100%;
-  padding: 13px 14px;
-  border: 1px solid #bac7db;
-  background: #fff;
-  color: #263449;
-  font-size: 16px;
-  border-radius: 12px;
-  min-height: 46px;
+  min-height: 9.4cqw;
+  padding: 0 3.4cqw 0 8.8cqw;
+  border: 1px solid #e2e8f6;
+  border-radius: 2.1cqw;
+  background: var(--auth-field);
+  color: #212f45;
+  font-family: inherit;
+  font-size: 3.05cqw;
+  box-shadow: inset 0 1px 2px #0a24590f;
+}
+/* Champs sans icône (récupération, nouveau mot de passe) : pas de retrait à gauche. */
+.gestion-auth form > input {
+  padding-left: 3.4cqw;
 }
 .gestion-auth input::placeholder {
-  color: #596b86;
+  color: #6b7893;
+  opacity: 1;
+}
+.gestion-auth input:hover {
+  border-color: #c8d4ec;
 }
 .gestion-auth input:focus {
   outline: 3px solid #f4770035;
   outline-offset: 1px;
-  border-color: #b65300;
+  border-color: #f47700;
 }
 .gestion-auth :is(button, a, input):focus-visible {
   outline: 3px solid #174a91;
   outline-offset: 3px;
 }
-.gestion-auth__password-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  margin-top: 8px;
-}
-.gestion-auth__password-heading button {
-  font-size: 11px;
-  color: #102f70;
-  text-decoration: underline;
-  font-weight: 650;
-}
-.gestion-auth__password {
-  position: relative;
-}
 .gestion-auth__password input {
-  padding-right: 48px;
+  padding-right: 9.6cqw;
 }
 .gestion-auth__password > button {
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #102f70;
+  right: 2.4cqw;
   display: flex;
-  padding: 4px;
+  padding: 0.6cqw;
+  color: #2b4a8c;
+  border-radius: 1cqw;
 }
+.gestion-auth__password > button svg {
+  width: 3.4cqw;
+  height: 3.4cqw;
+}
+.gestion-auth small {
+  color: var(--auth-muted);
+  font-size: 2.5cqw;
+  line-height: 1.4;
+}
+
+/* Ligne « Se souvenir de moi » + mot de passe oublié. */
+.gestion-auth__options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  margin: 0.4cqw 0 0;
+}
+.gestion-auth__remember {
+  display: flex;
+  align-items: center;
+  gap: 1.7cqw;
+  color: #1b3564;
+  font-size: 2.7cqw;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gestion-auth input.gestion-auth__check {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 4.4cqw;
+  height: 4.4cqw;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #26478c;
+  border-radius: 0.9cqw;
+  background: #fff center/72% no-repeat;
+  box-shadow: none;
+}
+.gestion-auth input.gestion-auth__check:checked {
+  border-color: #12357c;
+  background-color: #12357c;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' d='M3 8.6l3.2 3.2L13 5'/%3E%3C/svg%3E");
+}
+.gestion-auth__options button {
+  padding: 0;
+  color: #1d4ed8;
+  font-size: 2.7cqw;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.4cqw;
+}
+
+/* Bouton principal. */
 .gestion-auth__submit {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 1.8cqw;
   width: 100%;
-  min-height: 48px;
-  margin: 10px 0 0;
-  padding: 12px;
-  border-radius: 13px;
-  color: #10233f;
-  background: linear-gradient(180deg, #ff9b32, #f47700);
-  font-weight: 800 !important;
-  box-shadow: 0 7px 18px #f4770035;
+  min-height: 9.94cqw;
+  margin: 1.6cqw 0 0;
+  padding: 0 3cqw;
+  border-radius: 2.4cqw;
+  color: #fff;
+  font-size: 3.3cqw;
+  font-weight: 700;
+  background: linear-gradient(100deg, #ffa22b 0%, #fb7a04 55%, #ef5b00 100%);
+  box-shadow: 0 1.2cqw 2.6cqw #f4770040;
   transition:
     filter 0.18s,
     transform 0.18s;
 }
+.gestion-auth__submit svg {
+  flex: none;
+  width: 3.7cqw;
+  height: 3.7cqw;
+}
 .gestion-auth__submit:hover {
-  filter: brightness(1.07);
+  filter: brightness(1.06);
 }
 .gestion-auth__submit:active {
   transform: translateY(1px);
 }
 .gestion-auth button:disabled {
-  opacity: 0.55;
+  opacity: 0.6;
   cursor: wait;
 }
 .gestion-auth__separator {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: #52627a;
-  font-size: 10px;
-  margin: 16px 0;
+  gap: 2.2cqw;
+  margin: 2.4cqw 0 1.2cqw;
+  color: #55627c;
+  font-size: 2.4cqw;
+  font-weight: 600;
 }
 .gestion-auth__separator::before,
 .gestion-auth__separator::after {
   content: "";
-  height: 1px;
-  background: #c3cddd;
   flex: 1;
+  height: 1px;
+  background: #c3cde1;
 }
 .gestion-auth__google {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 2cqw;
   width: 100%;
-  padding: 12px;
-  color: #102f70;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  border: 1px solid #bac7db;
+  min-height: 9.75cqw;
+  padding: 0 3cqw;
+  border: 1px solid #e6ebf7;
+  border-radius: 2.4cqw;
   background: #fff;
-  border-radius: 12px;
+  color: #0c2a63;
+  font-size: 3.05cqw;
+  font-weight: 700;
+  box-shadow: 0 0.5cqw 1.4cqw #0a24591a;
 }
 .gestion-auth__google svg {
-  width: 20px;
-  height: 20px;
+  flex: none;
+  width: 3.9cqw;
+  height: 3.9cqw;
 }
 .gestion-auth .gestion-auth__provider-note {
+  margin: 1.2cqw 0 0;
   text-align: center;
-  margin: 9px 0 0;
-  font-size: 10px;
-  line-height: 1.5;
+  font-size: 2cqw;
+  line-height: 1.45;
+  color: #58688a;
 }
 .gestion-auth__security {
-  border-top: 1px solid #c9d3e2;
-  margin-top: 14px;
-  padding-top: 12px;
-  text-align: center;
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  color: #465675;
+  justify-content: center;
+  gap: 1.2cqw;
+  margin-top: 1.6cqw;
+  padding-top: 1.2cqw;
+  border-top: 1px solid #d3dcec;
+  font-size: 2.05cqw;
+  color: #56658a;
 }
 .gestion-auth__security svg {
+  flex: none;
+  width: 2.6cqw;
+  height: 2.6cqw;
   color: #174a91;
 }
 .gestion-auth__error,
 .gestion-auth__notice {
-  padding: 12px;
-  border-radius: 10px;
-  font-size: 12px;
-  margin: 12px 0;
-  line-height: 1.5;
+  margin: 0 0 1.4cqw;
+  padding: 2cqw 2.4cqw;
+  border-radius: 1.6cqw;
+  font-size: 2.5cqw;
+  line-height: 1.45;
 }
 .gestion-auth__error {
+  color: #8b2020;
   background: #fff0f0;
   border: 1px solid #eeb6b6;
-  color: #8b2020;
 }
 .gestion-auth__notice {
+  color: #19603a;
   background: #eaf7ef;
   border: 1px solid #b4ddc3;
-  color: #19603a;
 }
 .gestion-auth__back {
   width: 100%;
-  color: #102f70;
-  padding: 16px 0 0;
-  font-size: 12px !important;
-  text-decoration: underline;
-}
-.gestion-auth small {
-  color: #465675;
-  line-height: 1.5;
-}
-.gestion-auth__footer {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-  padding: 20px 4vw;
-  background: #0a2459ed;
-  border-top: 3px solid #f47700;
-  color: #fff;
-}
-.gestion-auth__footer > div {
-  display: flex;
-  gap: 24px;
-}
-.gestion-auth__footer span {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
+  margin-top: 2cqw;
+  padding: 1cqw 0 0;
+  color: #14356f;
+  font-size: 2.6cqw;
   font-weight: 600;
-}
-.gestion-auth__footer svg {
-  color: #ff922e;
-}
-.gestion-auth__footer p {
-  color: white;
-  font-weight: 650;
-  font-style: italic;
-  text-align: right;
-}
-.gestion-auth__footer small {
-  display: block;
-  margin-top: 5px;
-  color: #cedbf0;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 400;
+  text-decoration: underline;
 }
 @keyframes otl-spin {
   to {
@@ -383,70 +468,6 @@
 .gestion-auth__spinner {
   animation: otl-spin 1s linear infinite;
 }
-@supports not (backdrop-filter: blur(1px)) {
-  .gestion-auth__panel {
-    background: #f1f5fb;
-  }
-}
-@media (min-width: 1400px) {
-  .gestion-auth__layout {
-    min-height: calc(100svh - 225px);
-  }
-}
-@media (max-width: 760px) {
-  .otl-auth-header {
-    padding: 18px 20px 0;
-    justify-content: center;
-  }
-  .otl-auth-identity .otl-logo {
-    width: 175px;
-  }
-  .otl-auth-identity p,
-  .otl-secure {
-    display: none;
-  }
-  .gestion-auth__layout {
-    padding: 18px 16px 28px;
-  }
-  .gestion-auth__panel {
-    padding: 20px 22px;
-    border-radius: 22px;
-  }
-  .gestion-auth .otl-auth-logo {
-    width: 175px;
-  }
-  .gestion-auth__form-heading h1 {
-    font-size: 25px;
-  }
-  .gestion-auth__footer {
-    flex-direction: column;
-    gap: 15px;
-    padding: 18px;
-  }
-  .gestion-auth__footer > div {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px 20px;
-  }
-  .gestion-auth__footer span {
-    font-size: 10px;
-  }
-  .gestion-auth__footer p {
-    text-align: center;
-    font-size: 12px;
-  }
-}
-@media (max-width: 360px) {
-  .gestion-auth__panel {
-    padding: 18px;
-  }
-  .gestion-auth__password-heading {
-    gap: 6px;
-  }
-  .gestion-auth__password-heading button {
-    font-size: 10px;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .gestion-auth *,
   .gestion-auth *::before,
@@ -455,109 +476,246 @@
     transition: none !important;
   }
 }
-/* Neutraliser le padding du main métier : Auth est un shell plein écran indépendant. */
-.gestion-auth {
-  padding: 0;
-  font-size: 14px;
-  line-height: 1.4;
-}
-.gestion-auth .otl-auth-identity p {
-  font-size: 17px;
-  line-height: 1.4;
-}
-@media (min-width: 761px) {
-  .otl-auth-header {
-    padding-top: 16px;
-  }
-  .otl-auth-identity .otl-logo {
-    width: 190px;
-  }
-  .gestion-auth__layout {
-    padding: 10px 24px 28px;
-  }
-  .gestion-auth__panel {
-    padding: 16px 30px;
+
+/* Repli sans requêtes de conteneur : tailles en pixels proches de la maquette. */
+@supports not (container-type: inline-size) {
+  .gestion-auth__card {
+    padding: 0 40px 30px;
   }
   .gestion-auth .otl-auth-logo {
-    width: 175px;
-    margin-bottom: 4px;
-  }
-  .gestion-auth__form-heading .gestion-auth__kicker {
-    display: none;
+    width: 331px;
+    margin-top: -21px;
   }
   .gestion-auth__form-heading h1 {
-    font-size: 26px;
+    margin-top: -32px;
+    font-size: 37px;
   }
-  .gestion-auth__form-heading::after {
-    margin: 12px auto;
+  .gestion-auth__form-heading p,
+  .gestion-auth p {
+    font-size: 17px;
   }
-  .gestion-auth__modes {
-    margin-bottom: 12px;
-  }
-  .gestion-auth__modes button {
-    padding: 8px;
-  }
-  .gestion-auth form {
-    gap: 7px;
+  .gestion-auth__modes button,
+  .gestion-auth__remember,
+  .gestion-auth__options button {
+    font-size: 15px;
   }
   .gestion-auth input {
-    padding: 10px 14px;
-  }
-  .gestion-auth__separator {
-    margin: 12px 0;
-  }
-  .gestion-auth__security {
-    margin-top: 10px;
-    padding-top: 8px;
-  }
-  .gestion-auth__footer {
-    padding-top: 16px;
-    padding-bottom: 16px;
+    font-size: 16px;
   }
 }
 
-/* Remplace le décor 3D uniquement sur Auth, sans toucher aux animations métier.
-   L’image est intacte ; la carte opaque couvre les champs déjà dessinés dans la maquette. */
-.gestion-auth--static {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #102f70;
-}
-.otl-auth-background {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: -1;
-  pointer-events: none;
-}
-.gestion-auth--static .gestion-auth__layout {
-  min-height: 100svh;
-  padding: 40px 16px;
-}
-.gestion-auth--static .gestion-auth__panel {
-  width: max(34vw, 56vh);
-  min-width: 480px;
-  min-height: 76svh;
-  background: #eef2fa;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-@media (max-width: 760px) {
+/* Sous 1100 px, la carte HTML ne peut plus se superposer exactement à la carte
+   dessinée dans la maquette : l'image devient un fond d'ambiance (flou + voile
+   marine) et la carte réelle s'affiche en pleine largeur, nette et lisible. */
+@media (max-width: 1100px) {
+  .gestion-auth--static {
+    display: block;
+  }
+  .gestion-auth {
+    background: #0b2454;
+  }
+  .gestion-auth__stage {
+    position: relative;
+    display: flow-root;
+    min-height: 100svh;
+    padding: 0 0 max(20px, env(safe-area-inset-bottom));
+    overflow: visible;
+  }
+  .gestion-auth__canvas {
+    display: contents;
+  }
   .otl-auth-background {
-    object-position: left center;
-  }
-  .gestion-auth--static .gestion-auth__layout {
-    padding: 24px 16px;
-  }
-  .gestion-auth--static .gestion-auth__panel {
+    position: fixed;
+    inset: 0;
     width: 100%;
-    min-width: 0;
+    height: 100%;
+    object-fit: cover;
+    object-position: 24% center;
+    filter: blur(9px) brightness(0.72) saturate(0.92);
+    transform: scale(1.08);
+  }
+  .gestion-auth__stage::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      #0a2050bd 0%,
+      #0a1f4ace 52%,
+      #081c44f2 100%
+    );
+  }
+  /* Vrai panneau : net, au-dessus du décor, avec tout l'espace de saisie. */
+  .gestion-auth--static .gestion-auth__panel {
+    position: relative;
+    z-index: 2;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: min(calc(100vw - 24px), 430px);
     min-height: 0;
-    max-width: 480px;
+    margin: max(18px, env(safe-area-inset-top)) auto 0;
+    padding: 0;
+    overflow: visible;
+    border-radius: 22px;
+    container-type: normal;
+    box-shadow: 0 18px 48px #04112866;
+  }
+  .gestion-auth__card {
+    flex: none;
+    padding: 22px 20px 20px;
+  }
+  .gestion-auth .otl-auth-logo {
+    width: 62%;
+    margin: 0 auto 4px;
+  }
+  .gestion-auth__form-heading h1 {
+    margin: 2px 0 0;
+    font-size: 25px;
+    letter-spacing: -0.4px;
+  }
+  .gestion-auth__form-heading p,
+  .gestion-auth p {
+    font-size: 14px;
+  }
+  .gestion-auth__form-heading::after {
+    width: 22%;
+    height: 3px;
+    margin: 12px auto 14px;
+  }
+  .gestion-auth__modes {
+    gap: 2px;
+    margin-bottom: 10px;
+  }
+  .gestion-auth__modes button {
+    min-height: 44px;
+    gap: 8px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .gestion-auth__modes button svg {
+    width: 17px;
+    height: 17px;
+  }
+  .gestion-auth form {
+    gap: 9px;
+  }
+  .gestion-auth__field > svg {
+    left: 14px;
+    width: 18px;
+    height: 18px;
+  }
+  .gestion-auth form > input {
+    padding-left: 14px;
+  }
+  .gestion-auth label:not(.gestion-auth__label) {
+    font-size: 13px;
+  }
+  .gestion-auth input {
+    min-height: 46px;
+    padding: 0 14px 0 40px;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  .gestion-auth__password input {
+    padding-right: 46px;
+  }
+  .gestion-auth__password > button {
+    right: 10px;
+  }
+  .gestion-auth__password > button svg {
+    width: 20px;
+    height: 20px;
+  }
+  .gestion-auth small {
+    font-size: 12px;
+  }
+  .gestion-auth__options {
+    gap: 8px;
+    margin: 2px 0;
+  }
+  .gestion-auth__remember {
+    gap: 8px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .gestion-auth input.gestion-auth__check {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border-radius: 5px;
+  }
+  .gestion-auth__options button {
+    white-space: nowrap;
+    font-size: 12.5px;
+  }
+  .gestion-auth__submit {
+    min-height: 48px;
+    gap: 9px;
+    margin-top: 6px;
+    border-radius: 12px;
+    font-size: 16px;
+  }
+  .gestion-auth__submit svg {
+    width: 19px;
+    height: 19px;
+  }
+  .gestion-auth__separator {
+    gap: 10px;
+    margin: 8px 0 2px;
+    font-size: 11px;
+  }
+  .gestion-auth__google {
+    min-height: 48px;
+    gap: 9px;
+    border-radius: 12px;
+    font-size: 15px;
+  }
+  .gestion-auth__google svg {
+    width: 20px;
+    height: 20px;
+  }
+  .gestion-auth .gestion-auth__provider-note {
+    margin-top: 8px;
+    font-size: 10.5px;
+  }
+  .gestion-auth__security {
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    font-size: 10.5px;
+  }
+  .gestion-auth__security svg {
+    width: 15px;
+    height: 15px;
+  }
+  .gestion-auth__error,
+  .gestion-auth__notice {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12.5px;
+  }
+  .gestion-auth__back {
+    margin-top: 10px;
+    font-size: 13px;
+  }
+}
+@media (max-width: 360px) {
+  .gestion-auth--static .gestion-auth__panel {
+    padding: 18px 16px;
+  }
+  .gestion-auth__form-heading h1 {
+    font-size: 22px;
+  }
+  .gestion-auth input.gestion-auth__check {
+    width: 18px;
+    height: 18px;
+  }
+  .gestion-auth__remember,
+  .gestion-auth__options button {
+    font-size: 11.5px;
   }
 }

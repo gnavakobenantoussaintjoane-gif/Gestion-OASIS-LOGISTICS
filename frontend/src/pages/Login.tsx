@@ -5,6 +5,10 @@ import {
   ArrowRight,
   ShieldCheck,
   LoaderCircle,
+  Mail,
+  Phone,
+  Lock,
+  LogIn,
 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -38,7 +42,22 @@ function GoogleIcon() {
 export default function Login() {
   const { reload, error: sessionError } = useSession();
   const [mode, setMode] = useState<"email" | "phone">("email");
-  const [identity, setIdentity] = useState("");
+  // « Se souvenir de moi » est une préférence locale : le cookie de session reste
+  // httpOnly et sa durée (30 jours) est fixée côté serveur, jamais par le navigateur.
+  const [remember, setRemember] = useState(() => {
+    try {
+      return window.localStorage.getItem("otl-remember-identity") !== null;
+    } catch {
+      return false;
+    }
+  });
+  const [identity, setIdentity] = useState(() => {
+    try {
+      return window.localStorage.getItem("otl-remember-identity") ?? "";
+    } catch {
+      return "";
+    }
+  });
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -95,6 +114,14 @@ export default function Login() {
         method: "POST",
         body: JSON.stringify({ [mode]: value, password }),
       });
+      // Mémoriser seulement l'identifiant choisi, jamais le mot de passe.
+      try {
+        if (!forgot && remember)
+          window.localStorage.setItem("otl-remember-identity", value);
+        else window.localStorage.removeItem("otl-remember-identity");
+      } catch {
+        /* stockage indisponible : la connexion reste valable */
+      }
       // A valid Auth identity is not enough: preserve server-side company/role checks.
       await api<Session>("/auth/session");
       await reload();
@@ -104,9 +131,6 @@ export default function Login() {
   return (
     <AuthShell>
       <div className="gestion-auth__form-heading">
-        <span className="gestion-auth__kicker">
-          OTL · VOTRE ESPACE DE TRAVAIL
-        </span>
         <h1>{forgot ? "Mot de passe oublié ?" : "Bienvenue sur Gestion"}</h1>
         <p>
           {forgot
@@ -132,6 +156,11 @@ export default function Login() {
                 setError("");
               }}
             >
+              {m === "email" ? (
+                <Mail aria-hidden="true" />
+              ) : (
+                <Phone aria-hidden="true" />
+              )}
               {m === "email" ? "E-mail" : "Téléphone"}
             </button>
           ))}
@@ -154,58 +183,55 @@ export default function Login() {
         }}
         noValidate
       >
-        <label htmlFor="gestion-identity">
+        <label className="gestion-auth__label" htmlFor="gestion-identity">
           {forgot || mode === "email"
             ? "Adresse e-mail"
             : "Numéro de téléphone"}
         </label>
-        <input
-          id="gestion-identity"
-          type={forgot || mode === "email" ? "email" : "tel"}
-          autoComplete={forgot || mode === "email" ? "email" : "tel"}
-          placeholder={
-            forgot || mode === "email" ? "vous@entreprise.ci" : "+2250700000000"
-          }
-          value={identity}
-          onChange={(e) => setIdentity(e.target.value)}
-          disabled={busy}
-          required
-          aria-describedby={
-            mode === "phone" && !forgot ? "gestion-phone-help" : undefined
-          }
-        />
+        <div className="gestion-auth__field">
+          {/* Le libellé reste accessible ; la maquette n'affiche que le placeholder. */}
+          {forgot || mode === "email" ? (
+            <Mail aria-hidden="true" />
+          ) : (
+            <Phone aria-hidden="true" />
+          )}
+          <input
+            id="gestion-identity"
+            type={forgot || mode === "email" ? "email" : "tel"}
+            autoComplete={forgot || mode === "email" ? "email" : "tel"}
+            placeholder={
+              forgot || mode === "email"
+                ? "Adresse e-mail"
+                : "Numéro de téléphone (+225…)"
+            }
+            value={identity}
+            onChange={(e) => setIdentity(e.target.value)}
+            disabled={busy}
+            required
+            aria-describedby={
+              mode === "phone" && !forgot ? "gestion-phone-help" : undefined
+            }
+          />
+        </div>
         {mode === "phone" && !forgot && (
           <small id="gestion-phone-help">
-            Format international avec indicatif pays. Connexion par mot de
-            passe, sans SMS.
+            Indicatif pays inclus, sans SMS.
           </small>
         )}
         {!forgot && (
           <>
-            <div className="gestion-auth__password-heading">
-              <label htmlFor="gestion-password">Mot de passe</label>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  setForgot(true);
-                  setMode("email");
-                  setIdentity("");
-                  setError("");
-                  setPassword("");
-                }}
-              >
-                Mot de passe oublié ?
-              </button>
-            </div>
-            <div className="gestion-auth__password">
+            <label className="gestion-auth__label" htmlFor="gestion-password">
+              Mot de passe
+            </label>
+            <div className="gestion-auth__password gestion-auth__field">
+              <Lock aria-hidden="true" />
               <input
                 id="gestion-password"
                 type={show ? "text" : "password"}
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Votre mot de passe"
+                placeholder="Mot de passe"
                 maxLength={128}
                 disabled={busy}
                 required
@@ -221,6 +247,31 @@ export default function Login() {
                 {show ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            <div className="gestion-auth__options">
+              <label className="gestion-auth__remember">
+                <input
+                  className="gestion-auth__check"
+                  type="checkbox"
+                  checked={remember}
+                  disabled={busy}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
+                Se souvenir de moi
+              </label>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setForgot(true);
+                  setMode("email");
+                  setIdentity("");
+                  setError("");
+                  setPassword("");
+                }}
+              >
+                Mot de passe oublié ?
+              </button>
+            </div>
           </>
         )}
         <button className="gestion-auth__submit" type="submit" disabled={busy}>
@@ -232,7 +283,7 @@ export default function Login() {
           ) : (
             <>
               {forgot ? "Envoyer le lien" : "Se connecter"}
-              <ArrowRight size={19} />
+              {forgot ? <ArrowRight size={19} /> : <LogIn size={19} />}
             </>
           )}
         </button>

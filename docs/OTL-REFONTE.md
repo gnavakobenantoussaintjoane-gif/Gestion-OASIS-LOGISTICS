@@ -1,7 +1,8 @@
 # Refonte OTL — analyse préalable et suivi
 
-> **Évolution ultérieure :** à la demande du propriétaire, la connexion utilise désormais la maquette fournie comme image fixe, sans Canvas/GLB. Le formulaire HTML reste interactif. Les détails 3D ci-dessous décrivent la tranche précédente ; pour la vérification actuelle, lancer `node frontend/tests/loginStatic.mjs` plutôt que l’ancien `truck3d.mjs`. Les animations internes restent inchangées.
-
+> **Évolution ultérieure :** la carte de connexion reproduit désormais au pixel la maquette fournie (coordonnées relevées, espacements en `cqw`), voir `docs/ETAT-DU-PROJET.md`.
+>
+> **Contexte 3D :** à la demande du propriétaire, la connexion utilise désormais la maquette fournie comme image fixe, sans Canvas/GLB. Le formulaire HTML reste interactif. Les détails 3D ci-dessous décrivent la tranche précédente ; pour la vérification actuelle, lancer `node frontend/tests/loginStatic.mjs` plutôt que l’ancien `truck3d.mjs`. Les animations internes restent inchangées.
 
 ## Architecture constatée avant modification
 
@@ -68,10 +69,10 @@ Transitions Motion de page existantes conservées ; cartes et modales apparaisse
 
 Déployer `frontend/public/branding`, le GLB et **`shared/branding/otl-logo.jpg` avec le backend** ; conserver la structure du dépôt pour que le chemin du logo export fonctionne en sources comme depuis `backend/dist`. La duplication publique du logo est vérifiée par test d’identité binaire. Le logo utilisateur n’est pas CC0, contrairement à la géométrie source Kenney. Aucun secret nouveau en Git.
 
-
 ## Inventaire des fichiers de cette tranche
 
 ### Modifiés
+
 - `backend/src/services/exports.ts`
 - `backend/tests/exports.test.ts`
 - `docs/ETAT-DU-PROJET.md`
@@ -99,6 +100,7 @@ Déployer `frontend/public/branding`, le GLB et **`shared/branding/otl-logo.jpg`
 - `frontend/tests/truckAsset.test.ts`
 
 ### Créés
+
 - `docs/OTL-REFONTE.md`
 - `docs/references/otl-login-reference.png`
 - `frontend/public/branding/otl-logo.jpg`

@@ -33,6 +33,12 @@ describe("Vrais fichiers de rapport", () => {
       "Test only",
     );
     expect(book.worksheets.length).toBeGreaterThanOrEqual(4);
+    expect(book.creator).toBe("OTL — OASIS TRANSPORT LOGISTICS");
+    for (const sheet of book.worksheets)
+      expect(sheet.getImages()).toHaveLength(1);
+    expect(book.getWorksheet("Synthèse")?.getCell("A3").value).toBe(
+      "Indicateur",
+    );
   });
   it("génère un PDF binaire", async () => {
     const r = await request(app)
@@ -46,5 +52,6 @@ describe("Vrais fichiers de rapport", () => {
     expect(r.status).toBe(200);
     expect(r.body.subarray(0, 5).toString()).toBe("%PDF-");
     expect(r.headers["content-disposition"]).toContain(".pdf");
+    expect(r.body.includes(Buffer.from("/Subtype /Image"))).toBe(true);
   });
 });

@@ -1,6 +1,11 @@
+import { readFileSync } from "node:fs";
 import ExcelJS from "exceljs";
 import PDFDocument from "pdfkit";
 import type { Response } from "express";
+// Source commune aux exports et au frontend : logo officiel intact, jamais une recréation.
+const logo = readFileSync(
+  new URL("../../../shared/branding/otl-logo.jpg", import.meta.url),
+);
 export async function exportReport(
   res: Response,
   format: "xlsx" | "pdf",
@@ -96,18 +101,29 @@ export async function exportReport(
   res.attachment(filename);
   if (format === "xlsx") {
     const book = new ExcelJS.Workbook();
-    book.creator = "OASIS LOGISTICS";
+    book.creator = "OTL — OASIS TRANSPORT LOGISTICS";
+    const imageId = book.addImage({
+      buffer: logo as unknown as ExcelJS.Buffer,
+      extension: "jpeg",
+    });
     for (const [name, head, rows] of sheets) {
       const sheet = book.addWorksheet(name);
       sheet.addRow([company]);
+
       sheet.addRow([period]);
       sheet.addRow(head);
       sheet.addRows(rows);
+      sheet.getRow(1).height = 30;
+      sheet.getRow(2).height = 30;
+      sheet.addImage(imageId, {
+        tl: { col: 7, row: 0 },
+        ext: { width: 120, height: 60 },
+      });
       sheet.getRow(3).font = { bold: true, color: { argb: "FFFFFFFF" } };
       sheet.getRow(3).fill = {
         type: "pattern",
         pattern: "solid",
-        fgColor: { argb: "FF173B7A" },
+        fgColor: { argb: "FF102F70" },
       };
       sheet.columns.forEach((c) => {
         c.width = 25;
@@ -130,18 +146,21 @@ export async function exportReport(
       if (i) doc.addPage();
       const [title, head, rows] = sheets[i];
       const heading = () => {
+        doc.image(logo, 35, 25, { width: 120 });
+        doc.y = 35;
         doc
-          .fillColor("#173b7a")
+          .fillColor("#102f70")
           .font("Helvetica-Bold")
           .fontSize(22)
-          .text("OASIS LOGISTICS / " + company);
+          .text("OTL / " + company, 175, 35, { width: 630 });
         doc
           .fillColor("#62728b")
           .fontSize(10)
           .text(
             `${title} | ${period} | Généré le ${new Date().toLocaleDateString("fr-FR")} | FCFA`,
           );
-        doc.moveDown();
+        doc.x = 35;
+        doc.y = 105;
       };
       heading();
       const widths = head.map(() => 770 / head.length);
@@ -154,7 +173,7 @@ export async function exportReport(
         doc
           .font(bold ? "Helvetica-Bold" : "Helvetica")
           .fontSize(8)
-          .fillColor(bold ? "#173b7a" : "#334155");
+          .fillColor(bold ? "#102f70" : "#334155");
         let x = 35;
         row.forEach((v, j) => {
           doc.text(String(v).replace(/\u202f/g, " "), x, y, {

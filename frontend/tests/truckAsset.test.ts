@@ -20,14 +20,14 @@ describe("Camion GLB réellement livré", () => {
       ),
     ).toBe(true);
   });
-  it("contient tracteur, remorque, essieux nommés et marque OASIS LOGISTICS", () => {
+  it("contient tracteur, remorque, essieux nommés et logo officiel OTL", () => {
     const names = gltf.nodes.map((node: { name: string }) => node.name);
     expect(names).toContain("body");
     expect(names).toContain("trailer-body");
     expect(
       names.filter((name: string) => name.startsWith("wheel-")),
     ).toHaveLength(10);
-    expect(names).toContain("OASIS LOGISTICS-logo");
+    expect(names).toContain("OTL-logo");
     expect(gltf.asset.copyright).toContain("CC0");
   });
   it("borne la simulation et boucle sans grand saut après suspension", () => {

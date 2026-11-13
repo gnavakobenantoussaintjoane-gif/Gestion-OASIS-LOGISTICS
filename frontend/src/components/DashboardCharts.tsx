@@ -1,3 +1,5 @@
+import { usePreferences } from "../contexts/PreferencesContext";
+import { useMotionPreference } from "../hooks/useMotionPreference";
 import { Link } from "react-router-dom";
 import { ArrowRight, Activity } from "lucide-react";
 import { money } from "../utils/format";
@@ -21,6 +23,8 @@ export function ActivityOverview({
 }: {
   chart: { date: string; recettes: number; depenses: number }[];
 }) {
+  const { animations } = usePreferences();
+  const animate = !useMotionPreference() && animations;
   return (
     <article className="card chart-card">
       <div className="card-heading">
@@ -42,8 +46,16 @@ export function ActivityOverview({
                   x2="0"
                   y2="1"
                 >
-                  <stop offset="0%" stopColor="#3376ef" stopOpacity={0.2} />
-                  <stop offset="100%" stopColor="#3376ef" stopOpacity={0} />
+                  <stop
+                    offset="0%"
+                    stopColor="var(--otl-navy)"
+                    stopOpacity={0.2}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="var(--otl-navy)"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -72,18 +84,20 @@ export function ActivityOverview({
                 }}
               />
               <Area
+                isAnimationActive={animate}
                 type="monotone"
                 dataKey="recettes"
                 name="Recettes"
-                stroke="#3376ef"
+                stroke="var(--otl-navy)"
                 strokeWidth={2.5}
                 fill="url(#revenueGradient)"
               />
               <Area
+                isAnimationActive={animate}
                 type="monotone"
                 dataKey="depenses"
                 name="Dépenses"
-                stroke="#eb9a63"
+                stroke="var(--otl-orange)"
                 strokeWidth={2}
                 fill="transparent"
               />
@@ -113,6 +127,8 @@ export function FinancialCharts({
   months: Map<string, { month: string; benefice: number }>;
   expenseGroups: { name: string; value: number }[];
 }) {
+  const { animations } = usePreferences();
+  const animate = !useMotionPreference() && animations;
   return (
     <section className="analytics-grid equal">
       <article className="card chart-card">
@@ -134,7 +150,12 @@ export function FinancialCharts({
                 <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip />
-                <Bar dataKey="benefice" fill="#3376ef" radius={[5, 5, 0, 0]} />
+                <Bar
+                  isAnimationActive={animate}
+                  dataKey="benefice"
+                  fill="var(--otl-navy)"
+                  radius={[5, 5, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -154,6 +175,7 @@ export function FinancialCharts({
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
+                  isAnimationActive={animate}
                   data={expenseGroups}
                   dataKey="value"
                   nameKey="name"
@@ -164,7 +186,7 @@ export function FinancialCharts({
                     <Cell
                       key={i}
                       fill={
-                        ["#3376ef", "#6c62e6", "#28a78e", "#e9a25f", "#7da5e7"][
+                        ["#102f70", "#f47700", "#174a91", "#b65300", "#8c9db8"][
                           i % 5
                         ]
                       }

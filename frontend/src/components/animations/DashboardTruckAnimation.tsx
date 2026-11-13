@@ -1,3 +1,4 @@
+import Brand from "../Brand";
 import { useState } from "react";
 import TruckVisual from "./TruckVisual";
 import type { ContainerKind } from "./TruckModel";
@@ -20,7 +21,7 @@ export default function DashboardTruckAnimation() {
           Un seul espace pour tout piloter.
         </p>
         <div className="hero-brand">
-          OASIS LOGISTICS <span>— TRANSPORT & LOGISTICS</span>
+          <Brand />
         </div>
       </div>
       <TruckVisual kind={kind} />

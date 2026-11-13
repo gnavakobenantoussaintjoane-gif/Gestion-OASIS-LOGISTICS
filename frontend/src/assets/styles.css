@@ -2,16 +2,16 @@
 :root {
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   color: #25344d;
-  background: #f5f7fb;
+  background: #f1f5fb;
   font-synthesis: none;
-  --bg: #f5f7fb;
+  --bg: #f1f5fb;
   --surface: #fff;
   --ink: #25344d;
   --muted: #52627a;
   --line: #e9edf5;
-  --blue: #306de5;
+  --blue: #102f70;
   --subtle: #f7f9fd;
-  --sidebar: #0c1931;
+  --sidebar: #102f70;
 }
 * {
   box-sizing: border-box;
@@ -123,7 +123,7 @@ small {
 .button.primary {
   background: var(--blue);
   color: white;
-  box-shadow: 0 4px 10px #306de519;
+  box-shadow: 0 4px 10px #102f7019;
 }
 .button.primary:hover {
   background: #255dcc;
@@ -179,7 +179,7 @@ small {
   width: 41px;
   display: grid;
   place-items: center;
-  background: #306de5;
+  background: #102f70;
   color: #fff;
   border-radius: 11px;
   box-shadow: 0 4px 15px #1b4b9c20;

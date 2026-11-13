@@ -1,537 +1,25 @@
-/* Login-only styles: intentionally independent of dashboard and shared truck styles. */
+/* Auth OTL : le formulaire est du HTML réel, indépendant du Canvas décoratif. */
 .gestion-auth {
-  --auth-blue: #2563eb;
-  --auth-ink: #172b4d;
-  --auth-muted: #52647c;
-  color-scheme: light;
-  background: #fff;
-  color: var(--auth-ink);
-  min-height: 100svh;
+  --auth-ink: #102f70;
+  --auth-muted: #465675;
   position: relative;
   isolation: isolate;
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
-  padding: 48px clamp(24px, 5vw, 80px) 24px;
+  min-height: 100svh;
   overflow: hidden;
+  color: var(--auth-ink);
+  background: #102f70;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 .gestion-auth *,
 .gestion-auth *::before,
 .gestion-auth *::after {
   box-sizing: border-box;
 }
-.gestion-auth__layout {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: clamp(40px, 8vw, 130px);
-  max-width: 1200px;
-  margin: 0 auto;
-  align-items: center;
-  min-height: calc(100svh - 150px);
-}
-.gestion-auth__intro {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 12px 0 24px;
-  min-width: 0;
-}
-.gestion-auth__brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.gestion-auth__brand > span {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border-radius: 15px;
-  color: #fff;
-  background: #2563eb;
-  box-shadow: 0 8px 20px #2563eb22;
-}
-.gestion-auth__brand strong {
-  display: block;
-  font-size: clamp(18px, 2vw, 25px);
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: 1px;
-}
-.gestion-auth__brand small {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 2.3px;
-  color: #52647c;
-  margin-top: 5px;
-  font-weight: 650;
-}
-.gestion-auth__pitch {
-  margin-top: 60px;
-}
-.gestion-auth__kicker {
-  display: block;
-  color: #2459b4;
-  font-size: 12px;
-  font-weight: 750;
-  letter-spacing: 1.6px;
-}
-.gestion-auth__pitch h2 {
-  font-size: clamp(32px, 3.3vw, 49px);
-  line-height: 1.16;
-  letter-spacing: -1.5px;
-  font-weight: 780;
-  margin: 20px 0;
-  color: #173b70;
-}
-.gestion-auth__pitch em {
-  color: #2563eb;
-  font-style: normal;
-}
-.gestion-auth p {
-  color: #52647c;
-  font-size: 16px;
-  line-height: 1.7;
-}
-.gestion-auth__pitch p {
-  max-width: 430px;
-}
-.gestion-auth__illustration {
-  background: linear-gradient(150deg, #eef5ff, #f5f8fc);
-  border: 1px solid #e2e8f0;
-  border-radius: 22px;
-  padding: 22px 12px;
-  margin-top: 30px;
-  max-width: 500px;
-  position: relative;
-}
-.gestion-auth__illustration::after {
-  content: "";
-  position: absolute;
-  bottom: 23px;
-  left: 14px;
-  right: 14px;
-  height: 1px;
-  background: #b4c9e2;
-}
-.gestion-auth__illustration .truck-illustration {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: auto;
-  animation: none;
-  transform: none;
-}
-.gestion-auth__company {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #405570;
-  margin-top: 24px;
-  font-weight: 600;
-}
-.gestion-auth__panel {
-  padding: 38px;
-  border: 1px solid #e2e8f0;
-  border-radius: 22px;
-  box-shadow: 0 22px 70px #173b700b;
-  background: #fff;
-  width: 100%;
-  max-width: 480px;
-  justify-self: end;
-  min-width: 0;
-}
-.gestion-auth__form-heading h1 {
-  color: #172b4d;
-  font-size: clamp(27px, 2.4vw, 34px);
-  font-weight: 760;
-  letter-spacing: -0.9px;
-  line-height: 1.2;
-  margin: 14px 0 10px;
-}
-.gestion-auth__form-heading p {
-  font-size: 15px;
-}
-.gestion-auth__modes {
-  display: flex;
-  background: #f5f8fc;
-  padding: 5px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  gap: 6px;
-  margin: 26px 0;
-}
-.gestion-auth button {
-  font-family: inherit;
-  cursor: pointer;
-}
-.gestion-auth__modes button {
-  flex: 1;
-  min-height: 40px;
-  font-size: 14px;
-  color: #405570;
-  font-weight: 650;
-  border-radius: 7px;
-}
-.gestion-auth__modes button[aria-pressed="true"] {
-  color: #173b70;
-  background: #fff;
-  box-shadow: 0 2px 8px #173b7014;
-}
-.gestion-auth form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 22px;
-}
-.gestion-auth label {
-  color: #172b4d;
-  font-size: 14px;
-  font-weight: 700;
-}
-.gestion-auth input {
-  color: #172b4d;
-  background: #fff;
-  border: 1px solid #98a9be;
-  border-radius: 9px;
-  min-height: 50px;
-  width: 100%;
-  padding: 13px 14px;
-  font-size: 16px;
-  line-height: 1.4;
-  font-weight: 400;
-}
-.gestion-auth input::placeholder {
-  color: #64748b;
-  opacity: 1;
-}
-.gestion-auth input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px #2563eb18;
-}
-.gestion-auth :is(button, input, a):focus-visible {
-  outline: 3px solid #2563eb;
-  outline-offset: 3px;
-}
-.gestion-auth input:disabled {
-  opacity: 0.7;
-}
-.gestion-auth small {
-  color: #52647c;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.gestion-auth__password-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  margin-top: 10px;
-}
-.gestion-auth__password-heading button {
-  color: #2459b4;
-  font-size: 12px;
-  font-weight: 650;
-  padding: 6px 0;
-}
-.gestion-auth__password {
-  position: relative;
-}
-.gestion-auth__password input {
-  padding-right: 52px;
-}
-.gestion-auth__password > button {
-  position: absolute;
-  right: 3px;
-  top: 3px;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  color: #405570;
-}
-.gestion-auth__submit {
-  background: #2563eb;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  min-height: 50px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 12px 18px;
-}
-.gestion-auth__submit:hover {
-  background: #1d4ed8;
-}
-.gestion-auth button:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-.gestion-auth__separator {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  color: #52647c;
-  font-size: 12px;
-  margin: 23px 0;
-}
-.gestion-auth__separator::before,
-.gestion-auth__separator::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #e2e8f0;
-}
-.gestion-auth__google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  border: 1px solid #c3cfde;
-  border-radius: 9px;
-  min-height: 50px;
-  width: 100%;
-  color: #172b4d;
-  background: #fff;
-  font-size: 14px;
-  font-weight: 650;
-}
-.gestion-auth__google:hover {
-  background: #f5f8fc;
-}
-.gestion-auth .gestion-auth__provider-note {
-  font-size: 12px;
-  margin-top: 12px;
-  text-align: center;
-}
-.gestion-auth__security {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  color: #405570;
-  font-size: 12px;
-  margin-top: 26px;
-  border-top: 1px solid #e2e8f0;
-  padding-top: 22px;
-}
-.gestion-auth__security svg {
-  flex-shrink: 0;
-  color: #2563eb;
-}
-.gestion-auth__error,
-.gestion-auth__notice {
-  font-size: 14px;
-  line-height: 1.6;
-  padding: 12px;
-  border: 1px solid #efb2b2;
-  border-radius: 9px;
-  color: #962222;
-  background: #fff5f5;
-  margin-top: 16px;
-  overflow-wrap: anywhere;
-}
-.gestion-auth__notice {
-  color: #145332;
-  background: #effaf4;
-  border-color: #a5d9ba;
-}
-.gestion-auth__back {
-  color: #2459b4;
-  font-weight: 650;
-  font-size: 14px;
-  margin-top: 20px;
-  min-height: 44px;
-}
-.gestion-auth__footer {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  max-width: 1200px;
-  margin: 32px auto 0;
-  font-size: 12px;
-  color: #405570;
-}
-/* The ONLY moving layer is this decorative strip, anchored below all content. */
-.gestion-auth__background {
-  pointer-events: none;
-  position: absolute;
-  z-index: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 210px;
-  overflow: hidden;
-  background: radial-gradient(ellipse at 20% 100%, #dbeafe90, transparent 68%);
-}
-.gestion-auth__background svg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  fill: none;
-}
-.gestion-auth__background path {
-  stroke: #b7d2f4;
-  stroke-width: 1;
-  opacity: 0.7;
-}
-.gestion-auth__background .gestion-auth__light {
-  stroke: #60a5fa;
-  stroke-width: 2;
-  stroke-dasharray: 80 900;
-  opacity: 0.7;
-}
-.gestion-auth__background i {
-  position: absolute;
-  bottom: 20%;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #60a5fa;
-  left: 18%;
-  opacity: 0.4;
-}
-.gestion-auth__background i:nth-of-type(2) {
-  left: 45%;
-  bottom: 35%;
-  animation-delay: -3s;
-}
-.gestion-auth__background i:nth-of-type(3) {
-  left: 67%;
-  bottom: 15%;
-  animation-delay: -6s;
-}
-.gestion-auth__background i:nth-of-type(4) {
-  left: 85%;
-  bottom: 55%;
-  animation-delay: -2s;
-}
-.gestion-auth--moving .gestion-auth__light {
-  animation: gestionLight 16s linear infinite;
-}
-.gestion-auth--moving .gestion-auth__background {
-  animation: gestionGlow 12s ease-in-out infinite alternate;
-}
-.gestion-auth--moving .gestion-auth__background i {
-  animation: gestionParticle 9s ease-in-out infinite;
-}
-.gestion-auth__spinner {
-  animation: gestionSpinner 1s linear infinite;
-}
-@keyframes gestionLight {
-  to {
-    stroke-dashoffset: -980;
-  }
-}
-@keyframes gestionGlow {
-  to {
-    background-position: 100px 20px;
-  }
-}
-@keyframes gestionParticle {
-  50% {
-    translate: 15px -16px;
-    opacity: 0.15;
-  }
-}
-@keyframes gestionSpinner {
-  to {
-    rotate: 360deg;
-  }
-}
-@media (max-width: 1000px) {
-  .gestion-auth {
-    padding: 32px 28px 24px;
-  }
-  .gestion-auth__layout {
-    gap: 36px;
-    grid-template-columns: 1fr 1fr;
-  }
-  .gestion-auth__panel {
-    padding: 28px;
-  }
-  .gestion-auth__pitch h2 {
-    font-size: 35px;
-  }
-}
-@media (max-width: 760px) {
-  .gestion-auth {
-    padding: 24px 20px;
-  }
-  .gestion-auth__layout {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    min-height: 0;
-  }
-  .gestion-auth__intro {
-    padding: 0;
-    width: 100%;
-  }
-  .gestion-auth__pitch,
-  .gestion-auth__illustration,
-  .gestion-auth__company {
-    display: none;
-  }
-  .gestion-auth__brand {
-    justify-content: center;
-  }
-  .gestion-auth__panel {
-    align-self: center;
-    max-width: 460px;
-    padding: 26px 22px;
-  }
-  .gestion-auth__form-heading h1 {
-    font-size: 28px;
-  }
-  .gestion-auth__form-heading .gestion-auth__kicker {
-    font-size: 11px;
-  }
-  .gestion-auth__footer {
-    justify-content: center;
-    text-align: center;
-    font-size: 11px;
-    margin-top: 28px;
-  }
-  .gestion-auth__background {
-    height: 140px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .gestion-auth *,
-  .gestion-auth *::before,
-  .gestion-auth *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-/* GLB scene: only this auth shell changes; business pages keep their existing layout. */
-.gestion-auth {
-  background: #dce9f5;
-}
 .gestion-auth__three {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: -2;
   pointer-events: none;
-  overflow: hidden;
-}
-.gestion-auth__three
-  > div:not(.gestion-auth__scene-scrim):not(.gestion-auth__static-sky) {
-  position: absolute !important;
-  inset: 0;
 }
 .gestion-auth__three canvas {
   display: block;
@@ -542,56 +30,521 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 25% 65%, #b4cce4, transparent 70%),
-    linear-gradient(150deg, #f3f8ff, #cadbed);
+    radial-gradient(ellipse at 5% 50%, #f4770077, transparent 45%),
+    linear-gradient(145deg, #d5e5ff, #174a91 55%, #061c49);
+}
+.gestion-auth__three canvas {
+  position: absolute;
+  inset: 0;
 }
 .gestion-auth__scene-scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    #f5f9fff2 0%,
-    #f5f9ffb5 24%,
-    #edf5ff30 62%,
-    #dce9f5aa 100%
+    #eaf1ffb5 0%,
+    #eaf1ff08 30%,
+    #102f7030 80%,
+    #061a46a0
   );
 }
+.otl-auth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 3.5vw 0;
+}
+.otl-auth-identity {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+.otl-auth-identity .otl-logo {
+  width: 240px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 30px #102f7010;
+}
+.otl-auth-identity p {
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 750;
+  line-height: 1.5;
+  color: #102f70;
+  border-left: 2px solid #102f70;
+  padding-left: 28px;
+  margin: 0;
+  text-shadow: 0 1px 8px #ffffff90;
+}
+.otl-auth-identity p span {
+  display: block;
+  width: 110px;
+  height: 3px;
+  background: #f47700;
+  margin-top: 10px;
+  border-radius: 100%;
+}
+.otl-secure {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  border: 1px solid #ffffff35;
+  color: white;
+  background: #102f70;
+  border-radius: 30px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.otl-secure svg {
+  color: #ffb36c;
+}
+.gestion-auth__layout {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 24px 42px;
+  width: 100%;
+}
 .gestion-auth__panel {
-  background: rgba(255, 255, 255, 0.93);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.94);
-  box-shadow: 0 24px 80px #16355824;
+  width: min(100%, 480px);
+  position: relative;
+  padding: 22px 32px;
+  background: rgba(246, 249, 255, 0.93);
+  border: 1px solid #ffffffd0;
+  border-radius: 28px;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 24px 70px #061a4660,
+    inset 0 1px 0 white;
 }
-.gestion-auth__pitch {
-  margin-top: 45px;
-  margin-bottom: auto;
+.gestion-auth__panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 28px;
+  width: 80px;
+  height: 4px;
+  background: #f47700;
+  border-radius: 0 0 5px 5px;
 }
-.gestion-auth__pitch p {
-  color: #243e60;
-  max-width: 410px;
+.gestion-auth .otl-auth-logo {
+  width: 210px;
+  margin: 0 auto 8px;
+  background: #fff;
 }
-.gestion-auth__company {
-  background: #ffffffd9;
-  border: 1px solid #ffffff;
+.gestion-auth__form-heading {
+  text-align: center;
+}
+.gestion-auth__kicker {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-weight: 750;
+  color: #174a91;
+}
+.gestion-auth__form-heading h1 {
+  font-size: 27px;
+  letter-spacing: -0.7px;
+  line-height: 1.2;
+  color: #102f70;
+  margin: 8px 0;
+}
+.gestion-auth p {
+  color: var(--auth-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.gestion-auth__form-heading p {
+  max-width: 340px;
+  margin: 0 auto;
+}
+.gestion-auth__form-heading::after {
+  content: "";
+  display: block;
+  width: 58px;
+  height: 3px;
+  border-radius: 4px;
+  background: #f47700;
+  margin: 16px auto;
+}
+.gestion-auth__modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  background: #dce3ed;
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+.gestion-auth button {
+  font: inherit;
+  cursor: pointer;
+}
+.gestion-auth__modes button {
   border-radius: 9px;
-  padding: 10px 14px;
-  align-self: flex-start;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #102f70;
+  background: #f1f5fb;
+  transition:
+    background 0.18s,
+    color 0.18s;
+}
+.gestion-auth__modes button[aria-pressed="true"] {
+  color: white;
+  background: #102f70;
+  box-shadow: 0 3px 8px #102f7020;
+}
+.gestion-auth form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.gestion-auth label {
+  color: #102f70;
+  font-size: 12px;
+  font-weight: 700;
+}
+.gestion-auth input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #bac7db;
+  background: #fff;
+  color: #263449;
+  font-size: 16px;
+  border-radius: 12px;
+  min-height: 46px;
+}
+.gestion-auth input::placeholder {
+  color: #596b86;
+}
+.gestion-auth input:focus {
+  outline: 3px solid #f4770035;
+  outline-offset: 1px;
+  border-color: #b65300;
+}
+.gestion-auth :is(button, a, input):focus-visible {
+  outline: 3px solid #174a91;
+  outline-offset: 3px;
+}
+.gestion-auth__password-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+.gestion-auth__password-heading button {
+  font-size: 11px;
+  color: #102f70;
+  text-decoration: underline;
+  font-weight: 650;
+}
+.gestion-auth__password {
+  position: relative;
+}
+.gestion-auth__password input {
+  padding-right: 48px;
+}
+.gestion-auth__password > button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #102f70;
+  display: flex;
+  padding: 4px;
+}
+.gestion-auth__submit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  margin: 10px 0 0;
+  padding: 12px;
+  border-radius: 13px;
+  color: #10233f;
+  background: linear-gradient(180deg, #ff9b32, #f47700);
+  font-weight: 800 !important;
+  box-shadow: 0 7px 18px #f4770035;
+  transition:
+    filter 0.18s,
+    transform 0.18s;
+}
+.gestion-auth__submit:hover {
+  filter: brightness(1.07);
+}
+.gestion-auth__submit:active {
+  transform: translateY(1px);
+}
+.gestion-auth button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.gestion-auth__separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #52627a;
+  font-size: 10px;
+  margin: 16px 0;
+}
+.gestion-auth__separator::before,
+.gestion-auth__separator::after {
+  content: "";
+  height: 1px;
+  background: #c3cddd;
+  flex: 1;
+}
+.gestion-auth__google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  color: #102f70;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border: 1px solid #bac7db;
+  background: #fff;
+  border-radius: 12px;
+}
+.gestion-auth__google svg {
+  width: 20px;
+  height: 20px;
+}
+.gestion-auth .gestion-auth__provider-note {
+  text-align: center;
+  margin: 9px 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.gestion-auth__security {
+  border-top: 1px solid #c9d3e2;
+  margin-top: 14px;
+  padding-top: 12px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #465675;
+}
+.gestion-auth__security svg {
+  color: #174a91;
+}
+.gestion-auth__error,
+.gestion-auth__notice {
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+.gestion-auth__error {
+  background: #fff0f0;
+  border: 1px solid #eeb6b6;
+  color: #8b2020;
+}
+.gestion-auth__notice {
+  background: #eaf7ef;
+  border: 1px solid #b4ddc3;
+  color: #19603a;
+}
+.gestion-auth__back {
+  width: 100%;
+  color: #102f70;
+  padding: 16px 0 0;
+  font-size: 12px !important;
+  text-decoration: underline;
+}
+.gestion-auth small {
+  color: #465675;
+  line-height: 1.5;
 }
 .gestion-auth__footer {
-  color: #243e60;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 4vw;
+  background: #0a2459ed;
+  border-top: 3px solid #f47700;
+  color: #fff;
+}
+.gestion-auth__footer > div {
+  display: flex;
+  gap: 24px;
+}
+.gestion-auth__footer span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.gestion-auth__footer svg {
+  color: #ff922e;
+}
+.gestion-auth__footer p {
+  color: white;
+  font-weight: 650;
+  font-style: italic;
+  text-align: right;
+}
+.gestion-auth__footer small {
+  display: block;
+  margin-top: 5px;
+  color: #cedbf0;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+}
+@keyframes otl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.gestion-auth__spinner {
+  animation: otl-spin 1s linear infinite;
 }
 @supports not (backdrop-filter: blur(1px)) {
   .gestion-auth__panel {
-    background: #fff;
+    background: #f1f5fb;
+  }
+}
+@media (min-width: 1400px) {
+  .gestion-auth__layout {
+    min-height: calc(100svh - 225px);
   }
 }
 @media (max-width: 760px) {
-  .gestion-auth__panel {
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
+  .otl-auth-header {
+    padding: 18px 20px 0;
+    justify-content: center;
   }
-  .gestion-auth__scene-scrim {
-    background: linear-gradient(180deg, #f5f9fff0, #f5f9ff66 70%, #dce9f5c9);
+  .otl-auth-identity .otl-logo {
+    width: 175px;
+  }
+  .otl-auth-identity p,
+  .otl-secure {
+    display: none;
+  }
+  .gestion-auth__layout {
+    padding: 18px 16px 28px;
+  }
+  .gestion-auth__panel {
+    padding: 20px 22px;
+    border-radius: 22px;
+  }
+  .gestion-auth .otl-auth-logo {
+    width: 175px;
+  }
+  .gestion-auth__form-heading h1 {
+    font-size: 25px;
+  }
+  .gestion-auth__footer {
+    flex-direction: column;
+    gap: 15px;
+    padding: 18px;
+  }
+  .gestion-auth__footer > div {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 20px;
+  }
+  .gestion-auth__footer span {
+    font-size: 10px;
+  }
+  .gestion-auth__footer p {
+    text-align: center;
+    font-size: 12px;
+  }
+}
+@media (max-width: 360px) {
+  .gestion-auth__panel {
+    padding: 18px;
+  }
+  .gestion-auth__password-heading {
+    gap: 6px;
+  }
+  .gestion-auth__password-heading button {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gestion-auth *,
+  .gestion-auth *::before,
+  .gestion-auth *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* Neutraliser le padding du main métier : Auth est un shell plein écran indépendant. */
+.gestion-auth {
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.gestion-auth .otl-auth-identity p {
+  font-size: 17px;
+  line-height: 1.4;
+}
+@media (min-width: 761px) {
+  .otl-auth-header {
+    padding-top: 16px;
+  }
+  .otl-auth-identity .otl-logo {
+    width: 190px;
+  }
+  .gestion-auth__layout {
+    padding: 10px 24px 28px;
+  }
+  .gestion-auth__panel {
+    padding: 16px 30px;
+  }
+  .gestion-auth .otl-auth-logo {
+    width: 175px;
+    margin-bottom: 4px;
+  }
+  .gestion-auth__form-heading .gestion-auth__kicker {
+    display: none;
+  }
+  .gestion-auth__form-heading h1 {
+    font-size: 26px;
+  }
+  .gestion-auth__form-heading::after {
+    margin: 12px auto;
+  }
+  .gestion-auth__modes {
+    margin-bottom: 12px;
+  }
+  .gestion-auth__modes button {
+    padding: 8px;
+  }
+  .gestion-auth form {
+    gap: 7px;
+  }
+  .gestion-auth input {
+    padding: 10px 14px;
+  }
+  .gestion-auth__separator {
+    margin: 12px 0;
+  }
+  .gestion-auth__security {
+    margin-top: 10px;
+    padding-top: 8px;
+  }
+  .gestion-auth__footer {
+    padding-top: 16px;
+    padding-bottom: 16px;
   }
 }

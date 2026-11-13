@@ -24,7 +24,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { toast } from "sonner";
-import Brand from "../components/Brand";
+import Brand, { OtlLogo } from "../components/Brand";
 import { api } from "../api/client";
 import { useSession } from "../contexts/SessionContext";
 import { usePreferences } from "../contexts/PreferencesContext";
@@ -202,6 +202,7 @@ export default function AppLayout() {
         </div>
       </aside>
       <div className="main-wrap">
+        <OtlLogo className="otl-print-brand" />
         <header className="topbar">
           <div className="breadcrumb">
             <button
@@ -249,7 +250,7 @@ export default function AppLayout() {
           <Outlet />
           <footer className="app-footer">
             <span>
-              OASIS LOGISTICS <b>TRANSPORT & LOGISTICS</b>
+              OTL <b>OASIS TRANSPORT LOGISTICS</b>
             </span>
             <span>
               Conçu pour aller plus loin. <i>✦</i>

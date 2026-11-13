@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
-import { Truck, ShieldCheck } from "lucide-react";
+import { ShieldCheck, ChartNoAxesCombined, Truck } from "lucide-react";
 import TruckBackground from "../login3d/TruckBackground";
+import { OtlLogo } from "../Brand";
 import { usePreferences } from "../../contexts/PreferencesContext";
 import { useMotionPreference } from "../../hooks/useMotionPreference";
 import "../../assets/login.css";
-/** Présentation partagée des écrans Auth ; le décor 3D ne contrôle jamais le formulaire. */
+/** La scène est décorative : aucun chargement WebGL ne bloque les formulaires Auth. */
 export default function AuthShell({ children }: { children: ReactNode }) {
   const { animations } = usePreferences();
   const reduced = useMotionPreference();
@@ -12,45 +13,47 @@ export default function AuthShell({ children }: { children: ReactNode }) {
     <main
       className={`gestion-auth ${animations && !reduced ? "gestion-auth--moving" : ""}`}
     >
+      <TruckBackground />
+      <header className="otl-auth-header">
+        <div className="otl-auth-identity">
+          <OtlLogo />
+          <p>
+            Votre flotte, votre performance,
+            <br />
+            votre contrôle.
+            <span />
+          </p>
+        </div>
+        <span className="otl-secure">
+          <ShieldCheck size={16} /> Accès privé
+        </span>
+      </header>
       <div className="gestion-auth__layout">
         <section
-          className="gestion-auth__intro"
-          aria-label="Présentation de OASIS LOGISTICS"
+          className="gestion-auth__panel"
+          aria-label="Espace de connexion OTL"
         >
-          <div className="gestion-auth__brand">
-            <span>
-              <Truck size={28} />
-            </span>
-            <div>
-              <strong>OASIS LOGISTICS</strong>
-              <small>FLEET MANAGEMENT</small>
-            </div>
-          </div>
-          <div className="gestion-auth__pitch">
-            <span className="gestion-auth__kicker">TRANSPORT & LOGISTIQUE</span>
-            <h2>
-              Votre flotte,
-              <br />
-              votre performance,
-              <br />
-              <em>votre contrôle.</em>
-            </h2>
-            <p>
-              Gérez vos véhicules, vos missions, vos chauffeurs et vos finances
-              depuis une plateforme centralisée.
-            </p>
-          </div>
-          <div className="gestion-auth__company">
-            <ShieldCheck size={18} /> Espace privé OASIS LOGISTICS
-          </div>
+          <OtlLogo className="otl-auth-logo" />
+          {children}
         </section>
-        <section className="gestion-auth__panel">{children}</section>
       </div>
       <footer className="gestion-auth__footer">
-        © {new Date().getFullYear()} OASIS LOGISTICS
-        <span>Transport · Logistique · Gestion de flotte</span>
+        <div>
+          <span>
+            <ShieldCheck size={21} /> Accès sécurisé
+          </span>
+          <span>
+            <ChartNoAxesCombined size={21} /> Gestion intelligente
+          </span>
+          <span>
+            <Truck size={21} /> Transport & logistique
+          </span>
+        </div>
+        <p>
+          Pilotez votre flotte. Maîtrisez votre activité.
+          <small>© {new Date().getFullYear()} OASIS TRANSPORT LOGISTICS</small>
+        </p>
       </footer>
-      <TruckBackground />
     </main>
   );
 }

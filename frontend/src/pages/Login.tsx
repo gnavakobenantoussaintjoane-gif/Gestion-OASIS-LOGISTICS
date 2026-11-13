@@ -1,13 +1,8 @@
 import { useRef, useState } from "react";
 import {
-  Eye,
-  EyeOff,
   ArrowRight,
-  ShieldCheck,
   LoaderCircle,
-  Mail,
   Phone,
-  Lock,
   LogIn,
 } from "lucide-react";
 import { z } from "zod";
@@ -16,6 +11,89 @@ import AuthShell from "../components/auth/AuthShell";
 import { api } from "../api/client";
 import { useSession } from "../contexts/SessionContext";
 import type { Session } from "../types";
+/** Icônes de la maquette : enveloppe pleine bleue, cadenas et œil au trait marine. */
+function MailGlyph() {
+  return (
+    <svg
+      className="gestion-auth__mail-glyph"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="2.6" y="4.7" width="18.8" height="14.6" rx="3.1" fill="currentColor" />
+      <path
+        className="gestion-auth__mail-flap"
+        d="m4.5 6.9 6.8 5.1a1.2 1.2 0 0 0 1.4 0l6.8-5.1"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+function LockGlyph() {
+  return (
+    <svg
+      className="gestion-auth__lock-glyph"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M8 10V7.5a4 4 0 0 1 8 0V10"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <rect
+        x="4.4"
+        y="10.2"
+        width="15.2"
+        height="10.4"
+        rx="2.7"
+        stroke="currentColor"
+        strokeWidth="2.2"
+      />
+      <circle cx="12" cy="15.2" r="1.3" fill="currentColor" />
+    </svg>
+  );
+}
+function EyeGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M2.6 12S6.2 6.2 12 6.2 21.4 12 21.4 12 17.8 17.8 12 17.8 2.6 12 2.6 12Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="2.9" fill="currentColor" />
+      <circle cx="11" cy="11" r="0.85" fill="#fff" />
+    </svg>
+  );
+}
+function EyeOffGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M2.6 12S6.2 6.2 12 6.2 21.4 12 21.4 12 17.8 17.8 12 17.8 2.6 12 2.6 12Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        opacity=".5"
+      />
+      <circle cx="12" cy="12" r="2.9" fill="currentColor" opacity=".5" />
+      <path
+        d="M4.2 4.2 19.8 19.8"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 function GoogleIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
@@ -132,7 +210,7 @@ export default function Login() {
     <AuthShell>
       <div className="gestion-auth__form-heading">
         <h1>
-          {forgot ? "Mot de passe oublié ?" : "Bienvenue sur OTL Gestion"}
+          {forgot ? "Mot de passe oublié ?" : "Bienvenue sur Gestion"}
         </h1>
         <p>
           {forgot
@@ -159,7 +237,7 @@ export default function Login() {
               }}
             >
               {m === "email" ? (
-                <Mail aria-hidden="true" />
+                <MailGlyph />
               ) : (
                 <Phone aria-hidden="true" />
               )}
@@ -193,7 +271,7 @@ export default function Login() {
         <div className="gestion-auth__field">
           {/* Le libellé reste accessible ; la maquette n'affiche que le placeholder. */}
           {forgot || mode === "email" ? (
-            <Mail aria-hidden="true" />
+            <MailGlyph />
           ) : (
             <Phone aria-hidden="true" />
           )}
@@ -210,23 +288,15 @@ export default function Login() {
             onChange={(e) => setIdentity(e.target.value)}
             disabled={busy}
             required
-            aria-describedby={
-              mode === "phone" && !forgot ? "gestion-phone-help" : undefined
-            }
           />
         </div>
-        {mode === "phone" && !forgot && (
-          <small id="gestion-phone-help">
-            Indicatif pays inclus, sans SMS.
-          </small>
-        )}
         {!forgot && (
           <>
             <label className="gestion-auth__label" htmlFor="gestion-password">
               Mot de passe
             </label>
             <div className="gestion-auth__password gestion-auth__field">
-              <Lock aria-hidden="true" />
+              <LockGlyph />
               <input
                 id="gestion-password"
                 type={show ? "text" : "password"}
@@ -246,7 +316,7 @@ export default function Login() {
                 aria-pressed={show}
                 onClick={() => setShow(!show)}
               >
-                {show ? <EyeOff size={20} /> : <Eye size={20} />}
+                {show ? <EyeOffGlyph /> : <EyeGlyph />}
               </button>
             </div>
             <div className="gestion-auth__options">
@@ -284,8 +354,8 @@ export default function Login() {
             </>
           ) : (
             <>
-              {forgot ? "Envoyer le lien" : "Se connecter"}
               {forgot ? <ArrowRight size={19} /> : <LogIn size={19} />}
+              {forgot ? "Envoyer le lien" : "Se connecter"}
             </>
           )}
         </button>
@@ -324,16 +394,8 @@ export default function Login() {
             <GoogleIcon />
             Continuer avec Google
           </button>
-          <p className="gestion-auth__provider-note">
-            Google doit être activé par votre administrateur. Les mêmes règles
-            d’accès s’appliquent.
-          </p>
         </>
       )}
-      <div className="gestion-auth__security">
-        <ShieldCheck size={18} />
-        <span>Accès réservé au personnel autorisé.</span>
-      </div>
     </AuthShell>
   );
 }

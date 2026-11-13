@@ -8,7 +8,7 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
 await page
-  .getByRole("heading", { name: "Bienvenue sur OTL Gestion" })
+  .getByRole("heading", { name: "Bienvenue sur Gestion" })
   .waitFor();
 async function checkFormContrast() {
   const ratios = await page.evaluate(() => {
@@ -27,23 +27,27 @@ async function checkFormContrast() {
       return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
     };
     const input = document.querySelector(".gestion-auth input");
-    const panel = getComputedStyle(
-      document.querySelector(".gestion-auth__panel"),
-    );
-    return [
-      ratio(
-        getComputedStyle(input).color,
-        getComputedStyle(input).backgroundColor,
-      ),
-      ratio(
-        getComputedStyle(document.querySelector(".gestion-auth label")).color,
-        panel.backgroundColor,
-      ),
-    ];
+    const field = input.closest(".gestion-auth__field");
+    // La carte de verre est une image : on contrôle le texte visible et le
+    // fond des champs, pas le panneau (transparent par construction).
+    const fieldBackground = getComputedStyle(field).backgroundColor;
+    const subtitle = document.querySelector(".gestion-auth__form-heading p");
+    const label = document.querySelector(".gestion-auth__label");
+    const labelBox = label.getBoundingClientRect();
+    return {
+      input: ratio(getComputedStyle(input).color, fieldBackground),
+      subtitle: ratio(getComputedStyle(subtitle).color, fieldBackground),
+      labelHidden: labelBox.width <= 1 && labelBox.height <= 1,
+    };
   });
   assert.ok(
-    ratios.every((r) => r >= 4.5),
+    ratios.input >= 4.5 && ratios.subtitle >= 4.5,
     "Readable form contrast",
+  );
+  assert.equal(
+    ratios.labelHidden,
+    true,
+    "The visual labels stay available to screen readers",
   );
 }
 await checkFormContrast();
@@ -124,7 +128,7 @@ await page.goto(
 await page.getByRole("alert").waitFor();
 await page.getByRole("button", { name: "Retour à la connexion" }).click();
 await page
-  .getByRole("heading", { name: "Bienvenue sur OTL Gestion" })
+  .getByRole("heading", { name: "Bienvenue sur Gestion" })
   .waitFor();
 // Component-only animation checks. No fabricated session or operational data.
 await page.evaluate(async () => {

@@ -13,7 +13,7 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(origin);
     await page
-      .getByRole("heading", { name: "Bienvenue sur OTL Gestion" })
+      .getByRole("heading", { name: "Bienvenue sur Gestion" })
       .waitFor();
     await page.waitForFunction(() => {
       const image = document.querySelector(".otl-auth-background");
@@ -54,10 +54,8 @@ try {
       ),
       true,
     );
-    // Dès 1101 px, la carte HTML est centrée sur la carte dessinée dans la maquette.
-    // Elle est volontairement un peu plus petite (87 %) : les camions restent bien
-    // visibles autour du formulaire, sans jamais laisser dépasser la carte dessinée
-    // sur un côté (aucune bande blanche décalée).
+    // Dès 1100 px, la carte HTML recouvre exactement la carte dessinée dans la
+    // maquette : même rectangle, même centre, aucun décalage visible.
     if (width > 1100) {
       // L'apparition de la carte dure 0,55 s : on l'attend avant de mesurer
       // sa position (les animations de décor sont infinies, on les ignore).
@@ -111,8 +109,8 @@ try {
         `Panel must stay centred on the mockup card at ${width}px (dx=${placement.dx}, dy=${placement.dy})`,
       );
       assert.ok(
-        placement.ratio > 0.85 && placement.ratio < 1,
-        `Panel must be slightly smaller than the mockup card at ${width}px (ratio=${placement.ratio})`,
+        placement.ratio > 0.99 && placement.ratio < 1.01,
+        `Panel must match the mockup card at ${width}px (ratio=${placement.ratio})`,
       );
       assert.equal(
         placement.cardInside,
@@ -131,7 +129,7 @@ try {
   }
   // A missing image must never block access to the real form.
   const page = await browser.newPage();
-  await page.route("**/branding/otl-login-background.png", (route) =>
+  await page.route("**/branding/otl-login-stage.jpg", (route) =>
     route.abort(),
   );
   await page.goto(origin);

@@ -104,14 +104,14 @@ export default function Login() {
   return (
     <AuthShell>
       <div className="gestion-auth__form-heading">
-        <span className="gestion-auth__kicker">VOTRE ESPACE DE TRAVAIL</span>
-        <h1>
-          {forgot ? "Mot de passe oublié ?" : "Bienvenue sur OASIS LOGISTICS"}
-        </h1>
+        <span className="gestion-auth__kicker">
+          OTL · VOTRE ESPACE DE TRAVAIL
+        </span>
+        <h1>{forgot ? "Mot de passe oublié ?" : "Bienvenue sur Gestion"}</h1>
         <p>
           {forgot
             ? "Recevez un lien sécurisé par e-mail."
-            : "Connectez-vous à votre espace de travail."}
+            : "Gérez votre flotte, vos missions et vos finances en toute simplicité."}
         </p>
       </div>
       {!forgot && (

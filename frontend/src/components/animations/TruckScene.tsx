@@ -23,7 +23,7 @@ export default function TruckScene({
         castShadow
         shadow-mapSize={[512, 512]}
       />
-      <pointLight position={[-5, 3, -5]} intensity={30} color="#368bff" />
+      <pointLight position={[-5, 3, -5]} intensity={30} color="#f47700" />
       <TruckModel kind={kind} animate={animate} />
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}

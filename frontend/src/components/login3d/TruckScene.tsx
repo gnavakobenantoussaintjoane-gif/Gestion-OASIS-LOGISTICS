@@ -3,15 +3,18 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { Group, Mesh, Object3D, PerspectiveCamera } from "three";
 import { advanceTruck, WHEEL_RADIUS } from "./motion";
+import LogisticsHub from "./LogisticsHub";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 const MODEL_URL = `${import.meta.env.BASE_URL}models/truck.glb`;
 
 function Truck({
   animate,
   onLoaded,
+  parked,
 }: {
   animate: boolean;
   onLoaded: () => void;
+  parked?: [number, number, number];
 }) {
   const { scene } = useGLTF(MODEL_URL);
   // Clone transforms only. Cached GLTF geometry/materials remain shared and owned by useGLTF.
@@ -39,18 +42,22 @@ function Truck({
   }, [onLoaded]);
   // Déplacer uniquement les transformations : aucune géométrie recréée à chaque image.
   useFrame((_state, delta) => {
-    if (!animate || !moving.current) return;
+    if (!animate || parked || !moving.current) return;
     const next = advanceTruck(distance.current, delta);
     const step = (next - distance.current + 44) % 44;
     distance.current = next;
-    moving.current.position.x = -18 + distance.current;
+    moving.current.position.x = -22 + distance.current;
     // Distance / rayon = angle parcouru ; les pivots wheel-* viennent du modèle GLB.
     wheels.forEach((wheel) => {
       wheel.rotation.x += step / WHEEL_RADIUS;
     });
   });
   return (
-    <group ref={moving} position={[-6, 0, 1.4]} rotation={[0, Math.PI / 2, 0]}>
+    <group
+      ref={moving}
+      position={parked || [-10, 0, 6]}
+      rotation={[0, parked ? 0 : Math.PI / 2, 0]}
+    >
       <primitive object={model} dispose={null} />
     </group>
   );
@@ -59,16 +66,16 @@ function CameraRig({ compact }: { compact: boolean }) {
   useFrame(({ camera, size }) => {
     if (!(camera instanceof PerspectiveCamera)) return;
     // Canvas supplies the live aspect ratio; update framing on resize without rebuilding the scene.
-    const x = compact ? 12 : 14;
-    const y = compact ? 12 : 8.5;
-    const z = compact ? 21 : 16;
+    const x = compact ? 15 : 16;
+    const y = compact ? 14 : 10;
+    const z = compact ? 29 : 28;
     if (
       camera.position.x !== x ||
       camera.position.y !== y ||
       camera.position.z !== z
     ) {
       camera.position.set(x, y, z);
-      camera.lookAt(compact ? -2 : -4, compact ? 2 : 3.5, 0);
+      camera.lookAt(0, 2.8, 0);
       camera.updateProjectionMatrix();
     }
     if (camera.aspect !== size.width / size.height) {
@@ -100,7 +107,7 @@ function Road() {
         receiveShadow
       >
         <planeGeometry args={[140, 80]} />
-        <meshStandardMaterial color="#bccbd9" roughness={1} />
+        <meshStandardMaterial color="#203c62" roughness={0.3} metalness={0.5} />
       </mesh>
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
@@ -108,7 +115,11 @@ function Road() {
         receiveShadow
       >
         <planeGeometry args={[140, 6]} />
-        <meshStandardMaterial color="#293b50" roughness={0.92} />
+        <meshStandardMaterial
+          color="#304566"
+          roughness={0.35}
+          metalness={0.4}
+        />
       </mesh>
       {[-2.65, 2.65].map((z) => (
         <mesh key={z} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, z]}>
@@ -145,7 +156,7 @@ export default function TruckScene({
       dpr={compact ? 1 : [1, 1.5]}
       shadows={!compact}
       camera={{
-        position: compact ? [12, 12, 21] : [14, 8.5, 16],
+        position: compact ? [15, 14, 29] : [16, 10, 28],
         fov: compact ? 43 : 38,
         near: 0.1,
         far: 180,
@@ -153,13 +164,14 @@ export default function TruckScene({
       frameloop={animate ? "always" : "demand"}
       gl={{ alpha: false, antialias: !compact, powerPreference: "low-power" }}
       onCreated={({ camera }) => {
-        camera.lookAt(compact ? -2 : -4, compact ? 2 : 3.5, 0);
+        camera.lookAt(0, 2.8, 0);
       }}
     >
-      <color attach="background" args={["#dce9f5"]} />
-      <fog attach="fog" args={["#dce9f5", 30, 90]} />
-      <ambientLight intensity={1.4} />
-      <hemisphereLight args={["#edf7ff", "#7c8d9f", 2]} />
+      <color attach="background" args={["#7296ca"]} />
+      <fog attach="fog" args={["#7296ca", 45, 125]} />
+      <ambientLight intensity={1.1} />
+      <directionalLight position={[-20, 6, 10]} color="#ffad61" intensity={3} />
+      <hemisphereLight args={["#b9d5ff", "#102f70", 1.5]} />
       <directionalLight
         position={[-6, 12, 7]}
         intensity={3.2}
@@ -176,7 +188,15 @@ export default function TruckScene({
       <CameraRig compact={compact} />
       <Road />
       <Suspense fallback={null}>
+        <LogisticsHub compact={compact} />
         <Truck animate={animate} onLoaded={onLoaded} />
+        <Truck animate={false} onLoaded={onLoaded} parked={[1, 0, -2]} />
+        {!compact && (
+          <Truck animate={false} onLoaded={onLoaded} parked={[7, 0, -2]} />
+        )}
+        {!compact && (
+          <Truck animate={false} onLoaded={onLoaded} parked={[13, 0, -2]} />
+        )}
       </Suspense>
     </Canvas>
   );

@@ -20,7 +20,7 @@ try {
     });
     await page.goto(origin, { waitUntil: "domcontentloaded" });
     await page
-      .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
+      .getByRole("heading", { name: "Bienvenue sur Gestion" })
       .waitFor();
     await page.getByLabel("Adresse e-mail").fill("test@example.com"); // Form is interactive before model download.
     assert.equal(
@@ -115,7 +115,7 @@ try {
   });
   await noGL.goto(origin);
   await noGL
-    .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
+    .getByRole("heading", { name: "Bienvenue sur Gestion" })
     .waitFor();
   assert.equal(
     await noGL.locator(".gestion-auth__three").getAttribute("data-scene-state"),

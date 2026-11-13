@@ -1,5 +1,6 @@
 import { usePreferences } from "../../contexts/PreferencesContext";
 import { useReducedMotion } from "motion/react";
+import Brand from "../Brand";
 import { FlatTruck } from "./TruckVisual";
 export default function LoadingTruckAnimation() {
   const { animations } = usePreferences();
@@ -11,9 +12,7 @@ export default function LoadingTruckAnimation() {
       aria-live="polite"
       aria-busy="true"
     >
-      <strong>
-        OASIS LOGISTICS<span>TRANSPORT & LOGISTICS</span>
-      </strong>
+      <Brand />
       <FlatTruck animated={animations && !reduce} />
       <div className="loading-track">
         <i />

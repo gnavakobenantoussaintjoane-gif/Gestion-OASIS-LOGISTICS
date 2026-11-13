@@ -86,3 +86,8 @@ Aucun tarif inventé. Pas de retrait des politiques RLS pour faciliter le dével
 ## Identité OASIS LOGISTICS et diagnostic réseau
 
 La marque visible du shell Auth et du camion GLB est désormais OASIS LOGISTICS. La configuration exemple du backend référence le projet et l’entreprise réels, sans secret. Une commande `npm run check:supabase -w backend` distingue DNS et accès HTTPS Auth sans identifiants utilisateur. Dans le sandbox, DNS fonctionne mais HTTPS Supabase reste interrompu (`ECONNRESET`) ; les services distants sont sains selon le connecteur de gestion. Les 84 tests, le build, TypeScript, lint et les contrôles navigateur passent, sans prétendre résoudre le blocage réseau ou valider une connexion réelle. Voir [CONNEXION-SERVEUR.md](CONNEXION-SERVEUR.md).
+
+
+## Première tranche de refonte OTL
+
+Logo original OTL fourni intégré sans redessin, thème bleu marine/orange centralisé, shell Auth central, véritable entrepôt 3D et plusieurs camions GLB, graphiques harmonisés et exports PDF/Excel au logo officiel. Les composants partagés habillent les routes existantes ; aucune nouvelle table, RLS, donnée fictive ou dépendance npm. 88 tests unitaires, TypeScript, lint, build et smoke/GLB navigateur passent ; 37 combinaisons page/rôle sont contrôlées à vide en rendu isolé desktop/mobile avec formulaires administratifs sans soumission. Le photoréalisme de la référence n’est pas encore atteint, les modules non présents dans le schéma ne sont pas inventés, et la connexion réelle reste bloquée par le réseau Arena. Le dossier `shared/branding` doit accompagner le backend au déploiement pour les exports. Voir [OTL-REFONTE.md](OTL-REFONTE.md) pour le périmètre, les fichiers et la recette restante.

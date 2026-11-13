@@ -8,7 +8,7 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
 await page
-  .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
+  .getByRole("heading", { name: "Bienvenue sur Gestion" })
   .waitFor();
 async function checkFormContrast() {
   const ratios = await page.evaluate(() => {
@@ -121,7 +121,7 @@ await page.goto(
 await page.getByRole("alert").waitFor();
 await page.getByRole("button", { name: "Retour à la connexion" }).click();
 await page
-  .getByRole("heading", { name: "Bienvenue sur OASIS LOGISTICS" })
+  .getByRole("heading", { name: "Bienvenue sur Gestion" })
   .waitFor();
 // Component-only animation checks. No fabricated session or operational data.
 await page.evaluate(async () => {

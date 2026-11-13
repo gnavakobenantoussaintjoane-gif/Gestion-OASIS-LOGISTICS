@@ -10,8 +10,8 @@ export default function TruckIllustration({ kind }: { kind: ContainerKind }) {
     kind === "40_REEFER"
       ? "#e1e7ec"
       : kind === "20_DRY"
-        ? "#a95932"
-        : "#235f9b";
+        ? "#f47700"
+        : "#102f70";
   const start = kind === "20_DRY" ? 205 : 20;
   return (
     <svg
@@ -75,21 +75,17 @@ export default function TruckIllustration({ kind }: { kind: ContainerKind }) {
         strokeOpacity=".5"
         strokeWidth="4"
       />
+      <image
+        href={`${import.meta.env.BASE_URL}branding/otl-logo.jpg`}
+        x={(start + 548) / 2 - 80}
+        y={60}
+        width={160}
+        height={80}
+        preserveAspectRatio="xMidYMid meet"
+      />
       <text
         x={(start + 548) / 2}
-        y="116"
-        textAnchor="middle"
-        fill={kind === "40_REEFER" ? "#163554" : "#f1f6fc"}
-        fontSize="24"
-        fontFamily="Arial, sans-serif"
-        fontWeight="700"
-        letterSpacing="2"
-      >
-        OASIS LOGISTICS
-      </text>
-      <text
-        x={(start + 548) / 2}
-        y="140"
+        y="157"
         textAnchor="middle"
         fill={kind === "40_REEFER" ? "#163554" : "#d4e4f4"}
         fontSize="10"

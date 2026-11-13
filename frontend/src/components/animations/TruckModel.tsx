@@ -1,6 +1,7 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { RoundedBox } from "@react-three/drei";
+import { SRGBColorSpace } from "three";
+import { RoundedBox, useTexture } from "@react-three/drei";
 import type { Group } from "three";
 export type ContainerKind = "20_DRY" | "40_DRY" | "40_REEFER";
 export default function TruckModel({
@@ -10,6 +11,10 @@ export default function TruckModel({
   kind?: ContainerKind;
   animate?: boolean;
 }) {
+  const logo = useTexture(`${import.meta.env.BASE_URL}branding/otl-logo.jpg`);
+  useEffect(() => {
+    logo.colorSpace = SRGBColorSpace;
+  }, [logo]);
   const group = useRef<Group>(null);
   const wheels = useRef<Group[]>([]);
   const length = kind === "20_DRY" ? 3 : 5.4;
@@ -17,8 +22,8 @@ export default function TruckModel({
     kind === "40_REEFER"
       ? "#e8edf2"
       : kind === "20_DRY"
-        ? "#ed8c48"
-        : "#2a67d7";
+        ? "#f47700"
+        : "#102f70";
   useFrame(({ clock }, dt) => {
     if (!animate) return;
     if (group.current)
@@ -137,6 +142,16 @@ export default function TruckModel({
           </group>
         );
       })}
+      {[-1, 1].map((side) => (
+        <mesh
+          key={`logo-${side}`}
+          position={[-1.35, 1.8, side * 0.965]}
+          rotation={[0, side < 0 ? Math.PI : 0, 0]}
+        >
+          <planeGeometry args={[2, 1]} />
+          <meshBasicMaterial map={logo} toneMapped={false} />
+        </mesh>
+      ))}
       {kind === "40_REEFER" && (
         <group position={[1.4, 1.8, 0]}>
           <mesh>

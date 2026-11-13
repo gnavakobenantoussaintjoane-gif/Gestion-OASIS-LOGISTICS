@@ -7,9 +7,7 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
-await page
-  .getByRole("heading", { name: "Bienvenue sur Gestion" })
-  .waitFor();
+await page.getByRole("heading", { name: "Bienvenue sur Gestion" }).waitFor();
 async function checkFormContrast() {
   const ratios = await page.evaluate(() => {
     const lum = (color) => {
@@ -52,19 +50,12 @@ assert.equal(
   await page.locator(".gestion-auth .truck-illustration").count(),
   0,
 );
-await page.waitForFunction(() =>
-  ["ready", "static"].includes(
-    document.querySelector(".gestion-auth__three")?.dataset.sceneState,
-  ),
-);
-assert.equal(
-  await page.locator(".gestion-auth__three").evaluate((el) => {
-    const a = el.getBoundingClientRect(),
-      b = el.closest("main").getBoundingClientRect();
-    return Math.abs(a.height - b.height) < 2 && Math.abs(a.width - b.width) < 2;
-  }),
-  true,
-);
+assert.equal(await page.locator(".gestion-auth canvas").count(), 0);
+assert.equal(await page.locator(".gestion-auth__three").count(), 0);
+await page.waitForFunction(() => {
+  const image = document.querySelector(".otl-auth-background");
+  return image?.complete && image.naturalWidth > 0;
+});
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-desktop.png"),
   fullPage: true,
@@ -120,9 +111,7 @@ await page.goto(
 );
 await page.getByRole("alert").waitFor();
 await page.getByRole("button", { name: "Retour à la connexion" }).click();
-await page
-  .getByRole("heading", { name: "Bienvenue sur Gestion" })
-  .waitFor();
+await page.getByRole("heading", { name: "Bienvenue sur Gestion" }).waitFor();
 // Component-only animation checks. No fabricated session or operational data.
 await page.evaluate(async () => {
   const React = await import("/node_modules/.vite/deps/react.js");
@@ -157,5 +146,5 @@ assert.equal(await page.locator(".loading-screen .realistic-wheel").count(), 5);
 assert.deepEqual(errors, []);
 await browser.close();
 console.log(
-  "PASS: real login screen, GLB login with fallback, phone validation, recovery form, callback errors, responsive layout, dashboard and loading animation components. No authenticated workflow was simulated.",
+  "PASS: real login screen, static image login, phone validation, recovery form, callback errors, responsive layout, dashboard and loading animation components. No authenticated workflow was simulated.",
 );

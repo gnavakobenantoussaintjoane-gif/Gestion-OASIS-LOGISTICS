@@ -42,7 +42,9 @@
   width: max(100vw, calc(100svh * 1672 / 941));
   aspect-ratio: 1672 / 941;
 }
-.otl-auth-background {
+.otl-auth-background,
+.otl-auth-trucks,
+.otl-auth-trucks-banner {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -52,29 +54,140 @@
   pointer-events: none;
   user-select: none;
 }
+/* Décor large : travelling très lent, quasi imperceptible. L'image bouge, mais
+   le formulaire est un élément HTML indépendant : sa composition ne change pas. */
+@keyframes otl-camera-drift {
+  0% {
+    transform: scale(1.008) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.018) translate3d(-0.35%, 0.25%, 0);
+  }
+  100% {
+    transform: scale(1.008) translate3d(0, 0, 0);
+  }
+}
+.otl-auth-background {
+  animation: otl-camera-drift 64s ease-in-out infinite;
+  will-change: transform;
+}
 
-/* Carte : mêmes proportions, même position et mêmes espacements que la carte
-   dessinée dans la maquette. 1 cqw = 1 % de la largeur de la carte, ce qui garde
-   la composition identique quelle que soit la taille de l'écran. */
+/* Scintillement très discret des lumières du décor et reflet du sol.
+   Deux calques flous et transparents : aucun filtre sur l'image elle-même,
+   donc les camions restent nets. */
+@keyframes otl-lights-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 0.6;
+  }
+  70% {
+    opacity: 0.35;
+  }
+}
+.gestion-auth__stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(22% 16% at 79% 46%, #ffd9a64d 0%, #ffd9a600 70%),
+    radial-gradient(16% 12% at 92% 15%, #a9d6ff4d 0%, #a9d6ff00 70%),
+    radial-gradient(26% 10% at 60% 92%, #9fc4ff33 0%, #9fc4ff00 75%);
+  animation: otl-lights-twinkle 11s ease-in-out infinite;
+}
+/* Carte du monde : un réseau de connexions lumineuses qui parcourt les arcs
+   déjà dessinés dans la maquette (positionnée en pourcentage du décor, donc
+   toujours alignée sur l'image quelle que soit la taille de l'écran). */
+@keyframes otl-net-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  35% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+.otl-auth-net {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(9% 7% at 74% 14%, #ffe2b8a8 0%, #ffe2b800 70%),
+    radial-gradient(7% 6% at 82% 27%, #d8e9ff9e 0%, #d8e9ff00 70%),
+    radial-gradient(6% 5% at 66% 30%, #ffe2b88c 0%, #ffe2b800 70%),
+    radial-gradient(5% 5% at 88% 10%, #d8e9ff8c 0%, #d8e9ff00 70%);
+  animation: otl-net-pulse 7s ease-in-out infinite alternate;
+}
+.otl-auth-net--late {
+  animation-delay: -3.5s;
+  background:
+    radial-gradient(6% 5% at 70% 22%, #fff0d0a0 0%, #fff0d000 72%),
+    radial-gradient(8% 6% at 90% 21%, #cfe4ff96 0%, #cfe4ff00 72%),
+    radial-gradient(5% 4% at 78% 6%, #ffe2b890 0%, #ffe2b800 72%);
+}
+
+/* Reflet du sol : une bande claire qui glisse lentement en bas du décor. */
+@keyframes otl-floor-sweep {
+  0%,
+  100% {
+    transform: translate3d(-6%, 0, 0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate3d(6%, 0, 0);
+    opacity: 1;
+  }
+}
+.gestion-auth__stage::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 24%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(28% 60% at 22% 100%, #ffd7a63d 0%, #ffd7a600 70%),
+    radial-gradient(34% 70% at 72% 100%, #a8c8ff3d 0%, #a8c8ff00 72%),
+    linear-gradient(180deg, #ffffff00 0%, #cfe2ff1f 100%);
+  animation: otl-floor-sweep 18s ease-in-out infinite;
+}
+
+/* Les décors étroits ne servent qu'en dessous de 1101 px. */
+.otl-auth-trucks,
+.otl-auth-trucks-banner {
+  display: none;
+}
+
+/* La carte HTML reprend les proportions de celle de la maquette, en légèrement
+   plus petite pour dégager les camions autour du formulaire. 1 cqw = 1 % de la
+   largeur de la carte : la composition interne reste identique à toutes les tailles. */
+/* Carte unique : proportions et espacements relevés sur la maquette, avec une
+   largeur légèrement réduite (29 % du décor au lieu de 31,28 %) pour dégager
+   davantage les camions. 1 cqw = 1 % de la largeur de la carte : la composition
+   interne reste identique à toutes les tailles d'écran. */
 .gestion-auth--static .gestion-auth__panel {
   position: absolute;
-  /* Coordonnées relevées sur la maquette : centre de la carte dessinée
-     (x de 575 à 1097 px, y de 155 à 812 px sur 1672 × 941). */
+  /* Centre de la carte dessinée dans la maquette :
+     x de 575 à 1097 px, y de 155 à 812 px sur 1672 × 941. */
   left: 49.97%;
   top: 51.38%;
   transform: translate(-50%, -50%);
-  /* 31,28 % de la largeur du décor (max(100vw, 1672/941 × 100svh)) : la carte HTML
-     couvre ainsi entièrement la carte dessinée dans la maquette. */
-  width: max(31.28vw, 55.58svh);
-  /* Même hauteur que la carte dessinée (523 × 657 px) : même quand un écran affiche
-     moins de contenu (récupération, erreurs), la maquette reste entièrement couverte. */
-  min-height: max(39.3vw, 69.8svh);
+  width: max(29vw, 51.6svh);
+  min-height: max(36.4vw, 64.7svh);
   max-width: none;
   container-type: inline-size;
   padding: 0;
   overflow: hidden;
-  border: 1px solid #ffffffc0;
-  border-radius: 4.2cqw;
+  border-radius: 4cqw;
   background-color: #eef3fc;
   background-image:
     radial-gradient(
@@ -85,11 +198,58 @@
       #d3ddf4 100%
     ),
     linear-gradient(180deg, #ffffff26, #ffffff00);
+  /* Aucun filtre sur le décor : les camions restent nets derrière la carte.
+     La profondeur vient de l'ombre portée et du liseré clair. */
   box-shadow:
     0 2.2cqw 5.6cqw #08214d55,
+    0 0 0 1px #ffffffb8,
     inset 0 1px 0 #ffffff;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+}
+.gestion-auth--static .gestion-auth__panel::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: 0;
+  z-index: 0;
+  width: 45%;
+  height: 140%;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    #ffffff00 0%,
+    #ffffff5c 45%,
+    #ffffff00 100%
+  );
+  animation: otl-card-sheen 14s ease-in-out 1.2s infinite;
+}
+/* Apparition fluide du formulaire, comme un panneau de verre qui se pose. */
+@keyframes otl-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Reflet lumineux qui balaie lentement la carte, sans jamais gêner la saisie. */
+@keyframes otl-card-sheen {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateX(-35%) rotate(8deg);
+  }
+  18% {
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 0.2;
+  }
+  70% {
+    opacity: 0;
+    transform: translateX(120%) rotate(8deg);
+  }
 }
 /* Rappel de l'accent orange de la maquette, en haut à droite de la carte. */
 .gestion-auth--static .gestion-auth__panel::before {
@@ -97,14 +257,18 @@
   position: absolute;
   top: 0;
   right: 9%;
-  width: 25cqw;
-  height: 2.3cqw;
+  width: 25%;
+  height: 2.3%;
   border-radius: 0 0 100% 100%;
   background: linear-gradient(90deg, #f47700 0%, #ff9b2f 100%);
 }
 .gestion-auth__card {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex: 1;
+  /* L'animation porte sur la carte interne : la plaque garde son centrage. */
+  animation: otl-card-in 0.55s cubic-bezier(0.22, 0.7, 0.3, 1) both;
   flex-direction: column;
   /* Les écrans courts (récupération, erreurs) restent centrés dans la carte. */
   justify-content: center;
@@ -126,7 +290,8 @@
 }
 .gestion-auth__form-heading h1 {
   margin: -5.9cqw 0 0;
-  font-size: 6.45cqw;
+  /* « Bienvenue sur OTL Gestion » doit tenir sur une seule ligne dans la carte. */
+  font-size: 5.5cqw;
   white-space: nowrap;
   line-height: 1.2;
   letter-spacing: -0.06cqw;
@@ -201,6 +366,20 @@
   border-color: transparent;
   background: linear-gradient(95deg, #08204f 0%, #10387c 100%);
   box-shadow: 0 0.7cqw 1.6cqw #0a24593d;
+  /* Transition douce entre les onglets E-mail et Téléphone. */
+  transition:
+    background 0.24s ease,
+    color 0.24s ease,
+    box-shadow 0.24s ease;
+}
+.gestion-auth__modes button:not([aria-pressed="true"]):hover {
+  background: #dde5f9;
+  color: #08265e;
+}
+.gestion-auth__google:hover {
+  border-color: #c9d7f2;
+  background: #f7faff;
+  box-shadow: 0 0.9cqw 2.2cqw #0a24591f;
 }
 
 .gestion-auth form {
@@ -300,7 +479,7 @@
   gap: 2cqw;
   margin: 0.4cqw 0 0;
 }
-.gestion-auth__remember {
+.gestion-auth label.gestion-auth__remember {
   display: flex;
   align-items: center;
   gap: 1.7cqw;
@@ -402,6 +581,10 @@
   color: #0c2a63;
   font-size: 3.05cqw;
   font-weight: 700;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s,
+    background 0.18s;
   box-shadow: 0 0.5cqw 1.4cqw #0a24591a;
 }
 .gestion-auth__google svg {
@@ -488,7 +671,7 @@
   }
   .gestion-auth__form-heading h1 {
     margin-top: -32px;
-    font-size: 37px;
+    font-size: 32px;
   }
   .gestion-auth__form-heading p,
   .gestion-auth p {
@@ -505,8 +688,9 @@
 }
 
 /* Sous 1100 px, la carte HTML ne peut plus se superposer exactement à la carte
-   dessinée dans la maquette : l'image devient un fond d'ambiance (flou + voile
-   marine) et la carte réelle s'affiche en pleine largeur, nette et lisible. */
+   dessinée dans la maquette. On utilise donc un recadrage net du décor (logo,
+   devise et camion, sans la carte dessinée) : aucune image floue, les camions
+   restent parfaitement lisibles, et la carte réelle est réduite. */
 @media (max-width: 1100px) {
   .gestion-auth--static {
     display: block;
@@ -524,15 +708,20 @@
   .gestion-auth__canvas {
     display: contents;
   }
+  /* Décor net : recadrage de la maquette (logo, devise, camion), sans flou. */
   .otl-auth-background {
+    display: none;
+  }
+  .otl-auth-trucks {
+    display: block;
     position: fixed;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 24% center;
-    filter: blur(9px) brightness(0.72) saturate(0.92);
-    transform: scale(1.08);
+    object-position: 50% 74%;
+    pointer-events: none;
+    user-select: none;
   }
   .gestion-auth__stage::before {
     content: "";
@@ -540,67 +729,75 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    /* Voile discret, seulement pour détacher la carte : les camions restent nets et lumineux. */
     background: linear-gradient(
-      180deg,
-      #0a2050bd 0%,
-      #0a1f4ace 52%,
-      #081c44f2 100%
+      100deg,
+      #0a205000 0%,
+      #0a1f4a3d 60%,
+      #081c4499 100%
     );
   }
-  /* Vrai panneau : net, au-dessus du décor, avec tout l'espace de saisie. */
+  /* Vrai panneau, plus compact : le décor reste largement visible. */
   .gestion-auth--static .gestion-auth__panel {
     position: relative;
     z-index: 2;
     left: auto;
     top: auto;
     transform: none;
-    width: min(calc(100vw - 24px), 430px);
+    display: block;
+    width: min(calc(100vw - 32px), 392px);
     min-height: 0;
     margin: max(18px, env(safe-area-inset-top)) auto 0;
     padding: 0;
-    overflow: visible;
+    /* L'accent orange de la maquette reste découpé par le bord arrondi de la carte. */
+    overflow: hidden;
     border-radius: 22px;
-    container-type: normal;
+    /* Sur mobile la carte garde son fond propre : elle est seule sur le décor. */
+    background-color: #eef3fc;
+    background-image: linear-gradient(180deg, #ffffff 0%, #eef3fc 100%);
     box-shadow: 0 18px 48px #04112866;
   }
+
   .gestion-auth__card {
     flex: none;
-    padding: 22px 20px 20px;
+    padding: 18px 18px 16px;
   }
   .gestion-auth .otl-auth-logo {
-    width: 62%;
-    margin: 0 auto 4px;
+    width: 52%;
+    margin: 0 auto 2px;
   }
   .gestion-auth__form-heading h1 {
-    margin: 2px 0 0;
-    font-size: 25px;
-    letter-spacing: -0.4px;
+    margin: 0;
+    font-size: 21px;
+    letter-spacing: -0.3px;
+    /* Le titre complet « Bienvenue sur OTL Gestion » peut passer sur deux lignes. */
+    white-space: normal;
   }
   .gestion-auth__form-heading p,
   .gestion-auth p {
-    font-size: 14px;
+    font-size: 13px;
   }
   .gestion-auth__form-heading::after {
-    width: 22%;
+    width: 20%;
     height: 3px;
-    margin: 12px auto 14px;
+    margin: 9px auto 11px;
   }
   .gestion-auth__modes {
     gap: 2px;
     margin-bottom: 10px;
   }
   .gestion-auth__modes button {
-    min-height: 44px;
-    gap: 8px;
+    min-height: 42px;
+    gap: 7px;
     border-radius: 10px;
-    font-size: 14px;
+    font-size: 13.5px;
   }
   .gestion-auth__modes button svg {
     width: 17px;
     height: 17px;
   }
   .gestion-auth form {
-    gap: 9px;
+    gap: 8px;
   }
   .gestion-auth__field > svg {
     left: 14px;
@@ -614,7 +811,7 @@
     font-size: 13px;
   }
   .gestion-auth input {
-    min-height: 46px;
+    min-height: 44px;
     padding: 0 14px 0 40px;
     border-radius: 10px;
     font-size: 16px;
@@ -633,13 +830,23 @@
     font-size: 12px;
   }
   .gestion-auth__options {
-    gap: 8px;
     margin: 2px 0;
+    flex-wrap: nowrap;
   }
-  .gestion-auth__remember {
-    gap: 8px;
-    font-size: 12.5px;
+  /* Les deux libellés doivent tenir sur une seule ligne : on les laisse se réduire
+     et on empêche le retour à la ligne, sans jamais les faire déborder de la carte. */
+  .gestion-auth__remember,
+  .gestion-auth__options button {
+    flex: none;
     white-space: nowrap;
+  }
+  .gestion-auth label.gestion-auth__remember {
+    gap: 6px;
+    font-size: 12px;
+  }
+  .gestion-auth__options button {
+    flex: none;
+    font-size: 11.5px;
   }
   .gestion-auth input.gestion-auth__check {
     width: 20px;
@@ -647,16 +854,12 @@
     padding: 0;
     border-radius: 5px;
   }
-  .gestion-auth__options button {
-    white-space: nowrap;
-    font-size: 12.5px;
-  }
   .gestion-auth__submit {
-    min-height: 48px;
+    min-height: 46px;
     gap: 9px;
-    margin-top: 6px;
+    margin-top: 4px;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 15.5px;
   }
   .gestion-auth__submit svg {
     width: 19px;
@@ -664,14 +867,14 @@
   }
   .gestion-auth__separator {
     gap: 10px;
-    margin: 8px 0 2px;
+    margin: 6px 0 2px;
     font-size: 11px;
   }
   .gestion-auth__google {
-    min-height: 48px;
+    min-height: 46px;
     gap: 9px;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: 14.5px;
   }
   .gestion-auth__google svg {
     width: 20px;
@@ -683,8 +886,8 @@
   }
   .gestion-auth__security {
     gap: 6px;
-    margin-top: 10px;
-    padding-top: 8px;
+    margin-top: 8px;
+    padding-top: 7px;
     font-size: 10.5px;
   }
   .gestion-auth__security svg {
@@ -703,6 +906,107 @@
     font-size: 13px;
   }
 }
+/* Téléphones très étroits : les deux libellés ne tiennent plus côte à côte, on les
+   empile pour rester parfaitement lisible en conservant le lien de récupération. */
+/* Téléphone : la carte pleine largeur masquerait le camion. Le décor net occupe donc
+   le haut de l'écran (camion visible en entier) et la carte compacte se pose dessous. */
+@media (max-width: 760px) {
+  .gestion-auth__stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100svh;
+    padding: 0 0 max(16px, env(safe-area-inset-bottom));
+  }
+  /* Bandeau à l'échelle du camion : rien n'est rogné, l'image garde ses proportions. */
+  .gestion-auth__canvas {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 32svh;
+    min-height: 200px;
+    max-height: 300px;
+    flex: none;
+    overflow: hidden;
+  }
+  /* Sur téléphone, le camion entier du bandeau (image dédiée, aucun recadrage brutal). */
+  .otl-auth-trucks {
+    display: none;
+  }
+  .otl-auth-trucks-banner {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* cover : le camion remplit le bandeau sans bandes vides (léger recadrage latéral). */
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+  .gestion-auth__stage::before {
+    display: none;
+  }
+  /* Fondu bas du bandeau vers le bleu de la page. */
+  .gestion-auth__canvas::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      #0b245400 72%,
+      #0b2454cc 92%,
+      #0b2454 100%
+    );
+  }
+  .gestion-auth--static .gestion-auth__panel {
+    margin: -18px auto 0;
+    width: min(calc(100vw - 28px), 392px);
+  }
+}
+
+@media (max-width: 760px) {
+  .gestion-auth__form-heading h1 {
+    /* Deux lignes propres plutôt qu'un titre écrasé sur les très petits écrans. */
+    white-space: normal;
+    text-wrap: balance;
+  }
+  .gestion-auth__google {
+    /* L'icône et le libellé restent sur une ligne. */
+    white-space: nowrap;
+    font-size: 13.5px;
+    padding: 0 10px;
+  }
+  .gestion-auth__google svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Téléphone en paysage (hauteur faible) : bandeau réduit et carte remontée,
+   le camion reste visible sans repousser le formulaire hors de l'écran. */
+@media (max-width: 760px) and (max-height: 520px) {
+  .gestion-auth__canvas {
+    height: 104px;
+    min-height: 0;
+    max-height: none;
+  }
+  .gestion-auth--static .gestion-auth__panel {
+    margin-top: -12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .gestion-auth__options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+  }
+  .gestion-auth label.gestion-auth__remember,
+  .gestion-auth__options button {
+    font-size: 12px;
+  }
+}
 @media (max-width: 360px) {
   .gestion-auth--static .gestion-auth__panel {
     padding: 18px 16px;
@@ -714,8 +1018,11 @@
     width: 18px;
     height: 18px;
   }
-  .gestion-auth__remember,
+  .gestion-auth label.gestion-auth__remember,
   .gestion-auth__options button {
-    font-size: 11.5px;
+    font-size: 12px;
+  }
+  .gestion-auth label.gestion-auth__remember {
+    gap: 6px;
   }
 }

@@ -14,6 +14,8 @@ export default function AuthShell({ children }: { children: ReactNode }) {
     <main className="gestion-auth gestion-auth--static">
       <div className="gestion-auth__stage">
         <div className="gestion-auth__canvas">
+          {/* Décor large : la maquette complète, utilisée quand la carte HTML
+              peut se superposer exactement à la carte dessinée (écrans ≥ 1101 px). */}
           <img
             className="otl-auth-background"
             src={`${import.meta.env.BASE_URL}branding/otl-login-background.png`}
@@ -21,6 +23,35 @@ export default function AuthShell({ children }: { children: ReactNode }) {
             aria-hidden="true"
             fetchPriority="high"
             decoding="async"
+          />
+          {/* Décor étroit : camion entier de la maquette, net et jamais flouté,
+              pour les tablettes et les téléphones. */}
+          <img
+            className="otl-auth-trucks"
+            src={`${import.meta.env.BASE_URL}branding/otl-login-trucks.png`}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            width={557}
+            height={941}
+          />
+          {/* Carte du monde animée : deux calques de points lumineux superposés
+              au réseau déjà dessiné dans la maquette. Purement décoratif. */}
+          <span className="otl-auth-net" aria-hidden="true" />
+          <span
+            className="otl-auth-net otl-auth-net--late"
+            aria-hidden="true"
+          />
+          <img
+            className="otl-auth-trucks-banner"
+            src={`${import.meta.env.BASE_URL}branding/otl-login-trucks-banner.png`}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            width={557}
+            height={430}
           />
         </div>
         <section

@@ -1,4 +1,4 @@
-/* Auth OTL : le formulaire est du HTML réel, indépendant du Canvas décoratif. */
+/* Auth OTL : le fond est statique ; seul le formulaire HTML est interactif. */
 .gestion-auth {
   --auth-ink: #102f70;
   --auth-muted: #465675;
@@ -14,39 +14,6 @@
 .gestion-auth *::before,
 .gestion-auth *::after {
   box-sizing: border-box;
-}
-.gestion-auth__three {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-}
-.gestion-auth__three canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.gestion-auth__static-sky {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 5% 50%, #f4770077, transparent 45%),
-    linear-gradient(145deg, #d5e5ff, #174a91 55%, #061c49);
-}
-.gestion-auth__three canvas {
-  position: absolute;
-  inset: 0;
-}
-.gestion-auth__scene-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    #eaf1ffb5 0%,
-    #eaf1ff08 30%,
-    #102f7030 80%,
-    #061a46a0
-  );
 }
 .otl-auth-header {
   display: flex;
@@ -546,5 +513,51 @@
   .gestion-auth__footer {
     padding-top: 16px;
     padding-bottom: 16px;
+  }
+}
+
+/* Remplace le décor 3D uniquement sur Auth, sans toucher aux animations métier.
+   L’image est intacte ; la carte opaque couvre les champs déjà dessinés dans la maquette. */
+.gestion-auth--static {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #102f70;
+}
+.otl-auth-background {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: -1;
+  pointer-events: none;
+}
+.gestion-auth--static .gestion-auth__layout {
+  min-height: 100svh;
+  padding: 40px 16px;
+}
+.gestion-auth--static .gestion-auth__panel {
+  width: max(34vw, 56vh);
+  min-width: 480px;
+  min-height: 76svh;
+  background: #eef2fa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (max-width: 760px) {
+  .otl-auth-background {
+    object-position: left center;
+  }
+  .gestion-auth--static .gestion-auth__layout {
+    padding: 24px 16px;
+  }
+  .gestion-auth--static .gestion-auth__panel {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-width: 480px;
   }
 }

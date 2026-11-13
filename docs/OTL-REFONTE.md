@@ -1,5 +1,8 @@
 # Refonte OTL — analyse préalable et suivi
 
+> **Évolution ultérieure :** à la demande du propriétaire, la connexion utilise désormais la maquette fournie comme image fixe, sans Canvas/GLB. Le formulaire HTML reste interactif. Les détails 3D ci-dessous décrivent la tranche précédente ; pour la vérification actuelle, lancer `node frontend/tests/loginStatic.mjs` plutôt que l’ancien `truck3d.mjs`. Les animations internes restent inchangées.
+
+
 ## Architecture constatée avant modification
 
 - React/TypeScript/Vite frontend ; Express/Node backend ; Supabase Auth, REST et RLS. Aucun changement de stack prévu.

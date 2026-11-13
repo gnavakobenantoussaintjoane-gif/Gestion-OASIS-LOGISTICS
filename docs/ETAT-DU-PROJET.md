@@ -91,3 +91,10 @@ La marque visible du shell Auth et du camion GLB est désormais OASIS LOGISTICS.
 ## Première tranche de refonte OTL
 
 Logo original OTL fourni intégré sans redessin, thème bleu marine/orange centralisé, shell Auth central, véritable entrepôt 3D et plusieurs camions GLB, graphiques harmonisés et exports PDF/Excel au logo officiel. Les composants partagés habillent les routes existantes ; aucune nouvelle table, RLS, donnée fictive ou dépendance npm. 88 tests unitaires, TypeScript, lint, build et smoke/GLB navigateur passent ; 37 combinaisons page/rôle sont contrôlées à vide en rendu isolé desktop/mobile avec formulaires administratifs sans soumission. Le photoréalisme de la référence n’est pas encore atteint, les modules non présents dans le schéma ne sont pas inventés, et la connexion réelle reste bloquée par le réseau Arena. Le dossier `shared/branding` doit accompagner le backend au déploiement pour les exports. Voir [OTL-REFONTE.md](OTL-REFONTE.md) pour le périmètre, les fichiers et la recette restante.
+
+
+## Connexion : fond statique demandé par le propriétaire
+
+La dernière demande remplace la scène GLB de connexion par l’image fournie, copiée intacte dans `frontend/public/branding/otl-login-background.png`. AuthShell ne charge plus TruckBackground, WebGL ou les modèles de connexion. Le formulaire reste du HTML interactif, posé sur une carte opaque couvrant les champs dessinés dans l’image. L’image est décorative : ses mentions « En ligne », « Support 24/7 » et sa case dessinée ne sont pas des états ou fonctionnalités de l’application. Les animations dashboard/chargement sont conservées. Aucun backend, compte, rôle ou RLS modifié ; le problème réseau Supabase reste indépendant.
+
+TypeScript, lint, build, 88 tests unitaires, smoke navigateur et `node frontend/tests/loginStatic.mjs` réussis. Le nouveau test remplace `truck3d.mjs` : image chargée, aucun Canvas/GLB sur Auth, formulaire utilisable, responsive 1440/390/320 et fond manquant. Captures desktop/mobile inspectées. Aucune connexion réelle revendiquée.

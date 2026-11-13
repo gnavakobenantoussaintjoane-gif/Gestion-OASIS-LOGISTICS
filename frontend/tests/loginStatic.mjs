@@ -34,6 +34,32 @@ try {
       ),
       true,
     );
+    // Dès 1101 px, la carte HTML doit recouvrir la carte dessinée dans la maquette.
+    if (width > 1100) {
+      const covered = await page.evaluate(() => {
+        const image = document
+          .querySelector(".otl-auth-background")
+          .getBoundingClientRect();
+        const panel = document
+          .querySelector(".gestion-auth__panel")
+          .getBoundingClientRect();
+        const left = image.left + image.width * (575 / 1672);
+        const right = image.left + image.width * (1097 / 1672);
+        const top = image.top + image.height * (155 / 941);
+        const bottom = image.top + image.height * (812 / 941);
+        return (
+          panel.left <= left + 2 &&
+          panel.right >= right - 2 &&
+          panel.top <= top - 12 &&
+          panel.bottom >= bottom - 2
+        );
+      });
+      assert.equal(
+        covered,
+        true,
+        `Panel must cover the mockup card at ${width}px`,
+      );
+    }
     await page.getByLabel("Adresse e-mail").fill("static@example.invalid");
     await page.getByLabel("Mot de passe", { exact: true }).fill("test-only");
     await page.screenshot({

@@ -87,14 +87,20 @@ Aucun tarif inventé. Pas de retrait des politiques RLS pour faciliter le dével
 
 La marque visible du shell Auth et du camion GLB est désormais OASIS LOGISTICS. La configuration exemple du backend référence le projet et l’entreprise réels, sans secret. Une commande `npm run check:supabase -w backend` distingue DNS et accès HTTPS Auth sans identifiants utilisateur. Dans le sandbox, DNS fonctionne mais HTTPS Supabase reste interrompu (`ECONNRESET`) ; les services distants sont sains selon le connecteur de gestion. Les 84 tests, le build, TypeScript, lint et les contrôles navigateur passent, sans prétendre résoudre le blocage réseau ou valider une connexion réelle. Voir [CONNEXION-SERVEUR.md](CONNEXION-SERVEUR.md).
 
-
 ## Première tranche de refonte OTL
 
 Logo original OTL fourni intégré sans redessin, thème bleu marine/orange centralisé, shell Auth central, véritable entrepôt 3D et plusieurs camions GLB, graphiques harmonisés et exports PDF/Excel au logo officiel. Les composants partagés habillent les routes existantes ; aucune nouvelle table, RLS, donnée fictive ou dépendance npm. 88 tests unitaires, TypeScript, lint, build et smoke/GLB navigateur passent ; 37 combinaisons page/rôle sont contrôlées à vide en rendu isolé desktop/mobile avec formulaires administratifs sans soumission. Le photoréalisme de la référence n’est pas encore atteint, les modules non présents dans le schéma ne sont pas inventés, et la connexion réelle reste bloquée par le réseau Arena. Le dossier `shared/branding` doit accompagner le backend au déploiement pour les exports. Voir [OTL-REFONTE.md](OTL-REFONTE.md) pour le périmètre, les fichiers et la recette restante.
-
 
 ## Connexion : fond statique demandé par le propriétaire
 
 La dernière demande remplace la scène GLB de connexion par l’image fournie, copiée intacte dans `frontend/public/branding/otl-login-background.png`. AuthShell ne charge plus TruckBackground, WebGL ou les modèles de connexion. Le formulaire reste du HTML interactif, posé sur une carte opaque couvrant les champs dessinés dans l’image. L’image est décorative : ses mentions « En ligne », « Support 24/7 » et sa case dessinée ne sont pas des états ou fonctionnalités de l’application. Les animations dashboard/chargement sont conservées. Aucun backend, compte, rôle ou RLS modifié ; le problème réseau Supabase reste indépendant.
 
 TypeScript, lint, build, 88 tests unitaires, smoke navigateur et `node frontend/tests/loginStatic.mjs` réussis. Le nouveau test remplace `truck3d.mjs` : image chargée, aucun Canvas/GLB sur Auth, formulaire utilisable, responsive 1440/390/320 et fond manquant. Captures desktop/mobile inspectées. Aucune connexion réelle revendiquée.
+
+## Connexion alignée sur la maquette définitive
+
+La maquette fournie (`frontend/public/branding/otl-login-background.png`, fichier intact) sert de décor et la carte du formulaire est reproduite en HTML/CSS avec les coordonnées relevées sur l’image (carte de x 575 à 1097 px et y 155 à 812 px sur 1672 × 941). Largeur `max(31,28 vw, 55,58 svh)`, hauteur minimale identique, et espacements internes exprimés en `cqw` : la composition reste identique à toutes les échelles et la carte HTML recouvre entièrement la carte dessinée.
+
+Éléments repris de la maquette : logo officiel original, onglets E-mail/Téléphone avec icônes, champs avec icônes, case « Se souvenir de moi », lien « Mot de passe oublié ? », bouton orange, séparateur « OU », bouton Google. La case mémorise uniquement l’identifiant dans `localStorage` (jamais le mot de passe, la durée du cookie de session reste fixée par le serveur). Aucun libellé n’est inventé : les libellés réels restent associés aux champs pour les lecteurs d’écran, seuls les placeholders sont affichés comme sur l’image.
+
+Sous 1100 px (tablette/mobile), la carte HTML ne peut plus se superposer exactement à la maquette paysage : l’image devient un fond d’ambiance flouté avec voile marine et la carte réelle occupe la largeur, afin de ne jamais montrer deux formulaires. Le comportement est couvert par `frontend/tests/loginStatic.mjs` (recouvrement de la carte mesuré en 1440/390/320 px, aucun chargement GLB/Canvas, formulaire utilisable, image manquante).

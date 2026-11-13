@@ -111,6 +111,50 @@ describe("Formulaire de connexion", () => {
     await screen.findByRole("alert");
     expect(mocks.reload).not.toHaveBeenCalled();
   });
+  it("mémorise seulement l’identifiant quand « Se souvenir de moi » est coché", async () => {
+    localStorage.clear();
+    render(<Login />);
+    fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
+      target: { value: "member@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Mot de passe", { exact: true }), {
+      target: { value: "test-password" },
+    });
+    fireEvent.click(screen.getByLabelText("Se souvenir de moi"));
+    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }));
+    await waitFor(() => expect(mocks.reload).toHaveBeenCalledOnce());
+    expect(localStorage.getItem("otl-remember-identity")).toBe(
+      "member@example.com",
+    );
+    expect(JSON.stringify(localStorage)).not.toContain("test-password");
+  });
+  it("ne mémorise rien quand la case reste décochée", async () => {
+    localStorage.clear();
+    render(<Login />);
+    expect(
+      (screen.getByLabelText("Se souvenir de moi") as HTMLInputElement).checked,
+    ).toBe(false);
+    fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
+      target: { value: "sans-memoire@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Mot de passe", { exact: true }), {
+      target: { value: "test-password" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Se connecter" }));
+    await waitFor(() => expect(mocks.reload).toHaveBeenCalledOnce());
+    expect(localStorage.getItem("otl-remember-identity")).toBe(null);
+  });
+  it("recharge l’identifiant mémorisé au prochain affichage", () => {
+    localStorage.setItem("otl-remember-identity", "ancien@example.com");
+    render(<Login />);
+    expect(
+      (screen.getByLabelText("Adresse e-mail") as HTMLInputElement).value,
+    ).toBe("ancien@example.com");
+    expect(
+      (screen.getByLabelText("Se souvenir de moi") as HTMLInputElement).checked,
+    ).toBe(true);
+    localStorage.clear();
+  });
   it("affiche et masque le mot de passe", () => {
     render(<Login />);
     fireEvent.click(

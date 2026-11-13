@@ -7,7 +7,9 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.APP_URL || "http://localhost:3000");
-await page.getByRole("heading", { name: "Bienvenue sur Gestion" }).waitFor();
+await page
+  .getByRole("heading", { name: "Bienvenue sur OTL Gestion" })
+  .waitFor();
 async function checkFormContrast() {
   const ratios = await page.evaluate(() => {
     const lum = (color) => {
@@ -56,6 +58,16 @@ await page.waitForFunction(() => {
   const image = document.querySelector(".otl-auth-background");
   return image?.complete && image.naturalWidth > 0;
 });
+assert.equal(
+  await page.evaluate(() =>
+    [".otl-auth-background", ".otl-auth-trucks"].every(
+      (selector) =>
+        getComputedStyle(document.querySelector(selector)).filter === "none",
+    ),
+  ),
+  true,
+  "No blur on the login artwork",
+);
 await page.screenshot({
   path: join(tmpdir(), "gestion-login-desktop.png"),
   fullPage: true,
@@ -111,7 +123,9 @@ await page.goto(
 );
 await page.getByRole("alert").waitFor();
 await page.getByRole("button", { name: "Retour à la connexion" }).click();
-await page.getByRole("heading", { name: "Bienvenue sur Gestion" }).waitFor();
+await page
+  .getByRole("heading", { name: "Bienvenue sur OTL Gestion" })
+  .waitFor();
 // Component-only animation checks. No fabricated session or operational data.
 await page.evaluate(async () => {
   const React = await import("/node_modules/.vite/deps/react.js");

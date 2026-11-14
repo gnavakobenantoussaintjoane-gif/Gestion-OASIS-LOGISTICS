@@ -386,6 +386,15 @@ export default function Dashboard({
                     </tbody>
                   </table>
                 </div>
+                {!(shiftsMode ? trips.length : trucks.length) && (
+                  <div className="empty">
+                    <h3>Aucune donnée sur la période</h3>
+                    <p>
+                      Enregistrez un voyage ou ajustez les filtres pour
+                      afficher cette synthèse.
+                    </p>
+                  </div>
+                )}
                 <div className="table-footnote">
                   Les dépenses générales ne sont pas ventilées artificiellement
                   par camion ou shift. Ce résultat d’exploitation n’inclut ni

@@ -6,7 +6,8 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --config vitest.config.ts"
+    "test": "vitest run --config vitest.config.ts",
+    "test:states": "node tests/pageStates.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

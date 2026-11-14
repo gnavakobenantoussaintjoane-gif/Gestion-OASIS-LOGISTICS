@@ -59,6 +59,10 @@ export default function ResourcePage({
   const canWrite = config.writers.includes(session?.role || "");
   const canDelete =
     ["admin", "manager"].includes(session?.role || "") && canWrite;
+  // Les opérateurs ne modifient que les voyages qu'ils ont créés (la RLS le vérifie aussi).
+  const canEdit = (row: Row) =>
+    canWrite &&
+    (session?.role !== "operator" || row.created_by === session?.user.id);
   const format = (key: string, value: any) => {
     if (value === null || value === undefined || value === "") return "—";
     const links: Record<string, string> = {
@@ -156,6 +160,21 @@ export default function ResourcePage({
         </div>
       </div>
       <FiltersBar value={filters} onChange={setFilters} />
+      {refs.error && (
+        <div className="alert" role="alert">
+          <span>
+            Les références (camions, chauffeurs, terminaux) n’ont pas pu être
+            chargées. Les identifiants restent affichés.
+          </span>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => void refs.refetch()}
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
       <section className="card table-card">
         <div className="table-title">
           <h2>
@@ -265,7 +284,7 @@ export default function ResourcePage({
                         >
                           <Eye size={15} />
                         </button>
-                        {canWrite && (
+                        {canEdit(row) && (
                           <button
                             aria-label="Modifier"
                             title="Modifier"

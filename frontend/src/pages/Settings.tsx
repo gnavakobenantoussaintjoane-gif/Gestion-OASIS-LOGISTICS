@@ -25,7 +25,8 @@ export default function Settings() {
   const members = useQuery({
     queryKey: ["members"],
     queryFn: () => api<Row[]>("/members"),
-    enabled: admin,
+    // La carte « Utilisateurs & permissions » n'existe que pour le propriétaire.
+    enabled: superAdmin,
   });
   async function send(
     path: string,
@@ -353,39 +354,61 @@ export default function Settings() {
                 : "Rattacher / modifier le rôle"}
             </button>
           </form>
-          {members.error && <p className="error">{members.error.message}</p>}
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Utilisateur</th>
-                  <th>Téléphone</th>
-                  <th>Rôle</th>
-                </tr>
-              </thead>
-              <tbody>
-                {members.data?.map((m) => (
-                  <tr key={m.id}>
-                    <td>{m.full_name}</td>
-                    <td>{m.phone || "—"}</td>
-                    <td>
-                      <span className="badge blue">
-                        {m.user_roles?.[0]?.role
-                          ? roleNames[
-                              m.user_roles[0].role as keyof typeof roleNames
-                            ]
-                          : m.user_roles?.role
-                            ? roleNames[
-                                m.user_roles.role as keyof typeof roleNames
-                              ]
-                            : "—"}
-                      </span>
-                    </td>
+          {members.isPending ? (
+            <div className="empty" role="status">
+              <span className="spinner" />
+              Chargement de l’équipe…
+            </div>
+          ) : members.error ? (
+            <div className="empty" role="alert">
+              <p>{members.error.message}</p>
+              <button
+                className="button secondary"
+                onClick={() => void members.refetch()}
+              >
+                Réessayer
+              </button>
+            </div>
+          ) : !members.data?.length ? (
+            <div className="empty">
+              <p>
+                Aucun utilisateur n’est encore rattaché à cette entreprise.
+              </p>
+            </div>
+          ) : (
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Utilisateur</th>
+                    <th>Téléphone</th>
+                    <th>Rôle</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {members.data?.map((m) => (
+                    <tr key={m.id}>
+                      <td>{m.full_name}</td>
+                      <td>{m.phone || "—"}</td>
+                      <td>
+                        <span className="badge blue">
+                          {m.user_roles?.[0]?.role
+                            ? roleNames[
+                                m.user_roles[0].role as keyof typeof roleNames
+                              ]
+                            : m.user_roles?.role
+                              ? roleNames[
+                                  m.user_roles.role as keyof typeof roleNames
+                                ]
+                              : "—"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       )}
     </>

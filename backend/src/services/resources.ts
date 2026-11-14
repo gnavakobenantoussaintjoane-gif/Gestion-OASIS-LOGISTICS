@@ -21,9 +21,13 @@ const searchColumns: Record<string, string[]> = {
 export function queryResource(req: Request, resource: Resource, f: Filters) {
   if (!readAllowed(req.role, resource))
     throw new HttpError(403, "Consultation non autorisée.");
+  const select =
+    resource === "trips"
+      ? "*,trip_containers(id,number,size,created_at,created_by)"
+      : "*";
   let query = req.db
     .from(resource)
-    .select("*", { count: "exact" })
+    .select(select, { count: "exact" })
     .eq("company_id", req.companyId);
   const dateCol =
     resource === "trips"

@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  isValidIso6346,
+  normalizeContainerNumber,
+  validateContainerSet,
+} from "../utils/containers.js";
 const text = (max = 100) => z.string().trim().min(1).max(max);
 const optional = (max = 500) =>
   z.string().trim().max(max).nullable().optional();
@@ -6,6 +11,21 @@ const uuid = z.uuid();
 const link = uuid.nullable().optional();
 const date = z.iso.date();
 const money = z.number().int().min(1).max(1000000000000);
+export const tripContainerSchema = z.object({
+  number: z
+    .string()
+    .transform(normalizeContainerNumber)
+    .refine(isValidIso6346, "Numéro de conteneur ISO 6346 invalide."),
+  size: z.union([z.literal(20), z.literal(40)]),
+});
+export const tripContainersSchema = z
+  .array(tripContainerSchema)
+  .min(1, "Au moins un conteneur est requis.")
+  .max(2, "Deux conteneurs maximum par mission.")
+  .superRefine((containers, ctx) => {
+    const error = validateContainerSet(containers);
+    if (error) ctx.addIssue({ code: "custom", message: error });
+  });
 export const schemas = {
   trucks: z.object({
     plate: text(30).transform((v) => v.toUpperCase()),
@@ -42,6 +62,7 @@ export const schemas = {
     load: z.enum(["Plein", "Vide"]),
     tariff_rule_id: uuid,
     observations: optional(),
+    containers: tripContainersSchema,
   }),
   expenses: z.object({
     date,

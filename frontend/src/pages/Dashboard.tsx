@@ -21,6 +21,7 @@ import { useSession } from "../contexts/SessionContext";
 import { money, dateLabel } from "../utils/format";
 import FiltersBar from "../components/FiltersBar";
 import ExportButtons from "../components/ExportButtons";
+import ContainerSummary from "../components/containers/ContainerSummary";
 import {
   ActivityOverview,
   FinancialCharts,
@@ -458,11 +459,12 @@ export default function Dashboard({
                           )}
                         </td>
                         <td>
-                          {referenceLabel(
-                            refs.data,
-                            "container_types",
-                            t.container_type_id,
-                          )}{" "}
+                          <ContainerSummary
+                            containers={t.trip_containers}
+                            typeId={t.container_type_id}
+                            refs={refs.data}
+                            compact
+                          />{" "}
                           <span className="muted">· {t.load}</span>
                         </td>
                         <td className="money-cell">{money(t.price)}</td>

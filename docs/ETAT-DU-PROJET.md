@@ -1,4 +1,4 @@
-# État réel — 11 novembre 2026
+# État réel — 14 novembre 2026
 
 ## Connexion des pages à la base — audit et corrections (13 novembre 2026)
 
@@ -12,6 +12,19 @@ L’audit page par page est dans [AUDIT-PAGES-2026-11-13.md](AUDIT-PAGES-2026-11
 
 Limites : la base métier est vide (0 camion, 0 voyage, 0 dépense), les agrégats du dashboard restent calculés côté client, les PATCH dérivés ne sont pas recalculés et **aucun parcours authentifié réel Supabase** n’a pu être exécuté depuis le sandbox. Voir les priorités restantes dans l’audit.
 
+
+## Conteneurs des missions — 14 novembre 2026
+
+La traçabilité des conteneurs est maintenant portée par la base, pas par une saisie libre du voyage.
+
+- Migration **`20261114010753_trip_containers` appliquée** sur `nrwfnqtomyamswirrhqv` : table `trip_containers`, clé étrangère composite vers `trips`, unicité par voyage, CHECK **ISO 6346**, index `(company_id, trip_id)` et `(company_id, number)`, RLS et deux policies (`read`, `write`).
+- La règle métier **2 × 20 ou 1 × 40** est vérifiée par deux contraintes **différées** (mission et table fille), donc dans la même transaction que l’écriture. Le type doit être actif et de la bonne famille (`20_DRY`, `40_DRY`/`40_REEFER`).
+- La RPC `gestion_save_trip` enregistre le voyage et remplace ses conteneurs atomiquement ; l’API `POST/PATCH /trips` accepte `containers: [{number,size}]`, renvoie `trip_containers`, et `GET /trips/:id/containers/history` expose l’audit aux admin/gestionnaire. Les actions auditées sont `CONTAINER_ADDED|UPDATED|REMOVED`.
+- Interface : section **Informations sur les conteneurs** du formulaire voyage (cartes 2 × 20 / 1 × 40, champs numérotés, type 20/40, erreurs de format et doublon, validation avant confirmation), colonne **Conteneurs** dans la liste, résumé + historique dans la fiche voyage, missions et conteneurs récents dans la fiche camion, colonne conteneurs dans les Derniers mouvements du tableau de bord et dans la feuille Excel/PDF **Voyages**.
+- Tests : **121** (82 backend, 39 frontend), dont 14 backend et 7 frontend dédiés aux conteneurs ; `pageStates.mjs` couvre le passage 2 × 20 → 1 × 40, le refus ISO avant écriture et l’historique de la fiche. TypeScript, ESLint et build passent.
+- Vérification base : la fonction ISO a été contrôlée (`CSQU3054383`/`MSCU1234566` valides, clé fausse refusée) et un **test transactionnel admin** a créé deux 20 puis un 40, refusé un 20 seul et constaté l’audit, avant **annulation complète** ; aucune fixture n’est restée en base.
+
+Limites : le sandbox ne joint pas Supabase depuis le processus Express, donc **aucun parcours navigateur authentifié réel** ni appel API→base réel n’a été exécuté ici ; le test transactionnel a utilisé le rôle admin. Les rôles manager/opérateur/chauffeur sur les conteneurs restent à rejouer lors de la recette finale. La base métier reste vide. Voir [AUDIT-PAGES-2026-11-13.md](AUDIT-PAGES-2026-11-13.md) §8.
 
 ## Fond de connexion GLB 3D
 

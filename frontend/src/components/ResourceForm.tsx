@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resourceFormSchema } from "../schemas/resourceForm";
@@ -15,6 +15,13 @@ import { configs } from "../services/resources";
 import { shiftAt, money } from "../utils/format";
 import { useSession } from "../contexts/SessionContext";
 import type { Row, ListResult } from "../types";
+import ContainerSection from "./containers/ContainerSection";
+import {
+  type ContainerMode,
+  type TripContainer,
+  type TripContainerInput,
+  validateTripContainers,
+} from "../utils/containers";
 export default function ResourceForm({
   resource,
   row,
@@ -31,6 +38,32 @@ export default function ResourceForm({
   const { session } = useSession();
   const client = useQueryClient();
   const [saving, setSaving] = useState(false);
+  const initialContainers = useMemo(
+    () =>
+      [...((row?.trip_containers || []) as TripContainer[])].sort(
+        (a, b) =>
+          String(a.created_at || "").localeCompare(String(b.created_at || "")) ||
+          String(a.number).localeCompare(String(b.number)),
+      ),
+    [row?.trip_containers],
+  );
+  const initialMode: ContainerMode = initialContainers.some(
+    (c) => Number(c.size) === 40,
+  )
+    ? "1x40"
+    : "2x20";
+  const [containerMode, setContainerMode] =
+    useState<ContainerMode>(initialMode);
+  const [containerNumbers, setContainerNumbers] = useState<string[]>(() =>
+    initialMode === "2x20"
+      ? [initialContainers[0]?.number || "", initialContainers[1]?.number || ""]
+      : [initialContainers[0]?.number || ""],
+  );
+  const [containerFieldErrors, setContainerFieldErrors] = useState<string[]>(
+    [],
+  );
+  const [containerError, setContainerError] = useState<string | null>(null);
+  const modeInitialized = useRef(false);
   const recent = useQuery({
     queryKey: ["recent-trips"],
     queryFn: () => api<ListResult>("/trips?limit=100"),
@@ -78,6 +111,13 @@ export default function ResourceForm({
     resolver: zodResolver(schema) as any,
   });
   const watched = form.watch();
+  const containerTypes = refs.data?.container_types || [];
+  const twentyType = containerTypes.find(
+    (type) => type.active && type.kind === "20_DRY",
+  );
+  const fortyTypes = containerTypes.filter(
+    (type) => type.active && String(type.kind).startsWith("40"),
+  );
   const shift =
     resource === "trips" ? shiftAt(watched.occurred_at || "") : null;
   const tariffs = (refs.data?.tariff_rules || []).filter(
@@ -89,27 +129,142 @@ export default function ResourceForm({
       t.shift === shift?.shift,
   );
   const selectedTariff = tariffs.find((t) => t.id === watched.tariff_rule_id);
+  useEffect(() => {
+    if (resource !== "trips") return;
+    if (!modeInitialized.current) {
+      if (initialContainers.length) {
+        const target = initialContainers.some((c) => Number(c.size) === 40)
+          ? "1x40"
+          : "2x20";
+        if (target !== containerMode) {
+          setContainerMode(target);
+          return;
+        }
+        modeInitialized.current = true;
+      } else if (row?.container_type_id) {
+        const current = containerTypes.find(
+          (type) => type.id === row.container_type_id,
+        );
+        if (current) {
+          const target = current.kind === "20_DRY" ? "2x20" : "1x40";
+          if (target !== containerMode) {
+            setContainerMode(target);
+            return;
+          }
+          modeInitialized.current = true;
+        }
+      } else if (!refs.isPending) {
+        modeInitialized.current = true;
+      }
+    }
+    const current = containerTypes.find(
+      (type) => type.id === watched.container_type_id,
+    );
+    if (containerMode === "2x20" && current?.kind !== "20_DRY") {
+      if (twentyType)
+        form.setValue("container_type_id", twentyType.id, {
+          shouldValidate: true,
+        });
+    } else if (
+      containerMode === "1x40" &&
+      !String(current?.kind || "").startsWith("40")
+    ) {
+      const target =
+        fortyTypes.find((type) => type.id === watched.container_type_id) ||
+        fortyTypes[0];
+      if (target)
+        form.setValue("container_type_id", target.id, { shouldValidate: true });
+    }
+  }, [
+    resource,
+    containerMode,
+    containerTypes,
+    twentyType,
+    fortyTypes,
+    watched.container_type_id,
+    form,
+    initialContainers,
+    row?.container_type_id,
+    refs.isPending,
+  ]);
+  function changeContainerMode(next: ContainerMode) {
+    modeInitialized.current = true;
+    setContainerMode(next);
+    setContainerError(null);
+    setContainerFieldErrors([]);
+    const target =
+      next === "2x20"
+        ? twentyType
+        : fortyTypes.find((type) => type.id === watched.container_type_id) ||
+          fortyTypes[0];
+    if (target)
+      form.setValue("container_type_id", target.id, { shouldValidate: true });
+    setContainerNumbers((prev) =>
+      next === "1x40" ? [prev[0] || ""] : [prev[0] || "", prev[1] || ""],
+    );
+  }
+  function changeContainerNumber(index: number, value: string) {
+    setContainerNumbers((prev) =>
+      prev.map((number, i) => (i === index ? value.toUpperCase() : number)),
+    );
+    setContainerFieldErrors([]);
+    setContainerError(null);
+  }
   const submit = form.handleSubmit(async (values) => {
     if (resource === "trips" && !shift) {
       toast.error("L’heure choisie est hors shift.");
       return;
     }
+    let containers: TripContainerInput[] | undefined;
+    if (resource === "trips") {
+      const selectedType = containerTypes.find(
+        (type) => type.id === values.container_type_id,
+      );
+      if (!selectedType) {
+        setContainerError("Sélectionnez un type de conteneur actif.");
+        return;
+      }
+      if (containerMode === "2x20" && selectedType.kind !== "20_DRY") {
+        setContainerError(
+          "La configuration 2 × 20 pieds exige un type de conteneur 20 pieds.",
+        );
+        return;
+      }
+      if (
+        containerMode === "1x40" &&
+        !String(selectedType.kind).startsWith("40")
+      ) {
+        setContainerError(
+          "La configuration 1 × 40 pieds exige un type de conteneur 40 pieds.",
+        );
+        return;
+      }
+      const check = validateTripContainers(containerMode, containerNumbers);
+      setContainerFieldErrors(check.fieldErrors);
+      if (check.error) {
+        setContainerError(check.error);
+        return;
+      }
+      setContainerError(null);
+      containers = check.containers;
+    }
     if (
       !window.confirm(
         resource === "trips"
-          ? `Enregistrer ce voyage au tarif de ${money(selectedTariff?.price || row?.price || 0)} FCFA ?`
+          ? `Enregistrer ce voyage au tarif de ${money(selectedTariff?.price || row?.price || 0)} FCFA avec ${containerMode === "2x20" ? "2 conteneurs 20 pieds" : "1 conteneur 40 pieds"} ?`
           : "Confirmer l’enregistrement ?",
       )
     )
       return;
     setSaving(true);
     try {
-      const payload = { ...values };
+      const payload: Record<string, any> = { ...values };
       config.fields.forEach((f) => {
         if (f.ref && !payload[f.name]) payload[f.name] = null;
         if (f.type === "datetime-local")
           payload[f.name] = new Date(`${payload[f.name]}Z`).toISOString();
       });
+      if (resource === "trips") payload.containers = containers;
       await api(`/${resource}${row ? "/" + row.id : ""}`, {
         method: row ? "PATCH" : "POST",
         body: JSON.stringify(payload),
@@ -128,12 +283,22 @@ export default function ResourceForm({
           observations: "",
           occurred_at: new Date().toISOString().slice(0, 19),
         });
+        if (resource === "trips") {
+          setContainerNumbers(containerMode === "2x20" ? ["", ""] : [""]);
+          setContainerFieldErrors([]);
+          setContainerError(null);
+        }
       } else onClose();
     } catch (e) {
-      if (e instanceof ApiError)
-        e.details?.forEach((d) =>
-          form.setError(d.field, { message: d.message }),
-        );
+      if (e instanceof ApiError) {
+        let containerMessage: string | null = null;
+        e.details?.forEach((d) => {
+          if (d.field === "containers" || d.field?.startsWith("containers."))
+            containerMessage = d.message;
+          else form.setError(d.field, { message: d.message });
+        });
+        if (containerMessage) setContainerError(containerMessage);
+      }
       toast.error((e as Error).message);
     } finally {
       setSaving(false);
@@ -186,6 +351,8 @@ export default function ResourceForm({
       )}
       <div className="form-grid">
         {config.fields.map((field) => {
+          if (resource === "trips" && field.name === "container_type_id")
+            return null;
           const id = `field-${field.name}`;
           const table = field.ref;
           let options =
@@ -203,10 +370,31 @@ export default function ResourceForm({
               (t) => !t.archived || t.id === row?.truck_id,
             );
           return (
-            <div
-              className={`field ${field.type === "textarea" ? "full" : ""}`}
-              key={field.name}
-            >
+            <Fragment key={field.name}>
+              {resource === "trips" && field.name === "load" && (
+                <div className="container-field">
+                  <ContainerSection
+                    mode={containerMode}
+                    numbers={containerNumbers}
+                    typeId={String(watched.container_type_id || "")}
+                    types={containerTypes}
+                    fieldErrors={containerFieldErrors}
+                    error={containerError}
+                    loading={refs.isPending}
+                    onModeChange={changeContainerMode}
+                    onNumberChange={changeContainerNumber}
+                    onTypeChange={(id) => {
+                      form.setValue("container_type_id", id, {
+                        shouldValidate: true,
+                      });
+                      setContainerError(null);
+                    }}
+                  />
+                </div>
+              )}
+              <div
+                className={`field ${field.type === "textarea" ? "full" : ""}`}
+              >
               <label htmlFor={id}>
                 {field.label}
                 {field.required && <b> *</b>}
@@ -267,7 +455,8 @@ export default function ResourceForm({
                   {String(form.formState.errors[field.name]?.message)}
                 </small>
               )}
-            </div>
+              </div>
+            </Fragment>
           );
         })}
       </div>

@@ -14,7 +14,8 @@
     "lint": "eslint frontend/src backend/src",
     "start": "npm run start -w backend",
     "test:e2e": "node frontend/tests/smoke.mjs",
-    "test:frontend": "npm run test -w frontend"
+    "test:frontend": "npm run test -w frontend",
+    "test:states": "node frontend/tests/pageStates.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",

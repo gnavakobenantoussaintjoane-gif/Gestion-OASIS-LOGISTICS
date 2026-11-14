@@ -30,7 +30,9 @@ export default function App() {
   if (pathname === "/auth/reset-password")
     return <AuthReturn key="recovery" recovery />;
   if (loading) return <LoadingTruckAnimation />;
-  if (!session) return <Login />;
+  // La connexion est la seule page publique ; tout le reste y renvoie.
+  if (!session)
+    return pathname === "/login" ? <Login /> : <Navigate to="/login" replace />;
   if (!session.company || !session.role) return <Onboarding />;
   // Ceci filtre la navigation, pas la sécurité : l’API et la RLS vérifient aussi les droits.
   const finances = ["admin", "manager"].includes(session.role);

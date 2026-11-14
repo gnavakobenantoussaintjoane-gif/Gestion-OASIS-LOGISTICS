@@ -5,15 +5,11 @@ vi.mock("../src/api/client", () => ({ api: mocks.api }));
 vi.mock("../src/contexts/SessionContext", () => ({
   useSession: () => ({ reload: mocks.reload, error: null }),
 }));
-vi.mock("../src/components/auth/AuthShell", () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <main>{children}</main>
-  ),
-}));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 import Login from "../src/pages/Login";
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
   mocks.api.mockResolvedValue({});
   mocks.reload.mockResolvedValue({});
 });
@@ -120,7 +116,9 @@ describe("Formulaire de connexion", () => {
     fireEvent.change(screen.getByLabelText("Mot de passe", { exact: true }), {
       target: { value: "test-password" },
     });
-    fireEvent.click(screen.getByLabelText("Se souvenir de moi"));
+    expect(
+      (screen.getByLabelText("Se souvenir de moi") as HTMLInputElement).checked,
+    ).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Se connecter" }));
     await waitFor(() => expect(mocks.reload).toHaveBeenCalledOnce());
     expect(localStorage.getItem("otl-remember-identity")).toBe(
@@ -128,12 +126,13 @@ describe("Formulaire de connexion", () => {
     );
     expect(JSON.stringify(localStorage)).not.toContain("test-password");
   });
-  it("ne mémorise rien quand la case reste décochée", async () => {
+  it("ne mémorise rien quand la case est décochée", async () => {
     localStorage.clear();
     render(<Login />);
-    expect(
-      (screen.getByLabelText("Se souvenir de moi") as HTMLInputElement).checked,
-    ).toBe(false);
+    const box = screen.getByLabelText("Se souvenir de moi") as HTMLInputElement;
+    expect(box.checked).toBe(true);
+    fireEvent.click(box);
+    expect(box.checked).toBe(false);
     fireEvent.change(screen.getByLabelText("Adresse e-mail"), {
       target: { value: "sans-memoire@example.com" },
     });

@@ -1,0 +1,88 @@
+/* LoginOTL.css — page de connexion OTL, 100 % responsive */
+.otl-page{--navy:#0b2559;--orange:#f7861b;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(90deg,#ccdbfd,#618fd8,#1a5ac2);font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--navy);box-sizing:border-box}
+.otl-page *{box-sizing:border-box}
+.otl-head{display:flex;align-items:center;gap:20px;padding:max(14px,env(safe-area-inset-top)) clamp(14px,3vw,36px) 0}
+.otl-head img{height:clamp(46px,8vw,92px);width:auto}
+.otl-sep{width:2px;height:clamp(32px,5vw,60px);background:var(--navy)}
+.otl-tag{margin:0;font-style:italic;font-weight:600;font-size:clamp(15px,1.7vw,24px);line-height:1.25}
+.otl-badge{margin-left:auto;align-self:flex-start;display:flex;gap:8px;align-items:center;background:rgba(11,37,89,.6);color:#fff;border-radius:999px;padding:8px 16px;font-weight:600;font-size:15px;backdrop-filter:blur(6px)}
+.otl-badge i{width:10px;height:10px;border-radius:50%;background:#2fd05a}
+.otl-main{flex:1;display:flex;align-items:center;justify-content:center;padding:16px}
+.otl-card{position:relative;overflow:hidden;width:min(100%,470px);background:rgba(255,255,255,.84);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.75);border-radius:28px;padding:16px clamp(20px,6vw,40px) 30px;text-align:center;box-shadow:0 20px 60px rgba(8,24,70,.35)}
+.otl-card::before{content:"";position:absolute;top:0;right:0;width:120px;height:44px;background:linear-gradient(160deg,transparent 50%,var(--navy) 50%)}
+.otl-card::after{content:"";position:absolute;top:0;right:0;width:120px;height:28px;background:linear-gradient(160deg,transparent 52%,var(--orange) 52%)}
+.otl-login-logo{height:clamp(70px,16vw,104px);width:auto;display:block;margin:0 auto}
+.otl-card h1{margin:6px 0 4px;font-size:clamp(25px,6vw,34px);font-weight:800}
+.otl-sub{margin:0 auto 12px;max-width:380px;color:#4b546b;font-size:clamp(14px,3.6vw,17px);line-height:1.35}
+.otl-bar{width:90px;height:2px;background:var(--orange);margin:0 auto 20px}
+.otl-tabs{display:flex;border-radius:12px;overflow:hidden;margin-bottom:14px;background:#eef1f6}
+.otl-tabs button{flex:1;display:flex;gap:8px;align-items:center;justify-content:center;border:0;padding:13px 8px;font:600 16px inherit;font-family:inherit;color:#44506b;background:#eef1f6;cursor:pointer;border-radius:12px}
+.otl-tabs button.on{background:var(--navy);color:#fff}
+.otl-field{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e1e6ef;border-radius:12px;padding:0 16px;height:54px;margin-bottom:14px}
+.otl-field:focus-within{border-color:var(--orange);box-shadow:0 0 0 3px rgba(247,134,27,.2)}
+.otl-field input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:16px inherit;font-family:inherit;color:var(--navy)}
+.otl-field svg{flex:none}
+.otl-eye{border:0;background:none;padding:0;cursor:pointer;display:flex}
+.otl-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 18px;font-size:15px}
+.otl-row label{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}
+.otl-row input{width:20px;height:20px;accent-color:var(--navy)}
+.otl-row a{color:#1456d6;font-weight:600;text-decoration:underline}
+.otl-go{width:100%;height:54px;border:0;border-radius:999px;background:linear-gradient(180deg,#ff9a2e,#f47d0f);color:#fff;font:700 18px inherit;font-family:inherit;display:flex;gap:10px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 18px rgba(244,125,15,.4)}
+.otl-go[disabled]{opacity:.7;cursor:wait}
+.otl-msg{min-height:20px;margin:8px 0 0;color:#c0392b;font-size:14px}
+.otl-or{display:flex;align-items:center;gap:14px;color:#6b7488;margin:8px 0 14px;font-weight:600}
+.otl-or::before,.otl-or::after{content:"";flex:1;height:1px;background:#d5dbe6}
+.otl-gg{width:100%;height:54px;border:1px solid #e1e6ef;border-radius:999px;background:#fff;color:var(--navy);font:700 17px inherit;font-family:inherit;display:flex;gap:12px;align-items:center;justify-content:center;cursor:pointer}
+.otl-foot{background:var(--navy);color:#fff;clip-path:polygon(0 22%,14% 0,100% 0,100% 100%,0 100%);padding:30px clamp(14px,5vw,70px) max(14px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.otl-ft{display:flex;gap:clamp(12px,2.5vw,28px);align-items:center;flex-wrap:wrap;font-weight:600;font-size:clamp(13px,1.4vw,18px)}
+.otl-ft span{display:flex;gap:8px;align-items:center}
+.otl-ft b{width:1px;height:28px;background:rgba(255,255,255,.35)}
+.otl-slogan{font-style:italic;font-weight:600;font-size:clamp(14px,1.5vw,20px);border-bottom:3px solid var(--orange);padding-bottom:2px}
+@media(max-width:900px){.otl-ft b,.otl-slogan{display:none}.otl-foot{justify-content:center}}
+@media(max-width:700px){.otl-sep,.otl-tag{display:none}}
+
+/* Fond : scène complète (cover) sur écran large */
+.otl-page::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--bg) center/cover no-repeat}
+.otl-page::after{content:none}
+/* Écran étroit / portrait : camion à gauche, entrepôt à droite, toujours visibles */
+@media (max-aspect-ratio:13/10){
+  .otl-page::before,.otl-page::after{content:"";position:fixed;bottom:0;z-index:-1;width:62vw;height:94vw;inset:auto auto 0 auto;background-repeat:no-repeat;background-image:var(--bg);background-size:auto 100%;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 35%);mask-image:linear-gradient(to bottom,transparent 0,#000 35%)}
+  .otl-page::before{left:0;background-position:left bottom}
+  .otl-page::after{right:0;background-position:right bottom}
+}
+
+/* Tient en un seul écran : les hauteurs s'adaptent à la hauteur de la fenêtre */
+.otl-page{--u:.1136dvh;height:100vh;height:100dvh;min-height:0;overflow-x:hidden;overflow-y:auto}
+.otl-head{padding-top:max(10px,env(safe-area-inset-top))}
+.otl-head img{height:clamp(40px,min(8vw,calc(78*var(--u))),84px)}
+.otl-sep{height:clamp(28px,calc(54*var(--u)),56px)}
+.otl-main{min-height:0;padding:clamp(6px,calc(12*var(--u)),16px) 16px}
+.otl-card{padding-top:clamp(8px,calc(14*var(--u)),16px);padding-bottom:clamp(14px,calc(26*var(--u)),30px)}
+.otl-login-logo{height:clamp(52px,calc(92*var(--u)),100px)}
+.otl-card h1{font-size:clamp(22px,min(6vw,calc(32*var(--u))),34px);margin:4px 0 2px}
+.otl-sub{font-size:clamp(13px,min(3.6vw,calc(16*var(--u))),17px);margin-bottom:clamp(6px,calc(10*var(--u)),12px)}
+.otl-bar{margin-bottom:clamp(10px,calc(18*var(--u)),20px)}
+.otl-tabs{margin-bottom:clamp(8px,calc(12*var(--u)),14px)}
+.otl-tabs button{padding:clamp(8px,calc(12*var(--u)),13px) 8px}
+.otl-field{height:clamp(40px,calc(52*var(--u)),54px);margin-bottom:clamp(8px,calc(12*var(--u)),14px)}
+.otl-row{margin-bottom:clamp(10px,calc(16*var(--u)),18px)}
+.otl-go,.otl-gg{height:clamp(42px,calc(52*var(--u)),54px)}
+.otl-msg{min-height:0;height:clamp(14px,calc(18*var(--u)),20px);margin:4px 0 0}
+.otl-or{margin:clamp(2px,calc(6*var(--u)),8px) 0 clamp(8px,calc(12*var(--u)),14px)}
+.otl-foot{padding-top:clamp(18px,calc(26*var(--u)),30px);padding-bottom:max(8px,env(safe-area-inset-bottom))}
+@media(max-width:700px){.otl-ft{gap:10px;justify-content:center;font-size:12px}.otl-ft svg{width:18px;height:18px}}
+
+/* Intégration Gestion : actions secondaires et états accessibles. */
+.otl-row .otl-forgot{border:0;background:none;padding:0;font:600 15px inherit;font-family:inherit;color:#1456d6;font-weight:600;text-decoration:underline;cursor:pointer}
+.otl-row .otl-forgot:hover{color:var(--navy)}
+.otl-back{display:inline-block;margin-top:14px;border:0;background:none;padding:0;color:#1456d6;font:600 15px inherit;font-family:inherit;text-decoration:underline;cursor:pointer}
+.otl-back:hover{color:var(--navy)}
+.otl-msg.otl-ok{color:#177245}
+.otl-page button:focus-visible,.otl-page .otl-forgot:focus-visible,.otl-page .otl-back:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+
+/* Dans la colonne flex de la page, laisser la carte rétrécir sur mobile. */
+.otl-main{width:100%;min-width:0}
+.otl-card{min-width:0}
+
+/* Les PNG du logo sont transparents : ne pas laisser le fond blanc par défaut de l'image. */
+.otl-head img,.otl-login-logo{background:transparent}

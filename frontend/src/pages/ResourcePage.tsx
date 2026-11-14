@@ -25,6 +25,9 @@ import { money, dateLabel } from "../utils/format";
 import FiltersBar from "../components/FiltersBar";
 import Modal from "../components/Modal";
 import ResourceForm from "../components/ResourceForm";
+import ContainerSummary from "../components/containers/ContainerSummary";
+import ContainerHistory from "../components/containers/ContainerHistory";
+import TruckMissions from "../components/containers/TruckMissions";
 import type { Filters, ListResult, Row } from "../types";
 export default function ResourcePage({
   resource: prop,
@@ -246,7 +249,14 @@ export default function ResourcePage({
                           c === "price" || c === "amount" ? "money-cell" : ""
                         }
                       >
-                        {[
+                        {c === "containers" ? (
+                          <ContainerSummary
+                            containers={row.trip_containers}
+                            typeId={row.container_type_id}
+                            refs={refs.data}
+                            compact
+                          />
+                        ) : [
                           "status",
                           "shift",
                           "load",
@@ -449,7 +459,16 @@ export default function ResourcePage({
             {Object.entries(detail)
               .filter(
                 ([k]) =>
-                  !["company_id", "created_by", "receipt_path"].includes(k),
+                  ![
+                    "company_id",
+                    "created_by",
+                    "receipt_path",
+                    "trip_containers",
+                    "id",
+                    "created_at",
+                    "updated_at",
+                  ].includes(k) &&
+                  !(resource === "trips" && k === "container_type_id"),
               )
               .map(([k, v]) => (
                 <div key={k}>
@@ -462,6 +481,21 @@ export default function ResourcePage({
                 </div>
               ))}
           </dl>
+          {resource === "trips" && (
+            <section className="trip-container-detail">
+              <h3>Informations sur les conteneurs</h3>
+              <ContainerSummary
+                containers={detail.trip_containers}
+                typeId={detail.container_type_id}
+                refs={refs.data}
+              />
+              <ContainerHistory
+                tripId={detail.id}
+                canRead={["admin", "manager"].includes(session?.role || "")}
+              />
+            </section>
+          )}
+          {resource === "trucks" && <TruckMissions truckId={detail.id} />}
           {["trucks", "drivers"].includes(resource) &&
             ["admin", "manager"].includes(session?.role || "") && (
               <Link

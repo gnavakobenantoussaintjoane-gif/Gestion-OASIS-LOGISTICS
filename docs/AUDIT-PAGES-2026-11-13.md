@@ -99,7 +99,7 @@ Légende : ✅ état présent et testé ; ⚠️ présent mais partiel ; — san
 
 ### 4.3 Base distante — état vérifié
 
-- **18 tables** dans `public`, **RLS active partout**.
+- **18 tables** dans `public`, **RLS active partout** (19 depuis la migration `trip_containers` du 14 novembre, voir §8).
 - Policies : `trips` 4, `expenses` 4, `trucks` 3, `drivers` 3, `terminals` 3, `container_types` 3, `shift_definitions` 3, `companies` 2, `profiles` 2, `notifications` 2, `tariff_rules` 2, `expense_categories` 2, `audit_logs` 1, `user_roles` 1, `oasis_super_admin` **0** (volontaire : accès service role uniquement), tables `legacy_*` 1 chacune.
 - Contraintes clés : `UNIQUE(company_id, id)` sur les tables métier, `UNIQUE(company_id, reference)` sur trips/expenses, `UNIQUE(company_id, plate upper(trim))` sur trucks, `UNIQUE(company_id, code)` sur terminals/shift_definitions, `UNIQUE(company_id, kind)` sur container_types, index unique partiel `gestion_active_tariff`.
 - Triggers/fonctions : `gestion_prepare_trip()` (shift et date comptable Africa/Abidjan, refus 18:30–19:00, prix du tarif, `created_by` immuable), `gestion_prepare_expense()`, `gestion_audit()`, `gestion_trip_availability()` (camion non archivé/hors maintenance, chauffeur actif, terminal/conteneur actifs), `gestion_sync_trip_expenses()`.
@@ -132,7 +132,7 @@ Légende : ✅ état présent et testé ; ⚠️ présent mais partiel ; — san
 6. **Sélecteurs de formulaire** : afficher un état de chargement des options et un message « aucune référence disponible » plutôt qu'un select vide.
 7. **Recette authentifiée réelle** : impossible depuis ce sandbox ; à rejouer sur un poste connecté à Supabase avec un admin, un manager, un opérateur, un chauffeur et un compte non rattaché.
 8. **Cohérence des migrations** : les versions distantes (`20261111173522`, `20261111174805`, `20261111175811`, `20261111180409`, `20261111205805`, `20261111205816`) diffèrent des noms de fichiers locaux (`…174500`, `…180000`, `…190000`, `…193000`, `…210000`, `…220000`). Le contenu a été appliqué, mais l'historique n'est pas réconcilié ; à aligner avant le prochain déploiement.
-9. **Tests RLS** : les policies ont été inspectées mais les tests SQL transactionnels doivent être rejoués contre la base distante lors de la recette finale.
+9. **Tests RLS** : les policies ont été inspectées mais les tests SQL transactionnels doivent être rejoués contre la base distante lors de la recette finale (le 14 novembre, un test transactionnel **admin** sur les conteneurs a été exécuté et annulé ; manager/opérateur/chauffeur restent à rejouer, voir §8.3).
 
 ## 6. Recette exécutée le 13 novembre 2026
 
@@ -152,3 +152,53 @@ Légende : ✅ état présent et testé ; ⚠️ présent mais partiel ; — san
 ## 7. Conclusion
 
 Les pages sont **toutes reliées à la base** : aucun mock ne subsiste et les appels réseau sont les mêmes que ceux vérifiés dans l'API. Le chantier a surtout fermé les **angles morts d'ergonomie et de droits** (états, reprise, opérateur, super administrateur) et ajouté une **migration d'index** ainsi qu'une **matrice de droits testée**. Les trois prochains gains de robustesse sont l'agrégation serveur du dashboard, la cohérence des PATCH dérivés et la recette authentifiée réelle sur Supabase.
+
+## 8. Mise à jour conteneurs — 14 novembre 2026
+
+Branche `arena/c0063126-gestion-oasis-logistics`, depuis `eedfff8`. Cette passe relie la **traçabilité des conteneurs** aux pages concernées et ajoute la table de base correspondante.
+
+### 8.1 Base et contrat
+
+- Migration **`20261114010753_trip_containers` appliquée** sur `nrwfnqtomyamswirrhqv` (dernière version de `list_migrations`).
+- Nouvelle table `public.trip_containers` : `id`, `company_id`, `trip_id`, `number`, `size` (20/40), `created_by`, `created_at`, `updated_at`. Clés `UNIQUE(trip_id, number)`, `UNIQUE(company_id, id)`, FK composite `(company_id, trip_id) → trips(company_id, id) ON DELETE CASCADE`. CHECK ISO 6346 (`number = upper(btrim(number))` + fonction `gestion_iso6346_valid`). Index `(company_id, trip_id)` et `(company_id, number)`.
+- Règles différées : `gestion_trip_containers_valid` (table fille) et `gestion_trip_containers_required` (table `trips`) sont **DEFERRABLE INITIALLY DEFERRED** : une mission `20_DRY` doit avoir exactement deux conteneurs de taille 20, une mission `40_DRY`/`40_REEFER` exactement un conteneur de taille 40. Une mission sans type correspondant n’est pas contrainte.
+- RPC `gestion_save_trip(p_id, p_payload, p_containers)` : écrit le voyage et remplace ses conteneurs dans la même transaction ; SECURITY INVOKER, `search_path = ''`, GRANT à `authenticated`. Le POST/PATCH de l’API passent par cette RPC.
+- RLS : `trip_containers_read` (admin/manager/operator, ou chauffeur du voyage) et `trip_containers_write` (admin/manager, ou opérateur si `trips.created_by = auth.uid()`). `anon` n’a aucun droit.
+- Audit : `CONTAINER_ADDED`, `CONTAINER_UPDATED`, `CONTAINER_REMOVED` avec `entity = 'trip_containers'`, `entity_id = trip_id` ; l’historique est lisible par `GET /trips/:uuid/containers/history` (admin/manager).
+- Le nombre total de tables `public` passe de 18 à **19** ; les index de 56 à **58**. Le reste des policies et le volume métier (tables vides) sont inchangés.
+
+### 8.2 Écran par écran
+
+| Écran / route | Ce qui lit la base | États | Limites / décisions |
+| --- | --- | --- | --- |
+| `/records/trips` — formulaire | `GET /reference-data` (types de conteneurs), `POST/PATCH /trips` avec `containers` | types : chargement / erreur / aucun type actif ; numéros : erreur de format et de doublon ; erreur API `containers*` en bandeau | 2 × 20 ou 1 × 40 imposé ; le type 40 multiple est sélectionnable ; la validation ISO et le contrôle de cohérence sont faits **avant** `window.confirm` et de nouveau côté serveur. Aucune valeur n’est inventée. |
+| `/records/trips` — liste | `GET /trips` (jointure `trip_containers`) | chargement / erreur + reprise / vide | colonne **Conteneurs** : mode + type + pastilles de numéros ; « Non renseigné » pour un ancien voyage sans conteneurs. |
+| `/records/trips` — fiche | `GET /trips/:id` + `GET /trips/:id/containers/history` | résumé immédiat ; historique : chargement / erreur + reprise / vide | l’historique n’est demandé et affiché que pour admin/manager ; un opérateur voit les numéros mais pas l’historique, conformément au contrat serveur. |
+| `/records/trucks` — fiche | `GET /trips?truck_id=…&limit=10` (chaque ligne avec ses conteneurs) | chargement / erreur + reprise / vide | 10 dernières missions ; le chauffeur et les numéros sont affichés ; aucun nouvel endpoint. |
+| `/` — Derniers mouvements | `GET /dashboard` (déjà chargé) | chargement / erreur / vide existants | la cellule conteneurs réutilise `trip_containers` de la ligne, sans requête supplémentaire ni mock. |
+| Exports Excel/PDF | `GET /reports/xlsx|pdf` | états existants | feuille **Voyages** : colonnes `Conteneurs` et `Nb conteneurs` ; test Excel ajouté. |
+
+### 8.3 Recette exécutée le 14 novembre 2026
+
+| Contrôle | Résultat |
+| --- | --- |
+| `./node_modules/.bin/tsc -p backend/tsconfig.json --noEmit` | ✅ |
+| `./node_modules/.bin/tsc -p frontend/tsconfig.json --noEmit` | ✅ |
+| `npm run lint` | ✅ |
+| `npm test` | ✅ **121 tests** : 82 backend + 39 frontend (dont 14 tests backend et 7 tests frontend dédiés aux conteneurs) |
+| `npm run test:states` | ✅ conteneurs 2 × 20 / 1 × 40, erreur ISO avant écriture, fiche + historique, reprise des états existants — **rendu isolé**, session et API simulées |
+| `npm run build` | ✅ Vite + `tsc` |
+| Fonction SQL `gestion_iso6346_valid` | ✅ `CSQU3054383` et `MSCU1234566` valides ; `CSQU3054384` refusé ; espaces/minuscules acceptés puis normalisés |
+| Test transactionnel base (rôle admin) | ✅ deux 20 acceptés, un 40 accepté, deux 20 avec un seul numéro refusé par la contrainte différée, au moins une entrée d’audit `trip_containers` ; **transaction annulée**, aucune fixture conservée |
+| RLS inspectée | ✅ 2 policies `trip_containers`, role `authenticated` ; RPC et validation différée présentes |
+| Recette navigateur authentifiée réelle | ❌ non exécutable ici (Supabase inaccessible depuis le sandbox) ; les captures et tests navigateur utilisent une session simulée |
+
+**Ce qui n’est pas revendiqué** : le parcours navigateur réel connecté à Supabase, les mutations réelles via l’API Express, et les cas manager/opérateur/chauffeur sur `trip_containers` n’ont pas été rejoués sur la base distante. Le test transactionnel a utilisé le rôle **admin** ; les policies manager/opérateur/chauffeur ont été inspectées et la matrice de droits reste testée par `backend/tests/accessMatrix.test.ts`, mais leur exécution SQL réelle reste à faire lors de la recette finale.
+
+### 8.4 Écarts restants après cette passe
+
+1. Recette authentifiée réelle et test SQL des quatre rôles (admin, manager, opérateur, chauffeur) sur `trip_containers`.
+2. Les agrégats du dashboard restent calculés en JS ; la colonne conteneurs n’y change rien.
+3. Les filtres `FiltersBar` restent partiellement appliqués ; les sélecteurs de formulaire n’ont pas tous un état de chargement propre (le formulaire voyage désactive l’enregistrement tant que les références manquent).
+4. Les numéros de conteneurs ne sont pas encore dans la recherche globale `q` (la recherche porte sur les colonnes du voyage). À décider avec le propriétaire.
+5. Réconciliation des versions de migrations antérieures (inchangée, voir §5.8).

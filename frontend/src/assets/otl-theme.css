@@ -368,3 +368,386 @@ tbody tr:hover {
   max-width: 100%;
   min-width: 0;
 }
+
+/* Conteneurs d'une mission — charte OTL (marine, orange, blanc, gris clair). */
+.container-panel {
+  min-width: 0;
+  margin: 22px 0 0;
+  padding: 18px;
+  border: 1px solid var(--otl-line);
+  border-radius: var(--otl-radius);
+  background: var(--surface);
+}
+.container-panel legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  color: var(--otl-navy);
+  font-size: var(--otl-text-sm);
+  font-weight: 700;
+}
+[data-theme="dark"] .container-panel legend {
+  color: var(--otl-gray);
+}
+.container-panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--otl-gray);
+  color: var(--otl-navy);
+}
+.container-count {
+  margin-left: auto;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--otl-orange-soft);
+  color: #9a4a00;
+  font-size: var(--otl-text-xs);
+  font-weight: 600;
+}
+.container-intro {
+  margin: 4px 0 14px;
+  color: var(--muted);
+  font-size: var(--otl-text-sm);
+  line-height: 1.55;
+}
+.container-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.container-mode-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  padding: 13px;
+  border: 1.5px solid var(--otl-line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--otl-duration) var(--otl-ease),
+    background var(--otl-duration) var(--otl-ease),
+    box-shadow var(--otl-duration) var(--otl-ease);
+}
+.container-mode-card:hover {
+  border-color: var(--otl-blue);
+  box-shadow: var(--otl-shadow);
+}
+.container-mode-card.selected {
+  border-color: var(--otl-navy);
+  background: var(--subtle);
+  box-shadow: 0 0 0 1px var(--otl-navy) inset;
+}
+.container-mode-card > span:not(.container-mode-icon) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.container-mode-card strong {
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.container-mode-card small {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+.container-mode-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 43px;
+  height: 43px;
+  border-radius: 10px;
+  background: var(--otl-gray);
+  color: var(--otl-navy);
+}
+.container-mode-icon.two {
+  gap: 1px;
+}
+.container-mode-icon.two svg:last-child {
+  color: var(--otl-orange);
+}
+.container-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--otl-orange);
+}
+.container-type-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 13px 0 4px;
+}
+.container-type-badge {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--otl-navy);
+  color: var(--otl-white);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.container-type-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+.container-type-select select {
+  min-width: 170px;
+  padding: 6px 8px;
+}
+.container-type-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+.container-mode-caption {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.container-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.container-fields.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.container-number {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.container-number.invalid {
+  border-color: #c0392b !important;
+}
+.container-error {
+  margin: 11px 0 0;
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: #fff0ee;
+  color: #9d2f24;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+[data-theme="dark"] .container-error {
+  background: #3b1d1d;
+  color: #ffb4a7;
+}
+.container-summary {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+.container-summary.compact {
+  gap: 3px;
+}
+.container-summary-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--otl-navy);
+  font-size: 10px;
+  font-weight: 600;
+}
+[data-theme="dark"] .container-summary-type {
+  color: var(--otl-gray);
+}
+.container-summary-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.container-chip {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--otl-gray);
+  color: var(--otl-navy);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+[data-theme="dark"] .container-chip {
+  background: var(--subtle);
+  color: var(--otl-gray);
+}
+.container-summary-empty {
+  color: var(--muted);
+  font-size: 10px;
+  font-style: italic;
+}
+.container-summary small {
+  color: var(--muted);
+  font-size: 9.5px;
+}
+.trip-container-detail {
+  margin: 0 0 22px;
+  padding: 15px;
+  border: 1px solid var(--otl-line);
+  border-radius: var(--otl-radius);
+  background: var(--subtle);
+}
+.trip-container-detail > h3,
+.container-history h3,
+.truck-missions h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  color: var(--otl-navy);
+  font-size: 12px;
+}
+[data-theme="dark"] .trip-container-detail > h3,
+[data-theme="dark"] .container-history h3,
+[data-theme="dark"] .truck-missions h3 {
+  color: var(--otl-gray);
+}
+.container-history {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--otl-line);
+}
+.container-history-muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+.container-history-error {
+  color: #9d2f24;
+  font-size: 10.5px;
+}
+.container-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.container-history-list li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.container-history-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 23px;
+  height: 23px;
+  border-radius: 6px;
+  background: var(--otl-gray);
+  color: var(--otl-navy);
+}
+.container-history-icon.container_added {
+  color: #177245;
+}
+.container-history-icon.container_removed {
+  color: #a33a2b;
+}
+.container-history-list div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.container-history-list strong {
+  font-size: 10.5px;
+}
+.container-history-list small {
+  color: var(--muted);
+  font-size: 9.5px;
+}
+.container-history-numbers {
+  color: var(--ink);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+}
+.truck-missions {
+  margin: 0 0 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--otl-line);
+}
+.truck-mission-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.truck-mission-list li {
+  padding: 10px;
+  border: 1px solid var(--otl-line);
+  border-radius: 9px;
+  background: var(--subtle);
+}
+.truck-mission-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10.5px;
+}
+.truck-mission-head span {
+  color: var(--muted);
+}
+.truck-mission-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10px;
+}
+@media (max-width: 620px) {
+  .container-mode-grid,
+  .container-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .container-count {
+    margin-left: 0;
+  }
+  .container-panel legend {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .container-mode-card {
+    transition: none;
+  }
+}
+
+.container-field {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.container-field .container-panel {
+  margin-top: 4px;
+}

@@ -43,6 +43,13 @@ export default function ResourceForm({
       resource === "drivers" &&
       ["admin", "manager"].includes(session?.role || ""),
   });
+  // Les références secondaires ne doivent pas échouer silencieusement.
+  const auxiliaryError =
+    resource === "expenses"
+      ? recent.error
+      : resource === "drivers"
+        ? members.error
+        : null;
   const defaults = useMemo(
     () =>
       Object.fromEntries(
@@ -141,6 +148,40 @@ export default function ResourceForm({
             Un voyage = une recette. Le shift et la date comptable sont calculés
             automatiquement à partir de l’heure de départ.
           </span>
+        </div>
+      )}
+      {refs.error && (
+        <div className="empty" role="alert">
+          <p>
+            Les références indispensables n’ont pas pu être chargées. Aucun
+            enregistrement ne sera possible avant leur rétablissement.
+          </p>
+          <button
+            type="button"
+            className="button secondary"
+            onClick={() => void refs.refetch()}
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
+      {auxiliaryError && (
+        <div className="empty" role="alert">
+          <p>
+            {resource === "drivers"
+              ? "La liste des comptes disponibles n’a pas pu être chargée."
+              : "La liste des voyages récents n’a pas pu être chargée."}
+          </p>
+          <button
+            type="button"
+            className="button secondary"
+            onClick={() => {
+              if (resource === "expenses") void recent.refetch();
+              else void members.refetch();
+            }}
+          >
+            Réessayer
+          </button>
         </div>
       )}
       <div className="form-grid">
@@ -258,7 +299,10 @@ export default function ResourceForm({
         <button className="button secondary" type="button" onClick={onClose}>
           Annuler
         </button>
-        <button className="button primary" disabled={saving || refs.isPending}>
+        <button
+          className="button primary"
+          disabled={saving || refs.isPending || !!refs.error}
+        >
           <Check size={16} />
           {saving
             ? "Enregistrement…"

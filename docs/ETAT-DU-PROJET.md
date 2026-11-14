@@ -1,5 +1,18 @@
 # État réel — 11 novembre 2026
 
+## Connexion des pages à la base — audit et corrections (13 novembre 2026)
+
+L’audit page par page est dans [AUDIT-PAGES-2026-11-13.md](AUDIT-PAGES-2026-11-13.md). Aucun écran ne contenait de mock : le chantier a complété les états chargement/erreur/vide, les droits d’interface et le contrat base.
+
+- `Settings` : `/members` réservé au super administrateur, avec chargement, erreur + reprise et état vide.
+- `ResourcePage` / `ResourceForm` : avertissement et reprise si les références échouent, bouton Enregistrer bloqué sans références, erreurs des références secondaires visibles, opérateur limité à ses propres voyages (aligné sur la policy `trips_update`).
+- `Dashboard` : état vide explicite du tableau performance/shift ; `Notifications` : erreur en `role="alert"` et état vide d’audit dédié ; `Onboarding` : vérification et erreur visibles.
+- Base : migration `20261114003715_gestion_performance_indexes` appliquée sur `nrwfnqtomyamswirrhqv` ; 5 index vérifiés (56 index `public` au total). RLS active sur les 18 tables, policies et contraintes inspectées en lecture seule.
+- Tests : **99 automatisés** (67 backend, 32 frontend), dont la matrice de droits `accessMatrix` ; `pageStates.mjs` couvre erreur → reprise → vide, références non bloquantes et formulaire bloqué sans références ; `otlPages.mjs` passe 37 combinaisons page/rôle.
+
+Limites : la base métier est vide (0 camion, 0 voyage, 0 dépense), les agrégats du dashboard restent calculés côté client, les PATCH dérivés ne sont pas recalculés et **aucun parcours authentifié réel Supabase** n’a pu être exécuté depuis le sandbox. Voir les priorités restantes dans l’audit.
+
+
 ## Fond de connexion GLB 3D
 
 La demande 3D remplace la présentation précédente du shell Auth par un véritable camion GLB en plein fond et une carte glassmorphism. La stack Three/R3F/Drei existante est réutilisée, sans ajout de dépendances ni modification du backend/Auth/rôles. Le modèle CC0 Kenney est adapté en semi-remorque low-poly blanc/bleu et livré localement avec licence, provenance et source de génération. Les animations du dashboard restent inchangées.

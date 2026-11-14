@@ -6,12 +6,16 @@ JSON UTF-8, cookies HttpOnly, même origine que le frontend. Toutes les mutation
 
 | Méthode / route       | Entrée / effet                                                              |
 | --------------------- | --------------------------------------------------------------------------- |
-| POST `/auth/register` | email, password (12–128 caractères), confirmation selon Supabase            |
-| POST `/auth/login`    | email, password ; cookies de session                                        |
-| GET `/auth/session`   | user, profile, role et company (sans jeton)                                 |
+| POST `/auth/register` | fermée dans l’installation privée OASIS LOGISTICS                           |
+| POST `/auth/login`    | email ou téléphone, password ; cookies de session                           |
+| POST `/auth/forgot-password` | email ; envoi du lien de récupération Supabase                       |
+| POST `/auth/google`   | démarre le flux OAuth Google PKCE ; renvoie l’URL de consentement           |
+| POST `/auth/callback` | échange le code PKCE ; cookies de session                                   |
+| POST `/auth/recovery/password` | nouveau mot de passe après lien de récupération                     |
+| GET `/auth/session`   | user, profile, role, company et `isSuperAdmin` (sans jeton)                 |
 | POST `/auth/logout`   | révoque la session courante et efface les cookies                           |
 | POST `/auth/password` | current_password, password ; réauthentification puis déconnexion            |
-| POST `/auth/company`  | company_name, display_name ; crée atomiquement entreprise et administrateur |
+| POST `/auth/company`  | fermée dans l’installation privée ; aucune création d’entreprise            |
 
 ## Ressources
 
@@ -37,8 +41,9 @@ Les schémas de champs sont définis dans `backend/src/validators/resources.ts`.
 | GET `/reference-data`                 | références autorisées de l’entreprise                                    |
 | GET `/dashboard`                      | opérations filtrées + totaux exacts, admin/gestionnaire                  |
 | GET `/reports/xlsx` ou `/reports/pdf` | fichiers filtrés, admin/gestionnaire                                     |
-| GET `/members`                        | membres et rôles, admin/gestionnaire                                     |
-| POST `/members`                       | member_email, member_name, member_role ; admin, compte confirmé existant |
+| GET `/members`                        | membres et rôles de l’entreprise, admin/gestionnaire                     |
+| POST `/members`                       | member_email, member_name, member_role ; **super administrateur**, compte confirmé existant |
+| POST `/members/accounts`              | member_email, member_name, member_role, password ; **super administrateur**, crée le compte Auth |
 | PATCH `/company`                      | name, phone, address ; admin                                             |
 | PATCH `/profile`                      | full_name, phone ; son profil uniquement                                 |
 | GET `/notifications`                  | 100 derniers événements personnels                                       |

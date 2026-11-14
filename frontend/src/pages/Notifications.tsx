@@ -29,7 +29,7 @@ export default function Notifications({ audit = false }: { audit?: boolean }) {
       </div>
       <section className="card notification-list">
         {q.error ? (
-          <div className="empty">
+          <div className="empty" role="alert">
             <p>{q.error.message}</p>
             <button
               className="button secondary"
@@ -45,7 +45,9 @@ export default function Notifications({ audit = false }: { audit?: boolean }) {
         ) : !q.data?.length ? (
           <div className="empty">
             <Bell size={30} />
-            <h3>Vous êtes à jour.</h3>
+            <h3>
+              {audit ? "Aucune écriture journalisée." : "Vous êtes à jour."}
+            </h3>
             <p>
               {audit
                 ? "Les prochaines opérations seront journalisées ici."

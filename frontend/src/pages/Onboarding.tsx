@@ -1,8 +1,18 @@
+import { useState } from "react";
 import { useSession } from "../contexts/SessionContext";
 import Brand from "../components/Brand";
 import { toast } from "sonner";
 export default function Onboarding() {
-  const { session, reload, logout } = useSession();
+  const { session, reload, logout, error } = useSession();
+  const [checking, setChecking] = useState(false);
+  async function check() {
+    setChecking(true);
+    try {
+      await reload();
+    } finally {
+      setChecking(false);
+    }
+  }
   return (
     <div className="onboarding">
       <Brand />
@@ -14,9 +24,18 @@ export default function Onboarding() {
           Demandez à l’administrateur OASIS LOGISTICS de vous attribuer un rôle.
           La création d’autres entreprises n’est pas autorisée.
         </p>
+        {error && (
+          <div className="empty" role="alert">
+            <p>{error.message}</p>
+          </div>
+        )}
         <div className="onboarding-actions">
-          <button className="button primary" onClick={() => void reload()}>
-            Vérifier mon accès
+          <button
+            className="button primary"
+            disabled={checking}
+            onClick={() => void check()}
+          >
+            {checking ? "Vérification…" : "Vérifier mon accès"}
           </button>
           <button
             className="text-button"

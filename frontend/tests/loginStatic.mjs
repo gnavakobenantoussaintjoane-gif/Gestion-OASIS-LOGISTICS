@@ -2,124 +2,67 @@ import assert from "node:assert/strict";
 import { launchBrowser } from "./browser.mjs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 const browser = await launchBrowser();
 const origin = process.env.APP_URL || "http://localhost:3000";
 try {
-  for (const width of [1440, 390, 320]) {
+  for (const width of [1440, 820, 360]) {
     const page = await browser.newPage({ viewport: { width, height: 950 } });
-    const requests = [],
-      errors = [];
+    const requests = [];
+    const errors = [];
     page.on("request", (request) => requests.push(request.url()));
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(origin);
     await page
       .getByRole("heading", { name: "Bienvenue sur Gestion" })
       .waitFor();
-    await page.waitForFunction(() => {
-      const image = document.querySelector(".otl-auth-background");
-      const trucks = document.querySelector(".otl-auth-trucks");
-      // Le recadrage étroit est différé (loading="lazy") : on ne l'exige que s'il est affiché.
-      const narrow = getComputedStyle(trucks).display !== "none";
-      return (
-        image?.complete &&
-        image.naturalWidth > 0 &&
-        (!narrow || trucks.complete)
+    assert.equal(new URL(page.url()).pathname, "/login");
+    // Le fond fourni est servi par la feuille de style (::before) et se charge.
+    const background = await page.evaluate(() => {
+      const style = getComputedStyle(
+        document.querySelector(".otl-page"),
+        "::before",
       );
+      const match = style.backgroundImage.match(/url\("?([^")]+)"?\)/);
+      return match ? match[1] : "";
     });
-    // Le décor des écrans étroits doit rester net : aucun filtre de flou.
-    assert.equal(
-      await page.evaluate(() => {
-        const trucks = document.querySelector(".otl-auth-trucks");
-        const wide = document.querySelector(".otl-auth-background");
-        const filters = [trucks, wide].map(
-          (element) => getComputedStyle(element).filter,
-        );
-        return filters.every((filter) => filter === "none");
-      }),
-      true,
-      "Login artwork must not be blurred",
+    assert.ok(
+      background.includes("login-bg"),
+      `The supplied background is used at ${width}px`,
     );
-    assert.equal(await page.locator(".gestion-auth canvas").count(), 0);
-    assert.equal(await page.locator(".gestion-auth__three").count(), 0);
+    const naturalWidth = await page.evaluate(async (src) => {
+      const image = new Image();
+      return new Promise((resolve) => {
+        image.onload = () => resolve(image.naturalWidth);
+        image.onerror = () => resolve(0);
+        image.src = src;
+      });
+    }, background);
+    assert.ok(naturalWidth > 0, `The background image loads at ${width}px`);
+    assert.equal(await page.locator(".otl-page canvas").count(), 0);
     assert.equal(
       requests.some(
         (url) => url.includes("/models/truck.glb") || url.includes("/login3d/"),
       ),
       false,
-      "No 3D assets requested on Auth",
+      "No 3D assets requested on the login page",
     );
     assert.equal(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
       true,
+      `No horizontal overflow at ${width}px`,
     );
-    // Dès 1100 px, la carte HTML recouvre exactement la carte dessinée dans la
-    // maquette : même rectangle, même centre, aucun décalage visible.
-    if (width > 1100) {
-      // L'apparition de la carte dure 0,55 s : on l'attend avant de mesurer
-      // sa position (les animations de décor sont infinies, on les ignore).
-      await page.evaluate(async () => {
-        const card = document.querySelector(".gestion-auth__card");
-        const intro = card
-          ?.getAnimations()
-          .filter(
-            (animation) =>
-              animation.effect?.getTiming().iterations !== Infinity,
-          );
-        await Promise.all(
-          (intro ?? []).map((a) => a.finished.catch(() => undefined)),
-        );
-      });
-      const placement = await page.evaluate(() => {
-        const image = document
-          .querySelector(".otl-auth-background")
-          .getBoundingClientRect();
-        const panel = document
-          .querySelector(".gestion-auth__panel")
-          .getBoundingClientRect();
-        const card = document
-          .querySelector(".gestion-auth__card")
-          .getBoundingClientRect();
-        const drawn = {
-          left: image.left + image.width * (575 / 1672),
-          right: image.left + image.width * (1097 / 1672),
-          top: image.top + image.height * (155 / 941),
-          bottom: image.top + image.height * (812 / 941),
-        };
-        const drawnWidth = drawn.right - drawn.left;
-        return {
-          dx: Math.abs(
-            (panel.left + panel.right) / 2 - (drawn.left + drawn.right) / 2,
-          ),
-          dy: Math.abs(
-            (panel.top + panel.bottom) / 2 - (drawn.top + drawn.bottom) / 2,
-          ),
-          ratio: panel.width / drawnWidth,
-          // Le formulaire réel doit tenir entièrement dans la carte.
-          cardInside:
-            card.left >= panel.left - 1 &&
-            card.right <= panel.right + 1 &&
-            card.top >= panel.top - 1 &&
-            card.bottom <= panel.bottom + 1,
-        };
-      });
-      assert.ok(
-        placement.dx < 3 && placement.dy < 3,
-        `Panel must stay centred on the mockup card at ${width}px (dx=${placement.dx}, dy=${placement.dy})`,
-      );
-      assert.ok(
-        placement.ratio > 0.99 && placement.ratio < 1.01,
-        `Panel must match the mockup card at ${width}px (ratio=${placement.ratio})`,
-      );
-      assert.equal(
-        placement.cardInside,
-        true,
-        `The form card must stay inside the panel at ${width}px`,
-      );
-    }
+    // Le formulaire réel reste utilisable à toutes les largeurs.
     await page.getByLabel("Adresse e-mail").fill("static@example.invalid");
     await page.getByLabel("Mot de passe", { exact: true }).fill("test-only");
+    assert.equal(
+      await page
+        .getByRole("button", { name: "Se connecter", exact: true })
+        .isEnabled(),
+      true,
+    );
     await page.screenshot({
       path: join(tmpdir(), `otl-static-${width}.png`),
       fullPage: true,
@@ -127,17 +70,49 @@ try {
     assert.deepEqual(errors, []);
     await page.close();
   }
-  // A missing image must never block access to the real form.
-  const page = await browser.newPage();
-  await page.route("**/branding/otl-login-stage.jpg", (route) =>
-    route.abort(),
+
+  // Un écran court doit pouvoir faire défiler la carte et le pied de page.
+  const short = await browser.newPage({ viewport: { width: 360, height: 420 } });
+  await short.goto(origin);
+  await short
+    .getByRole("heading", { name: "Bienvenue sur Gestion" })
+    .waitFor();
+  const scrollable = await short.evaluate(() => {
+    const root = document.documentElement;
+    const page = document.querySelector(".otl-page");
+    return (
+      root.scrollHeight > innerHeight || page.scrollHeight > page.clientHeight
+    );
+  });
+  assert.equal(scrollable, true, "The login scrolls on a short screen");
+  await short.getByLabel("Adresse e-mail").scrollIntoViewIfNeeded();
+  await short.getByLabel("Adresse e-mail").fill("short@example.invalid");
+  await short.close();
+
+  // Une image manquante ne doit jamais bloquer le formulaire.
+  const fallback = await browser.newPage({
+    viewport: { width: 1440, height: 950 },
+  });
+  // Ne couper que le média : l’URL ?import sert de module JS au composant.
+  await fallback.route(/\/login-bg\.jpg$/, (route) => route.abort());
+  await fallback.goto(origin);
+  await fallback
+    .getByRole("heading", { name: "Bienvenue sur Gestion" })
+    .waitFor();
+  await fallback.getByLabel("Adresse e-mail").fill("fallback@example.invalid");
+  await fallback
+    .getByLabel("Mot de passe", { exact: true })
+    .fill("fallback-only");
+  assert.equal(
+    await fallback
+      .getByRole("button", { name: "Se connecter", exact: true })
+      .isEnabled(),
+    true,
   );
-  await page.goto(origin);
-  await page.getByLabel("Adresse e-mail").fill("fallback@example.invalid");
-  assert.equal(await page.locator(".gestion-auth canvas").count(), 0);
-  await page.close();
+  await fallback.close();
+
   console.log(
-    "PASS: supplied static image, no WebGL/GLB load on login, usable form and mobile layout, missing-image fallback. No real login tested.",
+    "PASS: provided LoginOTL page, supplied background, real form, responsive 1440/820/360, short-screen scrolling and missing-background fallback. No real login tested.",
   );
 } finally {
   await browser.close();

@@ -16,10 +16,10 @@ Aucun Next.js, Prisma ou stockage métier local dans l’application active. Le 
 
 ## Installation et démarrage
 
-Node.js **22.22+** recommandé. Depuis la racine :
+Node.js **22.22+** et npm **10+** recommandés. Depuis la racine :
 
 ```bash
-npm install
+npm ci
 cp backend/.env.example backend/.env
 # Renseigner SUPABASE_URL et SUPABASE_PUBLISHABLE_KEY dans backend/.env
 npm run dev
@@ -29,21 +29,31 @@ npm run dev
 - Backend : `http://localhost:4000/api/health`
 - Vite transmet `/api` à Express : aucun appel navigateur à localhost pour joindre un autre serveur.
 
-Les applications peuvent être démarrées séparément :
+Les applications peuvent être démarrées séparément depuis la racine, après le même `npm ci` :
 
 ```bash
-cd backend
-npm install
-npm run dev
+npm run dev -w backend
 ```
 
 ```bash
-cd frontend
-npm install
-npm run dev
+npm run dev -w frontend
 ```
 
-Le dépôt utilise les workspaces npm pour partager uniquement l’outillage de développement. Chaque application possède ses propres dépendances et responsabilités.
+Le dépôt utilise les workspaces npm pour partager uniquement l’outillage de développement. Chaque application possède ses propres dépendances et responsabilités, mais **l’installation se fait à la racine** pour respecter le lockfile unique.
+
+### Dépendances et audit
+
+Le dépôt versionne `package-lock.json` : `npm ci` installe exactement cet arbre et supprime `node_modules`. `npm install` peut réécrire le lockfile et résoudre un arbre différent ; l’utiliser uniquement pour ajouter ou modifier une dépendance, puis committer le lockfile.
+
+Contrôle de référence du 14 novembre 2026 (Node 22.22.3, npm 10.9.8) :
+
+```bash
+npm ci
+npm audit --audit-level=high
+# → found 0 vulnerabilities
+```
+
+Si un `npm install` local affiche des vulnérabilités, il ne décrit pas l’arbre de référence : vérifier `node -v` et `npm -v` (Node 22.22+/npm 10+), restaurer le lockfile si nécessaire (`git checkout -- package-lock.json`), puis relancer `npm ci`. Ne pas lancer `npm audit fix --force` sans revue : cela peut imposer des changements majeurs. Si le rapport persiste après `npm ci`, transmettre la sortie complète de `npm audit`.
 
 ## Supabase et premier compte
 

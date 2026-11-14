@@ -2,7 +2,7 @@
 
 ## Développement
 
-1. Installer Node 22.22+ et exécuter `npm ci` à la racine.
+1. Installer Node 22.22+ et npm 10+, puis exécuter `npm ci` à la racine. Vérifier `npm audit --audit-level=high` (attendu : 0 vulnérabilité avec le `package-lock.json` versionné). Ne pas utiliser `npm audit fix --force` sans revue.
 2. Copier `backend/.env.example` vers `backend/.env`.
 3. Renseigner l’URL Supabase et **la clé publiable**, obtenues dans le tableau de bord du projet. Aucun besoin de mot de passe PostgreSQL ni de clé service-role pour l’application.
 4. Vérifier que les migrations Supabase sont appliquées.
